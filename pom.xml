@@ -30,6 +30,12 @@
             <groupId>org.ow2.asm</groupId>
             <artifactId>asm-commons</artifactId>
             <version>9.7.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.ow2.asm</groupId>
+                    <artifactId>asm-tree</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
     </dependencies>
@@ -52,6 +58,9 @@
                                 <Implementation-Title>${project.name}</Implementation-Title>
                                 <Implementation-Version>${project.version}</Implementation-Version>
                                 <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
+                                <Built-By>${user.name}</Built-By>
+                                <Scm-Url>${project.scm.url}</Scm-Url>
+                                <Built-Time>${maven.build.timestamp}</Built-Time>
                             </manifestEntries>
                         </archive>
                     </configuration>
@@ -152,6 +161,16 @@
                                     </relocation>
                                 </relocations>
                                 <createDependencyReducedPom>false</createDependencyReducedPom>
+                                <minimizeJar>true</minimizeJar>
+                                <filters>
+                                    <filter>
+                                        <artifact>org.ow2.asm:*</artifact>
+                                        <excludes>
+                                            <exclude>META-INF/MANIFEST.MF</exclude>
+                                            <exclude>module-info.class</exclude>
+                                        </excludes>
+                                    </filter>
+                                </filters>
                             </configuration>
                         </execution>
                     </executions>

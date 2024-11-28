@@ -105,7 +105,14 @@ final class ExecutionTimeProfilingVisitor extends ClassVisitor {
             mv.visitVarInsn(LLOAD, this.timestampEnterVarIndex);
             mv.visitVarInsn(LLOAD, elapsedTimeVarIndex);
 
-            mv.visitMethodInsn(INVOKESTATIC, "ru/joke/profiler/core/output/ExecutionTimeRegistrar", "register", "(Ljava/lang/String;JJ)V", false);
+            final String registerMethodName = this.profilingConfiguration.isDynamicConfigurationEnabled() ? "registerDynamic" : "registerStatic";
+            mv.visitMethodInsn(
+                    INVOKESTATIC,
+                    "ru/joke/profiler/core/output/ExecutionTimeRegistrar",
+                    registerMethodName,
+                    "(Ljava/lang/String;JJ)V",
+                    false
+            );
         }
     }
 }

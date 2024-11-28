@@ -7,9 +7,11 @@ enum ProfilingTimeUnit {
 
     NANOSECONDS("ns", TimeUnit.NANOSECONDS),
 
-    SECONDS("s", TimeUnit.SECONDS),
+    MICROSECONDS("mcs", TimeUnit.MICROSECONDS),
 
     MILLISECONDS("ms", TimeUnit.MILLISECONDS),
+
+    SECONDS("s", TimeUnit.SECONDS),
 
     MINUTES("m", TimeUnit.MINUTES),
 

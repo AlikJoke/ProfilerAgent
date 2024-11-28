@@ -3,31 +3,57 @@ package ru.joke.profiler.core.configuration;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static ru.joke.profiler.core.configuration.ConfigurationProperties.*;
+
 public final class StaticProfilingConfiguration extends ProfilingConfiguration {
 
-    private static final String MIN_EXECUTION_THRESHOLD_ARG = "min_execution_threshold";
-    private static final String MIN_EXECUTION_THRESHOLD_TU_ARG = "min_execution_threshold_tu";
-    private static final String INCLUDED_RESOURCES_ARG = "included_resources";
-    private static final String INCLUDED_RESOURCES_MASK_ARG = "included_resources_mask";
-    private static final String EXCLUDED_RESOURCES_ARG = "excluded_resources";
-    private static final String EXCLUDED_RESOURCES_MASK_ARG = "excluded_resources_mask";
+    private static final long DEFAULT_DYNAMIC_CONFIG_REFRESHING_INTERVAL = 60_000;
 
-    private StaticProfilingConfiguration(final Predicate<String> resourcesFilter, final long minExecutionThreshold) {
+    private final boolean dynamicConfigurationEnabled;
+    private final String dynamicConfigurationFilePath;
+    private final long dynamicConfigurationRefreshInterval;
+
+    private StaticProfilingConfiguration(
+            final Predicate<String> resourcesFilter,
+            final long minExecutionThreshold,
+            final boolean dynamicConfigurationEnabled,
+            final String dynamicConfigurationFilePath,
+            final long dynamicConfigurationRefreshInterval) {
         super(resourcesFilter, minExecutionThreshold);
+        this.dynamicConfigurationEnabled = dynamicConfigurationEnabled;
+        this.dynamicConfigurationFilePath = dynamicConfigurationFilePath;
+        this.dynamicConfigurationRefreshInterval = dynamicConfigurationRefreshInterval;
+    }
+
+    public boolean isDynamicConfigurationEnabled() {
+        return dynamicConfigurationEnabled;
+    }
+
+    public String getDynamicConfigurationFilePath() {
+        return dynamicConfigurationFilePath;
+    }
+
+    public long getDynamicConfigurationRefreshInterval() {
+        return dynamicConfigurationRefreshInterval;
     }
 
     @Override
     public String toString() {
-        return "StaticProfilingConfiguration{minExecutionThreshold=" + minExecutionThreshold + '}';
+        return "StaticProfilingConfiguration{" + "dynamicConfigurationEnabled=" + dynamicConfigurationEnabled + ", dynamicConfigurationFilePath='" + dynamicConfigurationFilePath + '\'' + ", dynamicConfigurationRefreshInterval=" + dynamicConfigurationRefreshInterval + ", minExecutionThreshold=" + minExecutionThreshold + '}';
     }
 
     public static StaticProfilingConfiguration parse(final String argsString) {
         if (argsString == null || argsString.isEmpty()) {
-            return new StaticProfilingConfiguration(null, 0);
+            return new StaticProfilingConfiguration(
+                    null,
+                    0,
+                    false,
+                    null,
+                    0
+            );
         }
 
         final Map<String, String> args =
@@ -35,25 +61,44 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
                         .map(arg -> arg.split("="))
                         .collect(Collectors.toMap(arg -> arg[0], arg -> arg[1]));
 
-        final String includedResourcesStr = args.getOrDefault(INCLUDED_RESOURCES_ARG, "");
-        final Set<String> includedResources = parseResourcesArg(includedResourcesStr);
+        final String includedResourcesStr = args.getOrDefault(INCLUDED_RESOURCES, "");
+        final Set<String> includedResources = parseResourcesArg(includedResourcesStr, '/');
 
-        final String excludedResourcesStr = args.getOrDefault(EXCLUDED_RESOURCES_ARG, "");
-        final Set<String> excludedResources = parseResourcesArg(excludedResourcesStr);
+        final String excludedResourcesStr = args.getOrDefault(EXCLUDED_RESOURCES, "");
+        final Set<String> excludedResources = parseResourcesArg(excludedResourcesStr, '/');
 
-        final String includedResourcesMask = args.get(INCLUDED_RESOURCES_MASK_ARG);
-        final String excludedResourcesMask = args.get(EXCLUDED_RESOURCES_MASK_ARG);
+        final String includedResourcesMask = args.get(INCLUDED_RESOURCES_MASK);
+        final String excludedResourcesMask = args.get(EXCLUDED_RESOURCES_MASK);
 
-        final String minExecutionThresholdStr = args.get(MIN_EXECUTION_THRESHOLD_ARG);
-        final String minExecThresholdTimeUnitStr = args.get(MIN_EXECUTION_THRESHOLD_TU_ARG);
+        final String minExecutionThresholdStr = args.get(MIN_EXECUTION_THRESHOLD);
+        final String minExecThresholdTimeUnitStr = args.get(MIN_EXECUTION_THRESHOLD_TU);
 
-        final Predicate<String> resourcesFilter = composeResourcesFilter(includedResources, includedResourcesMask, excludedResources, excludedResourcesMask);
+        final Predicate<String> resourcesFilter = composeJoinedResourcesFilter(includedResources, includedResourcesMask, excludedResources, excludedResourcesMask);
         final long executionThresholdNs = parseExecutionThreshold(minExecutionThresholdStr, minExecThresholdTimeUnitStr);
 
-        return new StaticProfilingConfiguration(resourcesFilter, executionThresholdNs);
+        final boolean dynamicConfigurationEnabled = Boolean.parseBoolean(args.get(DYNAMIC_CONFIGURATION_ENABLED));
+        final String dynamicConfigurationFilePath = args.get(DYNAMIC_CONFIGURATION_FILEPATH);
+
+        final String dynamicConfigurationRefreshIntervalStr = args.get(DYNAMIC_CONFIGURATION_REFRESH_INTERVAL);
+        final long dynamicConfigurationRefreshInterval =
+                dynamicConfigurationRefreshIntervalStr == null || dynamicConfigurationRefreshIntervalStr.isEmpty()
+                        ? DEFAULT_DYNAMIC_CONFIG_REFRESHING_INTERVAL
+                        : Long.parseLong(dynamicConfigurationRefreshIntervalStr);
+
+        final String dynamicConfigurationRefreshIntervalTimeUnitStr = args.get(DYNAMIC_CONFIGURATION_REFRESH_INTERVAL_TU);
+        final ProfilingTimeUnit dynamicConfigurationRefreshIntervalTimeUnit = ProfilingTimeUnit.parse(dynamicConfigurationRefreshIntervalTimeUnitStr, ProfilingTimeUnit.MILLISECONDS);
+        final long dynamicConfigurationRefreshIntervalMs = dynamicConfigurationRefreshIntervalTimeUnit.toJavaTimeUnit().toMillis(dynamicConfigurationRefreshInterval);
+
+        return new StaticProfilingConfiguration(
+                resourcesFilter,
+                executionThresholdNs,
+                dynamicConfigurationEnabled,
+                dynamicConfigurationFilePath,
+                dynamicConfigurationRefreshIntervalMs
+        );
     }
 
-    private static Predicate<String> composeResourcesFilter(
+    private static Predicate<String> composeJoinedResourcesFilter(
             final Set<String> includedResources,
             final String includedResourcesMask,
             final Set<String> excludedResources,
@@ -67,19 +112,5 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
                 : resourcesFilterByIncluded == null
                     ? resourcesFilterByExcluded
                     : resourcesFilterByIncluded.and(resourcesFilterByExcluded);
-    }
-
-    private static long parseExecutionThreshold(final String thresholdArg, final String thresholdTimeUnitArg) {
-        final long minExecutionThreshold = thresholdArg == null || thresholdArg.isEmpty() ? 0 : Long.parseLong(thresholdArg);
-        final TimeUnit minExecThresholdTimeUnit = ProfilingTimeUnit.parse(thresholdTimeUnitArg, ProfilingTimeUnit.NANOSECONDS).toJavaTimeUnit();
-
-        return minExecThresholdTimeUnit.toNanos(minExecutionThreshold);
-    }
-
-    private static Set<String> parseResourcesArg(final String arg) {
-        return Arrays.stream(arg.split(","))
-                        .filter(p -> !p.isEmpty())
-                        .map(p -> p.replace(".", "/"))
-                        .collect(Collectors.toSet());
     }
 }
