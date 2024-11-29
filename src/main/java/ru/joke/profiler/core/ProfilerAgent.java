@@ -12,6 +12,10 @@ import java.util.function.Predicate;
 public final class ProfilerAgent {
 
     public static void premain(final String args, final Instrumentation instrumentation) {
+        agentmain(args, instrumentation);
+    }
+
+    public static void agentmain(final String args, final Instrumentation instrumentation) {
         final StaticProfilingConfiguration configuration = StaticProfilingConfiguration.parse(args);
         final Predicate<String> transformationFilter = new TransformationFilter(configuration);
 

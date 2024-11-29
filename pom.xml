@@ -53,6 +53,7 @@
                                 <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                             </manifest>
                             <manifestEntries>
+                                <Agent-Class>ru.joke.profiler.core.ProfilerAgent</Agent-Class>
                                 <Premain-Class>ru.joke.profiler.core.ProfilerAgent</Premain-Class>
                                 <Can-Retransform-Classes>true</Can-Retransform-Classes>
                                 <Implementation-Title>${project.name}</Implementation-Title>
