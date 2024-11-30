@@ -1,8 +1,6 @@
 package ru.joke.profiler.core;
 
-import ru.joke.profiler.core.configuration.DynamicProfilingConfigurationHolder;
-import ru.joke.profiler.core.configuration.DynamicProfilingConfigurationRefreshService;
-import ru.joke.profiler.core.configuration.StaticProfilingConfiguration;
+import ru.joke.profiler.core.configuration.*;
 import ru.joke.profiler.core.transformation.ProfilingTransformer;
 import ru.joke.profiler.core.transformation.TransformationFilter;
 
@@ -16,16 +14,19 @@ public final class ProfilerAgent {
     }
 
     public static void agentmain(final String args, final Instrumentation instrumentation) {
-        final StaticProfilingConfiguration configuration = StaticProfilingConfiguration.parse(args);
-        final Predicate<String> transformationFilter = new TransformationFilter(configuration);
+        final ProfilingConfigurationLoader configurationLoader = new ProfilingConfigurationLoader(args);
+        final StaticProfilingConfiguration staticConfiguration = configurationLoader.loadStatic();
+        final Predicate<String> transformationFilter = new TransformationFilter(staticConfiguration);
 
-        instrumentation.addTransformer(new ProfilingTransformer(transformationFilter, configuration));
+        instrumentation.addTransformer(new ProfilingTransformer(transformationFilter, staticConfiguration));
 
-        startDynamicConfigurationRefreshingIfNeed(configuration);
+        handleDynamicConfiguration(configurationLoader, staticConfiguration);
     }
 
-    private static void startDynamicConfigurationRefreshingIfNeed(final StaticProfilingConfiguration configuration) {
-        if (!configuration.isDynamicConfigurationEnabled()) {
+    private static void handleDynamicConfiguration(
+            final ProfilingConfigurationLoader configurationLoader,
+            final StaticProfilingConfiguration staticConfiguration) {
+        if (!staticConfiguration.isDynamicConfigurationEnabled()) {
             return;
         }
 
@@ -33,9 +34,9 @@ public final class ProfilerAgent {
         final DynamicProfilingConfigurationRefreshService dynamicConfigRefreshService =
                 new DynamicProfilingConfigurationRefreshService(
                         dynamicConfigHolder,
-                        configuration.getDynamicConfigurationFilePath(),
-                        configuration.getDynamicConfigurationRefreshInterval()
+                        configurationLoader,
+                        staticConfiguration.getDynamicConfigurationRefreshInterval()
                 );
-        dynamicConfigRefreshService.start();
+        dynamicConfigRefreshService.run();
     }
 }

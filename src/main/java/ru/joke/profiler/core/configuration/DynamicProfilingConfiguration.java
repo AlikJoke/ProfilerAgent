@@ -35,33 +35,17 @@ public final class DynamicProfilingConfiguration extends ProfilingConfiguration 
         return "DynamicProfilingConfiguration{" + "profilingDisabled=" + profilingDisabled + ", minExecutionThreshold=" + minExecutionThreshold + '}';
     }
 
-    public static DynamicProfilingConfiguration create(final Properties properties) {
-        final String minExecutionThresholdStr = properties.getProperty(MIN_EXECUTION_THRESHOLD);
-        final String minExecutionThresholdTimeUnitStr = properties.getProperty(MIN_EXECUTION_THRESHOLD_TU);
+    static DynamicProfilingConfiguration create(final Properties properties) {
+        final String minExecutionThresholdStr = properties.getProperty(DYNAMIC_MIN_EXECUTION_THRESHOLD);
+        final String minExecutionThresholdTimeUnitStr = properties.getProperty(DYNAMIC_MIN_EXECUTION_THRESHOLD_TU);
         final long minExecutionThresholdNs = parseExecutionThreshold(minExecutionThresholdStr, minExecutionThresholdTimeUnitStr);
 
-        final String excludedResourcesArg = properties.getProperty(EXCLUDED_RESOURCES, "");
+        final String excludedResourcesArg = properties.getProperty(DYNAMIC_EXCLUDED_RESOURCES, "");
         final Set<String> excludedResources = parseResourcesArg(excludedResourcesArg, '.');
 
-        final String excludedResourcesMask = properties.getProperty(EXCLUDED_RESOURCES_MASK);
-        final String excludedThreadsMask = properties.getProperty(EXCLUDED_THREADS_MASK);
-        final String profilingDisabledStr = properties.getProperty(PROFILING_DISABLED);
-        return create(
-                minExecutionThresholdNs,
-                excludedResources,
-                excludedResourcesMask,
-                excludedThreadsMask,
-                Boolean.parseBoolean(profilingDisabledStr)
-        );
-    }
-
-    public static DynamicProfilingConfiguration create(
-            final long minExecutionThresholdNs,
-            final Set<String> excludedResources,
-            final String excludedResourcesMask,
-            final String excludedThreadsMask,
-            final boolean profilingDisabled) {
-
+        final String excludedResourcesMask = properties.getProperty(DYNAMIC_EXCLUDED_RESOURCES_MASK);
+        final String excludedThreadsMask = properties.getProperty(DYNAMIC_EXCLUDED_THREADS_MASK);
+        final String profilingDisabledStr = properties.getProperty(DYNAMIC_PROFILING_DISABLED);
         final Predicate<String> threadsFilter =
                 excludedThreadsMask == null || excludedThreadsMask.isEmpty()
                         ? null
@@ -72,7 +56,7 @@ public final class DynamicProfilingConfiguration extends ProfilingConfiguration 
                 minExecutionThresholdNs,
                 resourcesFilter,
                 threadsFilter,
-                profilingDisabled
+                Boolean.parseBoolean(profilingDisabledStr)
         );
     }
 }
