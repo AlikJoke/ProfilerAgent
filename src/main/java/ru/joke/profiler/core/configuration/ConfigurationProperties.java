@@ -26,7 +26,8 @@ abstract class ConfigurationProperties {
     static final String STATIC_DYNAMIC_CONFIGURATION_ENABLED = createStaticProperty("dynamic_conf_enabled");
     static final String STATIC_DYNAMIC_CONFIGURATION_REFRESH_INTERVAL = createStaticProperty("dynamic_conf_refresh_interval");
     static final String STATIC_DYNAMIC_CONFIGURATION_REFRESH_INTERVAL_TU = createStaticProperty("dynamic_conf_refresh_interval_tu");
-    
+    static final String STATIC_EXECUTION_TRACING_ENABLED = createStaticProperty("execution_tracing_enabled");
+
     static final String DYNAMIC_MIN_EXECUTION_THRESHOLD = createDynamicProperty(ABS_MIN_EXECUTION_THRESHOLD);
     static final String DYNAMIC_MIN_EXECUTION_THRESHOLD_TU = createDynamicProperty(ABS_MIN_EXECUTION_THRESHOLD_TU);
     static final String DYNAMIC_EXCLUDED_RESOURCES = createDynamicProperty(ABS_EXCLUDED_RESOURCES);

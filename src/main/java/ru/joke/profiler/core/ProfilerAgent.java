@@ -1,6 +1,7 @@
 package ru.joke.profiler.core;
 
 import ru.joke.profiler.core.configuration.*;
+import ru.joke.profiler.core.output.ExecutionTimeRegistrarMetadataSelector;
 import ru.joke.profiler.core.transformation.ProfilingTransformer;
 import ru.joke.profiler.core.transformation.TransformationFilter;
 
@@ -9,6 +10,7 @@ import java.util.function.Predicate;
 
 public final class ProfilerAgent {
 
+    @SuppressWarnings("unused")
     public static void premain(final String args, final Instrumentation instrumentation) {
         agentmain(args, instrumentation);
     }
@@ -17,8 +19,9 @@ public final class ProfilerAgent {
         final ProfilingConfigurationLoader configurationLoader = new ProfilingConfigurationLoader(args);
         final StaticProfilingConfiguration staticConfiguration = configurationLoader.loadStatic();
         final Predicate<String> transformationFilter = new TransformationFilter(staticConfiguration);
+        final ExecutionTimeRegistrarMetadataSelector registrarMetadataSelector = new ExecutionTimeRegistrarMetadataSelector(staticConfiguration);
 
-        instrumentation.addTransformer(new ProfilingTransformer(transformationFilter, staticConfiguration));
+        instrumentation.addTransformer(new ProfilingTransformer(transformationFilter, staticConfiguration, registrarMetadataSelector));
 
         handleDynamicConfiguration(configurationLoader, staticConfiguration);
     }

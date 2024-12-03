@@ -12,15 +12,18 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
 
     private final boolean dynamicConfigurationEnabled;
     private final long dynamicConfigurationRefreshInterval;
+    private final boolean executionTracingEnabled;
 
     StaticProfilingConfiguration(
             final Predicate<String> resourcesFilter,
             final long minExecutionThreshold,
             final boolean dynamicConfigurationEnabled,
-            final long dynamicConfigurationRefreshInterval) {
+            final long dynamicConfigurationRefreshIntervalMs,
+            final boolean executionTracingEnabled) {
         super(resourcesFilter, minExecutionThreshold);
         this.dynamicConfigurationEnabled = dynamicConfigurationEnabled;
-        this.dynamicConfigurationRefreshInterval = dynamicConfigurationRefreshInterval;
+        this.dynamicConfigurationRefreshInterval = dynamicConfigurationRefreshIntervalMs;
+        this.executionTracingEnabled = executionTracingEnabled;
     }
 
     public boolean isDynamicConfigurationEnabled() {
@@ -31,9 +34,18 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
         return dynamicConfigurationRefreshInterval;
     }
 
+    public boolean isExecutionTracingEnabled() {
+        return executionTracingEnabled;
+    }
+
     @Override
     public String toString() {
-        return "StaticProfilingConfiguration{" + "dynamicConfigurationEnabled=" + dynamicConfigurationEnabled + ", dynamicConfigurationRefreshInterval=" + dynamicConfigurationRefreshInterval + ", minExecutionThreshold=" + minExecutionThreshold + '}';
+        return "StaticProfilingConfiguration{"
+                + "dynamicConfigurationEnabled=" + dynamicConfigurationEnabled
+                + ", dynamicConfigurationRefreshInterval=" + dynamicConfigurationRefreshInterval
+                + ", executionTracingEnabled=" + executionTracingEnabled
+                + ", minExecutionThreshold=" + minExecutionThreshold
+                + '}';
     }
 
     static StaticProfilingConfiguration create(final Properties props) {
@@ -64,11 +76,14 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
         final ProfilingTimeUnit dynamicConfigurationRefreshIntervalTimeUnit = ProfilingTimeUnit.parse(dynamicConfigurationRefreshIntervalTimeUnitStr, ProfilingTimeUnit.MILLISECONDS);
         final long dynamicConfigurationRefreshIntervalMs = dynamicConfigurationRefreshIntervalTimeUnit.toJavaTimeUnit().toMillis(dynamicConfigurationRefreshInterval);
 
+        final boolean executionTracingEnabled = Boolean.parseBoolean(props.getProperty(STATIC_EXECUTION_TRACING_ENABLED, ""));
+
         return new StaticProfilingConfiguration(
                 resourcesFilter,
                 executionThresholdNs,
                 dynamicConfigurationEnabled,
-                dynamicConfigurationRefreshIntervalMs
+                dynamicConfigurationRefreshIntervalMs,
+                executionTracingEnabled
         );
     }
 
