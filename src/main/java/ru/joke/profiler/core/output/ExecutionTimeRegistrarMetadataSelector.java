@@ -7,24 +7,26 @@ import java.lang.reflect.Method;
 
 public final class ExecutionTimeRegistrarMetadataSelector {
 
-    private static final String DYNAMIC_METHOD_NAME = "registerDynamic";
-    private static final String STATIC_METHOD_NAME = "registerStatic";
+    private static final String DYNAMIC_EXIT_METHOD_NAME = "registerMethodExitDynamic";
     private static final String ENTER_METHOD_NAME = "registerMethodEnter";
     private static final String EXIT_METHOD_NAME = "registerMethodExit";
+    private static final String REGISTRAR_ACCESSOR_METHOD_NAME = "getInstance";
 
     private static final String TIME_REGISTRATION_METHOD_SIGNATURE = "(Ljava/lang/String;JJ)V";
     private static final String ENTER_EXIT_METHOD_SIGNATURE = "()V";
 
-    private final Class<?> registrarClass;
+    private final String registrarClass;
+    private final String registrarAccessorMethodSignature;
     private final String timeRegistrationMethodName;
     private final String enterMethodRegistrationName;
     private final String exitMethodRegistrationName;
 
     public ExecutionTimeRegistrarMetadataSelector(final StaticProfilingConfiguration configuration) {
-        this.registrarClass = configuration.isExecutionTracingEnabled() ? TracedExecutionTimeRegistrar.class : SimpleExecutionTimeRegistrar.class;
-        this.timeRegistrationMethodName = findTimeRegistrationMethod(configuration, this.registrarClass);
-        this.enterMethodRegistrationName = findEnterRegistrationMethodName(configuration, this.registrarClass);
-        this.exitMethodRegistrationName = findExitRegistrationMethodName(configuration, this.registrarClass);
+        this.registrarClass = ExecutionTimeRegistrar.class.getCanonicalName().replace('.', '/');
+        this.registrarAccessorMethodSignature = buildRegistrarAccessorMethodSignature(this.registrarClass);
+        this.timeRegistrationMethodName = findTimeRegistrationMethod(configuration);
+        this.enterMethodRegistrationName = findEnterRegistrationMethodName();
+        this.exitMethodRegistrationName = findExitRegistrationMethodName();
     }
 
     public String selectEnterRegistrationMethod() {
@@ -35,7 +37,15 @@ public final class ExecutionTimeRegistrarMetadataSelector {
         return this.exitMethodRegistrationName;
     }
 
-    public Class<?> selectRegistrarClass() {
+    public String selectRegistrarSingletonAccessorMethod() {
+        return REGISTRAR_ACCESSOR_METHOD_NAME;
+    }
+
+    public String selectRegistrarSingletonAccessorSignature() {
+        return this.registrarAccessorMethodSignature;
+    }
+
+    public String selectRegistrarClass() {
         return this.registrarClass;
     }
 
@@ -55,41 +65,32 @@ public final class ExecutionTimeRegistrarMetadataSelector {
         return ENTER_EXIT_METHOD_SIGNATURE;
     }
 
-    private String findTimeRegistrationMethod(
-            final StaticProfilingConfiguration configuration,
-            final Class<?> registrarClass) {
-        final String targetMethodName = configuration.isDynamicConfigurationEnabled() ? DYNAMIC_METHOD_NAME : STATIC_METHOD_NAME;
+    private String buildRegistrarAccessorMethodSignature(final String registrarClass) {
+        return "()L" + registrarClass + ";";
+    }
+
+    private String findTimeRegistrationMethod(final StaticProfilingConfiguration configuration) {
+        final String targetMethodName = configuration.isDynamicConfigurationEnabled() ? DYNAMIC_EXIT_METHOD_NAME : EXIT_METHOD_NAME;
         try {
-            final Method result = registrarClass.getDeclaredMethod(targetMethodName, String.class, long.class, long.class);
+            final Method result = ExecutionTimeRegistrar.class.getMethod(targetMethodName, String.class, long.class, long.class);
             return result.getName();
         } catch (NoSuchMethodException e) {
             throw new ProfilerException(e);
         }
     }
 
-    private String findEnterRegistrationMethodName(
-            final StaticProfilingConfiguration configuration,
-            final Class<?> registrarClass) {
-        return findVisitRegistrationMethodName(configuration, registrarClass, ENTER_METHOD_NAME);
+    private String findEnterRegistrationMethodName() {
+        return findVisitRegistrationMethodName(ENTER_METHOD_NAME);
     }
 
-    private String findExitRegistrationMethodName(
-            final StaticProfilingConfiguration configuration,
-            final Class<?> registrarClass) {
-        return findVisitRegistrationMethodName(configuration, registrarClass, EXIT_METHOD_NAME);
+    private String findExitRegistrationMethodName() {
+        return findVisitRegistrationMethodName(EXIT_METHOD_NAME);
     }
 
-    private String findVisitRegistrationMethodName(
-            final StaticProfilingConfiguration configuration,
-            final Class<?> registrarClass,
-            final String methodName) {
-
-        if (!configuration.isExecutionTracingEnabled()) {
-            return null;
-        }
+    private String findVisitRegistrationMethodName(final String methodName) {
 
         try {
-            final Method result = registrarClass.getDeclaredMethod(methodName);
+            final Method result = ExecutionTimeRegistrar.class.getMethod(methodName);
             return result.getName();
         } catch (NoSuchMethodException e) {
             throw new ProfilerException(e);

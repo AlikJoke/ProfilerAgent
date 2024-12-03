@@ -1,6 +1,10 @@
 package ru.joke.profiler.core;
 
-import ru.joke.profiler.core.configuration.*;
+import ru.joke.profiler.core.configuration.DynamicProfilingConfigurationHolder;
+import ru.joke.profiler.core.configuration.DynamicProfilingConfigurationRefreshService;
+import ru.joke.profiler.core.configuration.ProfilingConfigurationLoader;
+import ru.joke.profiler.core.configuration.StaticProfilingConfiguration;
+import ru.joke.profiler.core.output.ExecutionTimeRegistrarInitializer;
 import ru.joke.profiler.core.output.ExecutionTimeRegistrarMetadataSelector;
 import ru.joke.profiler.core.transformation.ProfilingTransformer;
 import ru.joke.profiler.core.transformation.TransformationFilter;
@@ -19,6 +23,10 @@ public final class ProfilerAgent {
         final ProfilingConfigurationLoader configurationLoader = new ProfilingConfigurationLoader(args);
         final StaticProfilingConfiguration staticConfiguration = configurationLoader.loadStatic();
         final Predicate<String> transformationFilter = new TransformationFilter(staticConfiguration);
+
+        final ExecutionTimeRegistrarInitializer registrarInitializer = new ExecutionTimeRegistrarInitializer(staticConfiguration);
+        registrarInitializer.init();
+
         final ExecutionTimeRegistrarMetadataSelector registrarMetadataSelector = new ExecutionTimeRegistrarMetadataSelector(staticConfiguration);
 
         instrumentation.addTransformer(new ProfilingTransformer(transformationFilter, staticConfiguration, registrarMetadataSelector));

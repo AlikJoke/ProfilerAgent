@@ -38,6 +38,10 @@ final class ExecutionTimeProfilingVisitor extends ClassVisitor {
 
     private static class ExecutionTimeRegistrarVisitor extends LocalVariablesSorter {
 
+        private static final String SYSTEM_CLASS_NAME = System.class.getCanonicalName().replace('.', '/');
+        private static final String NANO_TIME_METHOD_NAME = "nanoTime";
+        private static final String NANO_TIME_METHOD_SIGNATURE = "()J";
+
         private final StaticProfilingConfiguration profilingConfiguration;
         private final ExecutionTimeRegistrarMetadataSelector registrarMetadataSelector;
         private final String methodName;
@@ -69,9 +73,9 @@ final class ExecutionTimeProfilingVisitor extends ClassVisitor {
             mv.visitVarInsn(LSTORE, this.timestampEnterVarIndex);
 
             /*
-             * ~ TracedExecutionTimeRegistrar.registerMethodEnter();
+             * ~ ExecutionTimeRegistrar.getInstance().registerMethodEnter();
              */
-            invokeMethodEnterRegistrationIfNeed();
+            invokeMethodEnterRegistration();
 
             super.visitCode();
         }
@@ -109,10 +113,10 @@ final class ExecutionTimeProfilingVisitor extends ClassVisitor {
 
                 /*
                  * ~ if (elapsedTime >= minExecutionThreshold) {
-                 *       (SimpleExecutionTimeRegistrar | TracedExecutionTimeRegistrar).(registerDynamic(this.method, startTime, elapsedTime) | registerStatic(this.method, startTime, elapsedTime));
+                 *       ExecutionTimeRegistrar.getInstance().(registerDynamic(this.method, startTime, elapsedTime) | registerStatic(this.method, startTime, elapsedTime));
                  *   } else {
                  *       // branch exists only if execution tracing enabled
-                 *       TracedExecutionTimeRegistrar.registerMethodExit();
+                 *       ExecutionTimeRegistrar.getInstance().registerMethodExit();
                  *   }
                  */
                 mv.visitVarInsn(LLOAD, elapsedTimeVarIndex);
@@ -122,38 +126,52 @@ final class ExecutionTimeProfilingVisitor extends ClassVisitor {
                 final Label jumpLabel = new Label();
                 mv.visitJumpInsn(IFLT, jumpLabel);
 
-                invokeElapsedTimeRegisterMethod(elapsedTimeVarIndex);
+                invokeMethodExitRegistration(elapsedTimeVarIndex);
                 final Label afterRegistrationCall = new Label();
                 mv.visitJumpInsn(GOTO, afterRegistrationCall);
 
                 mv.visitLabel(jumpLabel);
 
-                invokeMethodExitRegistrationIfNeed();
+                invokeMethodExitRegistration();
 
                 mv.visitLabel(afterRegistrationCall);
             } else {
                 /*
-                 * (SimpleExecutionTimeRegistrar | TracedExecutionTimeRegistrar).(registerDynamic(this.method, startTime, elapsedTime) | registerStatic(this.method, startTime, elapsedTime));
+                 * ExecutionTimeRegistrar.getInstance().(registerDynamic(this.method, startTime, elapsedTime) | registerStatic(this.method, startTime, elapsedTime));
                  */
-                invokeElapsedTimeRegisterMethod(elapsedTimeVarIndex);
+                invokeMethodExitRegistration(elapsedTimeVarIndex);
             }
         }
 
         private void invokeNanoTime() {
-            mv.visitMethodInsn(INVOKESTATIC, transformClassName(System.class), "nanoTime", "()J", false);
+            mv.visitMethodInsn(
+                    INVOKESTATIC,
+                    SYSTEM_CLASS_NAME,
+                    NANO_TIME_METHOD_NAME,
+                    NANO_TIME_METHOD_SIGNATURE,
+                    false
+            );
         }
 
-        private void invokeElapsedTimeRegisterMethod(final int elapsedTimeVarIndex) {
+        private void invokeMethodExitRegistration(final int elapsedTimeVarIndex) {
+            final String registerMethodName = this.registrarMetadataSelector.selectRegistrationMethod();
+            final String registerMethodSignature = this.registrarMetadataSelector.selectTimeRegistrationMethodSignature();
+            final String registrarClass = this.registrarMetadataSelector.selectRegistrarClass();
+            mv.visitMethodInsn(
+                    INVOKESTATIC,
+                    registrarClass,
+                    this.registrarMetadataSelector.selectRegistrarSingletonAccessorMethod(),
+                    this.registrarMetadataSelector.selectRegistrarSingletonAccessorSignature(),
+                    false
+            );
+
             mv.visitLdcInsn(this.methodName);
 
             mv.visitVarInsn(LLOAD, this.timestampEnterVarIndex);
             mv.visitVarInsn(LLOAD, elapsedTimeVarIndex);
 
-            final String registerMethodName = this.registrarMetadataSelector.selectRegistrationMethod();
-            final String registerMethodSignature = this.registrarMetadataSelector.selectTimeRegistrationMethodSignature();
-            final String registrarClass = transformClassName(this.registrarMetadataSelector.selectRegistrarClass());
             mv.visitMethodInsn(
-                    INVOKESTATIC,
+                    INVOKEVIRTUAL,
                     registrarClass,
                     registerMethodName,
                     registerMethodSignature,
@@ -161,28 +179,28 @@ final class ExecutionTimeProfilingVisitor extends ClassVisitor {
             );
         }
 
-        private String transformClassName(final Class<?> cls) {
-            return cls.getCanonicalName().replace('.', '/');
-        }
-
-        private void invokeMethodExitRegistrationIfNeed() {
+        private void invokeMethodExitRegistration() {
             final String exitRegistrationMethod = this.registrarMetadataSelector.selectExitRegistrationMethod();
-            invokeMethodVisitRegistrationIfNeed(exitRegistrationMethod, this.registrarMetadataSelector.selectExitRegistrationMethodSignature());
+            invokeMethodVisitRegistration(exitRegistrationMethod, this.registrarMetadataSelector.selectExitRegistrationMethodSignature());
         }
 
-        private void invokeMethodEnterRegistrationIfNeed() {
+        private void invokeMethodEnterRegistration() {
             final String enterRegistrationMethod = this.registrarMetadataSelector.selectEnterRegistrationMethod();
-            invokeMethodVisitRegistrationIfNeed(enterRegistrationMethod, this.registrarMetadataSelector.selectEnterRegistrationMethodSignature());
+            invokeMethodVisitRegistration(enterRegistrationMethod, this.registrarMetadataSelector.selectEnterRegistrationMethodSignature());
         }
 
-        private void invokeMethodVisitRegistrationIfNeed(final String methodName, final String signature) {
-            if (methodName == null) {
-                return;
-            }
-
+        private void invokeMethodVisitRegistration(final String methodName, final String signature) {
+            final String registrarClass = this.registrarMetadataSelector.selectRegistrarClass();
             mv.visitMethodInsn(
                     INVOKESTATIC,
-                    transformClassName(this.registrarMetadataSelector.selectRegistrarClass()),
+                    registrarClass,
+                    this.registrarMetadataSelector.selectRegistrarSingletonAccessorMethod(),
+                    this.registrarMetadataSelector.selectRegistrarSingletonAccessorSignature(),
+                    false
+            );
+            mv.visitMethodInsn(
+                    INVOKEVIRTUAL,
+                    registrarClass,
                     methodName,
                     signature,
                     false
