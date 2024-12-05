@@ -39,7 +39,7 @@ public final class ProfilingTransformer implements ClassFileTransformer {
 
         final ClassReader cr = new ClassReader(classFileBuffer);
         final ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
-        final ClassVisitor cv = new ExecutionTimeProfilingVisitor(cw, className, this.configuration, this.registrarMetadataSelector);
+        final ClassVisitor cv = new ClassProfilingTransformer(cw, className, this.configuration, this.registrarMetadataSelector);
         cr.accept(cv, ClassReader.EXPAND_FRAMES);
 
         return cw.toByteArray();

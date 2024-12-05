@@ -47,6 +47,7 @@ public abstract class ExecutionTimeRegistrar {
         }
 
         write(method, methodEnterTimestamp, methodElapsedTime);
+        registerMethodExit();
     }
 
     protected abstract void write(

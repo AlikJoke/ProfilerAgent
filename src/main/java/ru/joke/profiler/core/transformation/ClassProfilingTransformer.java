@@ -7,13 +7,13 @@ import ru.joke.profiler.core.output.ExecutionTimeRegistrarMetadataSelector;
 
 import static org.objectweb.asm.Opcodes.*;
 
-final class ExecutionTimeProfilingVisitor extends ClassVisitor {
+public final class ClassProfilingTransformer extends ClassVisitor {
 
     private final String className;
     private final StaticProfilingConfiguration profilingConfiguration;
     private final ExecutionTimeRegistrarMetadataSelector registrarMetadataSelector;
 
-    ExecutionTimeProfilingVisitor(
+    ClassProfilingTransformer(
             final ClassWriter classWriter,
             final String className,
             final StaticProfilingConfiguration profilingConfiguration,
@@ -33,22 +33,27 @@ final class ExecutionTimeProfilingVisitor extends ClassVisitor {
             final String[] exceptions) {
         final MethodVisitor methodVisitor = this.cv.visitMethod(methodAccess, methodName, methodDesc, signature, exceptions);
         final String fullMethodName = this.className + "." + methodName;
-        return new ExecutionTimeRegistrarVisitor(Opcodes.ASM9, methodAccess, methodDesc, methodVisitor, fullMethodName, profilingConfiguration, registrarMetadataSelector);
+        return new MethodExecutionTimeRegistrationTransformer(Opcodes.ASM9, methodAccess, methodDesc, methodVisitor, fullMethodName, profilingConfiguration, registrarMetadataSelector);
     }
 
-    private static class ExecutionTimeRegistrarVisitor extends LocalVariablesSorter {
+    private static class MethodExecutionTimeRegistrationTransformer extends LocalVariablesSorter {
 
         private static final String SYSTEM_CLASS_NAME = System.class.getCanonicalName().replace('.', '/');
         private static final String NANO_TIME_METHOD_NAME = "nanoTime";
         private static final String NANO_TIME_METHOD_SIGNATURE = "()J";
 
+        private static final String CONSTRUCTOR = "<init>";
+
         private final StaticProfilingConfiguration profilingConfiguration;
         private final ExecutionTimeRegistrarMetadataSelector registrarMetadataSelector;
         private final String methodName;
+        private final boolean isConstructor;
 
         private int timestampEnterVarIndex;
 
-        ExecutionTimeRegistrarVisitor(
+        private Label tryStartLabel, tryHandlerLabel, lastThrowLabel;
+
+        MethodExecutionTimeRegistrationTransformer(
                 final int api,
                 final int access,
                 final String descriptor,
@@ -60,6 +65,7 @@ final class ExecutionTimeProfilingVisitor extends ClassVisitor {
             this.methodName = methodName;
             this.profilingConfiguration = profilingConfiguration;
             this.registrarMetadataSelector = registrarMetadataSelector;
+            this.isConstructor = methodName.endsWith(CONSTRUCTOR);
         }
 
         @Override
@@ -77,17 +83,78 @@ final class ExecutionTimeProfilingVisitor extends ClassVisitor {
              */
             invokeMethodEnterRegistration();
 
+            /*
+             * Try block in constructors starts only after the parent class constructor is called.
+             */
+            if (!this.isConstructor) {
+                injectTryBlockBeginning();
+            }
+
             super.visitCode();
         }
 
         @Override
+        public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
+            super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
+            if (name.equals(CONSTRUCTOR) && this.isConstructor && opcode == INVOKESPECIAL && this.tryStartLabel == null) {
+                injectTryBlockBeginning();
+            }
+        }
+
+        @Override
         public void visitInsn(int opcode) {
-            final boolean isTerminalOpcode = opcode >= IRETURN && opcode <= RETURN || opcode == ATHROW;
-            if (isTerminalOpcode) {
-                insertElapsedTimeRegistrationCall();
+            if (opcode >= IRETURN && opcode <= RETURN) {
+                onSuccessMethodExecution(opcode);
+                return;
             }
 
             super.visitInsn(opcode);
+            if (opcode == Opcodes.ATHROW) {
+                this.lastThrowLabel = new Label();
+                mv.visitLabel(this.lastThrowLabel);
+            }
+        }
+
+        @Override
+        public void visitEnd() {
+            if (this.lastThrowLabel != null && this.lastThrowLabel.getOffset() > this.tryStartLabel.getOffset()) {
+                mv.visitTryCatchBlock(this.tryStartLabel, this.lastThrowLabel, this.tryHandlerLabel, null);
+            }
+        }
+
+        private void onSuccessMethodExecution(final int returnOpcode) {
+            final Label tryEndLabel = new Label();
+            mv.visitLabel(tryEndLabel);
+
+            insertElapsedTimeRegistrationCall();
+
+            super.visitInsn(returnOpcode);
+
+            if (this.tryStartLabel.getOffset() < tryEndLabel.getOffset()) {
+                mv.visitTryCatchBlock(this.tryStartLabel, tryEndLabel, this.tryHandlerLabel, null);
+            }
+
+            this.tryStartLabel = new Label();
+            mv.visitLabel(this.tryStartLabel);
+        }
+
+        private void injectTryBlockBeginning() {
+            final Label codeStart = new Label();
+            mv.visitJumpInsn(GOTO, codeStart);
+
+            injectTryHandler();
+
+            mv.visitLabel(codeStart);
+
+            this.tryStartLabel = new Label();
+            mv.visitLabel(this.tryStartLabel);
+        }
+
+        private void injectTryHandler() {
+            this.tryHandlerLabel = new Label();
+            mv.visitLabel(this.tryHandlerLabel);
+            insertElapsedTimeRegistrationCall();
+            mv.visitInsn(ATHROW);
         }
 
         private void insertElapsedTimeRegistrationCall() {
