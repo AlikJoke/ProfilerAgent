@@ -2,10 +2,14 @@ package ru.joke.profiler.core.configuration;
 
 public final class DynamicProfilingConfigurationHolder {
 
-    private static final DynamicProfilingConfigurationHolder instance = new DynamicProfilingConfigurationHolder();
+    private static DynamicProfilingConfigurationHolder instance;
 
     public static DynamicProfilingConfigurationHolder getInstance() {
         return instance;
+    }
+
+    DynamicProfilingConfigurationHolder() {
+        super();
     }
 
     private volatile DynamicProfilingConfiguration dynamicConfiguration;
@@ -16,5 +20,9 @@ public final class DynamicProfilingConfigurationHolder {
 
     public DynamicProfilingConfiguration getDynamicConfiguration() {
         return dynamicConfiguration;
+    }
+
+    void init() {
+        instance = this;
     }
 }

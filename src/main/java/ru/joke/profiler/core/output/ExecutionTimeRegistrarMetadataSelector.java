@@ -1,13 +1,11 @@
 package ru.joke.profiler.core.output;
 
 import ru.joke.profiler.core.ProfilerException;
-import ru.joke.profiler.core.configuration.StaticProfilingConfiguration;
 
 import java.lang.reflect.Method;
 
 public final class ExecutionTimeRegistrarMetadataSelector {
 
-    private static final String DYNAMIC_EXIT_METHOD_NAME = "registerMethodExitDynamic";
     private static final String ENTER_METHOD_NAME = "registerMethodEnter";
     private static final String EXIT_METHOD_NAME = "registerMethodExit";
     private static final String REGISTRAR_ACCESSOR_METHOD_NAME = "getInstance";
@@ -21,10 +19,10 @@ public final class ExecutionTimeRegistrarMetadataSelector {
     private final String enterMethodRegistrationName;
     private final String exitMethodRegistrationName;
 
-    public ExecutionTimeRegistrarMetadataSelector(final StaticProfilingConfiguration configuration) {
+    public ExecutionTimeRegistrarMetadataSelector() {
         this.registrarClass = ExecutionTimeRegistrar.class.getCanonicalName().replace('.', '/');
         this.registrarAccessorMethodSignature = buildRegistrarAccessorMethodSignature(this.registrarClass);
-        this.timeRegistrationMethodName = findTimeRegistrationMethod(configuration);
+        this.timeRegistrationMethodName = findTimeRegistrationMethod();
         this.enterMethodRegistrationName = findEnterRegistrationMethodName();
         this.exitMethodRegistrationName = findExitRegistrationMethodName();
     }
@@ -69,10 +67,9 @@ public final class ExecutionTimeRegistrarMetadataSelector {
         return "()L" + registrarClass + ";";
     }
 
-    private String findTimeRegistrationMethod(final StaticProfilingConfiguration configuration) {
-        final String targetMethodName = configuration.isDynamicConfigurationEnabled() ? DYNAMIC_EXIT_METHOD_NAME : EXIT_METHOD_NAME;
+    private String findTimeRegistrationMethod() {
         try {
-            final Method result = ExecutionTimeRegistrar.class.getMethod(targetMethodName, String.class, long.class, long.class);
+            final Method result = ExecutionTimeRegistrar.class.getMethod(EXIT_METHOD_NAME, String.class, long.class, long.class);
             return result.getName();
         } catch (NoSuchMethodException e) {
             throw new ProfilerException(e);

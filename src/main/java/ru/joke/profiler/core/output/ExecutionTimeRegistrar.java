@@ -1,8 +1,6 @@
 package ru.joke.profiler.core.output;
 
 import ru.joke.profiler.core.ProfilerException;
-import ru.joke.profiler.core.configuration.DynamicProfilingConfiguration;
-import ru.joke.profiler.core.configuration.DynamicProfilingConfigurationHolder;
 
 public abstract class ExecutionTimeRegistrar {
 
@@ -29,27 +27,6 @@ public abstract class ExecutionTimeRegistrar {
         write(method, methodEnterTimestamp, methodElapsedTime);
     }
 
-    @SuppressWarnings("unused")
-    public void registerMethodExitDynamic(
-            final String method,
-            final long methodEnterTimestamp,
-            final long methodElapsedTime) {
-        final DynamicProfilingConfigurationHolder dynamicConfigHolder = DynamicProfilingConfigurationHolder.getInstance();
-        final DynamicProfilingConfiguration dynamicConfig = dynamicConfigHolder.getDynamicConfiguration();
-        if (dynamicConfig == null) {
-            registerMethodExit(method, methodEnterTimestamp, methodElapsedTime);
-            return;
-        }
-
-        if (!isProfilingApplied(method, methodElapsedTime, dynamicConfig)) {
-            registerMethodExit();
-            return;
-        }
-
-        write(method, methodEnterTimestamp, methodElapsedTime);
-        registerMethodExit();
-    }
-
     protected abstract void write(
             final String method,
             final long methodEnterTimestamp,
@@ -62,16 +39,5 @@ public abstract class ExecutionTimeRegistrar {
         }
 
         registrarInstance = this;
-    }
-
-    private boolean isProfilingApplied(
-            final String method,
-            final long methodElapsedTime,
-            final DynamicProfilingConfiguration dynamicConfig) {
-        final Thread currentThread = Thread.currentThread();
-        return !dynamicConfig.isProfilingDisabled()
-                && dynamicConfig.isResourceMustBeProfiled(method)
-                && dynamicConfig.getMinExecutionThreshold() <= methodElapsedTime
-                && (dynamicConfig.getThreadsFilter() == null || dynamicConfig.getThreadsFilter().test(currentThread.getName()));
     }
 }

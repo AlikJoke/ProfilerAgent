@@ -1,9 +1,6 @@
 package ru.joke.profiler.core;
 
-import ru.joke.profiler.core.configuration.DynamicProfilingConfigurationHolder;
-import ru.joke.profiler.core.configuration.DynamicProfilingConfigurationRefreshService;
-import ru.joke.profiler.core.configuration.ProfilingConfigurationLoader;
-import ru.joke.profiler.core.configuration.StaticProfilingConfiguration;
+import ru.joke.profiler.core.configuration.*;
 import ru.joke.profiler.core.output.ExecutionTimeRegistrarInitializer;
 import ru.joke.profiler.core.output.ExecutionTimeRegistrarMetadataSelector;
 import ru.joke.profiler.core.transformation.ProfilingTransformer;
@@ -24,10 +21,13 @@ public final class ProfilerAgent {
         final StaticProfilingConfiguration staticConfiguration = configurationLoader.loadStatic();
         final Predicate<String> transformationFilter = new TransformationFilter(staticConfiguration);
 
-        final ExecutionTimeRegistrarInitializer registrarInitializer = new ExecutionTimeRegistrarInitializer(staticConfiguration);
+        final DynamicProfilingConfigurationHolderFactory dynamicConfigHolderFactory = new DynamicProfilingConfigurationHolderFactory();
+        final DynamicProfilingConfigurationHolder dynamicConfigHolder = dynamicConfigHolderFactory.create();
+
+        final ExecutionTimeRegistrarInitializer registrarInitializer = new ExecutionTimeRegistrarInitializer(staticConfiguration, dynamicConfigHolder);
         registrarInitializer.init();
 
-        final ExecutionTimeRegistrarMetadataSelector registrarMetadataSelector = new ExecutionTimeRegistrarMetadataSelector(staticConfiguration);
+        final ExecutionTimeRegistrarMetadataSelector registrarMetadataSelector = new ExecutionTimeRegistrarMetadataSelector();
 
         instrumentation.addTransformer(new ProfilingTransformer(transformationFilter, staticConfiguration, registrarMetadataSelector));
 
