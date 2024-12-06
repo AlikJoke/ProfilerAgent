@@ -1,25 +1,32 @@
 package ru.joke.profiler.core.output;
 
 import ru.joke.profiler.core.ProfilerException;
+import ru.joke.profiler.core.output.meta.MethodInstanceAccessorHandle;
+import ru.joke.profiler.core.output.meta.MethodEnterHandle;
+import ru.joke.profiler.core.output.meta.MethodExitHandle;
 
 public abstract class ExecutionTimeRegistrar {
 
     private static ExecutionTimeRegistrar registrarInstance;
 
     @SuppressWarnings("unused")
+    @MethodInstanceAccessorHandle
     public static ExecutionTimeRegistrar getInstance() {
         return registrarInstance;
     }
 
     @SuppressWarnings("unused")
+    @MethodEnterHandle
     public void registerMethodEnter() {
 
     }
 
+    @MethodExitHandle(forTimeRegistration = false)
     public void registerMethodExit() {
 
     }
 
+    @MethodExitHandle(forTimeRegistration = true)
     public void registerMethodExit(
             final String method,
             final long methodEnterTimestamp,

@@ -1,6 +1,7 @@
 package ru.joke.profiler.core;
 
 import ru.joke.profiler.core.configuration.*;
+import ru.joke.profiler.core.output.ExecutionTimeRegistrar;
 import ru.joke.profiler.core.output.ExecutionTimeRegistrarInitializer;
 import ru.joke.profiler.core.output.ExecutionTimeRegistrarMetadataSelector;
 import ru.joke.profiler.core.transformation.ProfilingTransformer;
@@ -27,7 +28,7 @@ public final class ProfilerAgent {
         final ExecutionTimeRegistrarInitializer registrarInitializer = new ExecutionTimeRegistrarInitializer(staticConfiguration, dynamicConfigHolder);
         registrarInitializer.init();
 
-        final ExecutionTimeRegistrarMetadataSelector registrarMetadataSelector = new ExecutionTimeRegistrarMetadataSelector();
+        final ExecutionTimeRegistrarMetadataSelector registrarMetadataSelector = new ExecutionTimeRegistrarMetadataSelector(ExecutionTimeRegistrar.class);
 
         instrumentation.addTransformer(new ProfilingTransformer(transformationFilter, staticConfiguration, registrarMetadataSelector));
 

@@ -1,30 +1,46 @@
 package ru.joke.profiler.core.output;
 
 import ru.joke.profiler.core.ProfilerException;
+import ru.joke.profiler.core.output.meta.MethodEnterHandle;
+import ru.joke.profiler.core.output.meta.MethodExitHandle;
+import ru.joke.profiler.core.output.meta.MethodInstanceAccessorHandle;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public final class ExecutionTimeRegistrarMetadataSelector {
 
-    private static final String ENTER_METHOD_NAME = "registerMethodEnter";
-    private static final String EXIT_METHOD_NAME = "registerMethodExit";
-    private static final String REGISTRAR_ACCESSOR_METHOD_NAME = "getInstance";
-
-    private static final String TIME_REGISTRATION_METHOD_SIGNATURE = "(Ljava/lang/String;JJ)V";
-    private static final String ENTER_EXIT_METHOD_SIGNATURE = "()V";
-
     private final String registrarClass;
+    private final String registrarAccessorMethodName;
     private final String registrarAccessorMethodSignature;
-    private final String timeRegistrationMethodName;
     private final String enterMethodRegistrationName;
+    private final String enterMethodRegistrationSignature;
     private final String exitMethodRegistrationName;
+    private final String exitMethodRegistrationSignature;
+    private final String exitMethodTimeRegistrationName;
+    private final String exitMethodTimeRegistrationSignature;
 
-    public ExecutionTimeRegistrarMetadataSelector() {
-        this.registrarClass = ExecutionTimeRegistrar.class.getCanonicalName().replace('.', '/');
-        this.registrarAccessorMethodSignature = buildRegistrarAccessorMethodSignature(this.registrarClass);
-        this.timeRegistrationMethodName = findTimeRegistrationMethod();
-        this.enterMethodRegistrationName = findEnterRegistrationMethodName();
-        this.exitMethodRegistrationName = findExitRegistrationMethodName();
+    public ExecutionTimeRegistrarMetadataSelector(final Class<?> registrarClass) {
+        this.registrarClass = transformClassName(registrarClass);
+
+        final Method accessorMethod = findAnnotatedMethod(registrarClass, MethodInstanceAccessorHandle.class, a -> true);
+        this.registrarAccessorMethodName = accessorMethod.getName();
+        this.registrarAccessorMethodSignature = buildMethodSignature(accessorMethod);
+
+        final Method enterMethod = findAnnotatedMethod(registrarClass, MethodEnterHandle.class, a -> true);
+        this.enterMethodRegistrationName = enterMethod.getName();
+        this.enterMethodRegistrationSignature = buildMethodSignature(enterMethod);
+
+        final Method exitTimeRegistrationMethod = findAnnotatedMethod(registrarClass, MethodExitHandle.class, MethodExitHandle::forTimeRegistration);
+        this.exitMethodTimeRegistrationName = exitTimeRegistrationMethod.getName();
+        this.exitMethodTimeRegistrationSignature = buildMethodSignature(exitTimeRegistrationMethod);
+
+        final Method exitMethod = findAnnotatedMethod(registrarClass, MethodExitHandle.class, a -> !a.forTimeRegistration());
+        this.exitMethodRegistrationName = exitMethod.getName();
+        this.exitMethodRegistrationSignature = buildMethodSignature(exitMethod);
     }
 
     public String selectEnterRegistrationMethod() {
@@ -36,7 +52,7 @@ public final class ExecutionTimeRegistrarMetadataSelector {
     }
 
     public String selectRegistrarSingletonAccessorMethod() {
-        return REGISTRAR_ACCESSOR_METHOD_NAME;
+        return this.registrarAccessorMethodName;
     }
 
     public String selectRegistrarSingletonAccessorSignature() {
@@ -47,50 +63,70 @@ public final class ExecutionTimeRegistrarMetadataSelector {
         return this.registrarClass;
     }
 
-    public String selectRegistrationMethod() {
-        return this.timeRegistrationMethodName;
+    public String selectExitTimeRegistrationMethod() {
+        return this.exitMethodTimeRegistrationName;
     }
 
     public String selectTimeRegistrationMethodSignature() {
-        return TIME_REGISTRATION_METHOD_SIGNATURE;
+        return this.exitMethodTimeRegistrationSignature;
     }
 
     public String selectEnterRegistrationMethodSignature() {
-        return ENTER_EXIT_METHOD_SIGNATURE;
+        return this.enterMethodRegistrationSignature;
     }
 
     public String selectExitRegistrationMethodSignature() {
-        return ENTER_EXIT_METHOD_SIGNATURE;
+        return this.exitMethodRegistrationSignature;
     }
 
-    private String buildRegistrarAccessorMethodSignature(final String registrarClass) {
-        return "()L" + registrarClass + ";";
+    private String buildMethodSignature(final Method method) {
+        final Class<?> returnType = method.getReturnType();
+        final String returnTypeSignature = getTypeSignature(returnType);
+
+        final Class<?>[] parameters = method.getParameterTypes();
+        final String paramsSignature =
+                Arrays.stream(parameters)
+                        .map(this::getTypeSignature)
+                        .collect(Collectors.joining("", "(", ")"));
+        return paramsSignature + returnTypeSignature;
     }
 
-    private String findTimeRegistrationMethod() {
-        try {
-            final Method result = ExecutionTimeRegistrar.class.getMethod(EXIT_METHOD_NAME, String.class, long.class, long.class);
-            return result.getName();
-        } catch (NoSuchMethodException e) {
-            throw new ProfilerException(e);
+    private String getTypeSignature(final Class<?> type) {
+        if (type == void.class) {
+            return "V";
+        } else if (type == long.class) {
+            return "J";
+        } else if (type == int.class) {
+            return "I";
+        } else if (type == boolean.class) {
+            return "Z";
+        } else if (type == char.class) {
+            return "C";
+        } else if (type == short.class) {
+            return "S";
+        } else if (type == byte.class) {
+            return "B";
+        } else if (type == float.class) {
+            return "F";
+        } else if (type == double.class) {
+            return "D";
+        } else {
+            return "L" + transformClassName(type) + ";";
         }
     }
 
-    private String findEnterRegistrationMethodName() {
-        return findVisitRegistrationMethodName(ENTER_METHOD_NAME);
+    private <T extends Annotation> Method findAnnotatedMethod(
+            final Class<?> registrarClass,
+            final Class<T> annotation,
+            final Predicate<T> annotationFilter) {
+        final Method[] methods = registrarClass.getMethods();
+        return Arrays.stream(methods)
+                        .filter(m -> m.isAnnotationPresent(annotation) && annotationFilter.test(m.getAnnotation(annotation)))
+                        .findAny()
+                        .orElseThrow(() -> new ProfilerException(String.format("No annotated %s method found in registrar class", annotation.getCanonicalName())));
     }
 
-    private String findExitRegistrationMethodName() {
-        return findVisitRegistrationMethodName(EXIT_METHOD_NAME);
-    }
-
-    private String findVisitRegistrationMethodName(final String methodName) {
-
-        try {
-            final Method result = ExecutionTimeRegistrar.class.getMethod(methodName);
-            return result.getName();
-        } catch (NoSuchMethodException e) {
-            throw new ProfilerException(e);
-        }
+    private String transformClassName(final Class<?> clazz) {
+        return clazz.getCanonicalName().replace('.', '/');
     }
 }

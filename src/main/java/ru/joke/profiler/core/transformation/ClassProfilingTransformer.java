@@ -31,6 +31,10 @@ public final class ClassProfilingTransformer extends ClassVisitor {
             final String methodDesc,
             final String signature,
             final String[] exceptions) {
+        if ((methodAccess & ACC_NATIVE) != 0 || (methodAccess & ACC_ABSTRACT) != 0) {
+            return null;
+        }
+
         final MethodVisitor methodVisitor = this.cv.visitMethod(methodAccess, methodName, methodDesc, signature, exceptions);
         final String fullMethodName = this.className + "." + methodName;
         return new MethodExecutionTimeRegistrationTransformer(Opcodes.ASM9, methodAccess, methodDesc, methodVisitor, fullMethodName, profilingConfiguration, registrarMetadataSelector);
@@ -221,7 +225,7 @@ public final class ClassProfilingTransformer extends ClassVisitor {
         }
 
         private void invokeMethodExitRegistration(final int elapsedTimeVarIndex) {
-            final String registerMethodName = this.registrarMetadataSelector.selectRegistrationMethod();
+            final String registerMethodName = this.registrarMetadataSelector.selectExitTimeRegistrationMethod();
             final String registerMethodSignature = this.registrarMetadataSelector.selectTimeRegistrationMethodSignature();
             final String registrarClass = this.registrarMetadataSelector.selectRegistrarClass();
             mv.visitMethodInsn(
