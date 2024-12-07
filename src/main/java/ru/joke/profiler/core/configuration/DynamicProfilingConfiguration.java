@@ -11,15 +11,18 @@ public final class DynamicProfilingConfiguration extends ProfilingConfiguration 
 
     private final boolean profilingDisabled;
     private final Predicate<String> threadsFilter;
+    private final Predicate<String> profilingRootsFilter;
 
     private DynamicProfilingConfiguration(
             final long minExecutionThresholdNs,
             final Predicate<String> resourcesFilter,
             final Predicate<String> threadsFilter,
+            final Predicate<String> profilingRootsFilter,
             final boolean profilingDisabled) {
         super(resourcesFilter, minExecutionThresholdNs);
         this.threadsFilter = threadsFilter;
         this.profilingDisabled = profilingDisabled;
+        this.profilingRootsFilter = profilingRootsFilter;
     }
 
     public boolean isProfilingDisabled() {
@@ -28,6 +31,10 @@ public final class DynamicProfilingConfiguration extends ProfilingConfiguration 
 
     public Predicate<String> getThreadsFilter() {
         return threadsFilter;
+    }
+
+    public Predicate<String> getProfilingRootsFilter() {
+        return profilingRootsFilter;
     }
 
     @Override
@@ -52,10 +59,17 @@ public final class DynamicProfilingConfiguration extends ProfilingConfiguration 
                         : Pattern.compile(excludedThreadsMask).asPredicate().negate();
         final Predicate<String> resourcesFilter = composeResourcesFilter(excludedResources, excludedResourcesMask, true);
 
+        final String profilingRootsStr = properties.getProperty(DYNAMIC_PROFILING_ROOTS, "");
+        final Set<String> profilingRoots = parseResourcesArg(profilingRootsStr, '.');
+
+        final String profilingRootsMask = properties.getProperty(DYNAMIC_PROFILING_ROOTS_MASK);
+        final Predicate<String> profilingRootsFilter = composeResourcesFilter(profilingRoots, profilingRootsMask, false);
+
         return new DynamicProfilingConfiguration(
                 minExecutionThresholdNs,
                 resourcesFilter,
                 threadsFilter,
+                profilingRootsFilter,
                 Boolean.parseBoolean(profilingDisabledStr)
         );
     }

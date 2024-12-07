@@ -120,10 +120,12 @@ public final class ClassProfilingTransformer extends ClassVisitor {
         }
 
         @Override
-        public void visitEnd() {
+        public void visitMaxs(int maxStack, int maxLocals) {
             if (this.lastThrowLabel != null && this.lastThrowLabel.getOffset() > this.tryStartLabel.getOffset()) {
                 mv.visitTryCatchBlock(this.tryStartLabel, this.lastThrowLabel, this.tryHandlerLabel, null);
             }
+
+            super.visitMaxs(maxStack, maxLocals);
         }
 
         private void onSuccessMethodExecution(final int returnOpcode) {
@@ -252,15 +254,15 @@ public final class ClassProfilingTransformer extends ClassVisitor {
 
         private void invokeMethodExitRegistration() {
             final String exitRegistrationMethod = this.registrarMetadataSelector.selectExitRegistrationMethod();
-            invokeMethodVisitRegistration(exitRegistrationMethod, this.registrarMetadataSelector.selectExitRegistrationMethodSignature());
+            invokeMethodVisitRegistration(exitRegistrationMethod, this.registrarMetadataSelector.selectExitRegistrationMethodSignature(), false);
         }
 
         private void invokeMethodEnterRegistration() {
             final String enterRegistrationMethod = this.registrarMetadataSelector.selectEnterRegistrationMethod();
-            invokeMethodVisitRegistration(enterRegistrationMethod, this.registrarMetadataSelector.selectEnterRegistrationMethodSignature());
+            invokeMethodVisitRegistration(enterRegistrationMethod, this.registrarMetadataSelector.selectEnterRegistrationMethodSignature(), true);
         }
 
-        private void invokeMethodVisitRegistration(final String methodName, final String signature) {
+        private void invokeMethodVisitRegistration(final String methodName, final String signature, final boolean loadInstrumentedMethodNameAsParameter) {
             final String registrarClass = this.registrarMetadataSelector.selectRegistrarClass();
             mv.visitMethodInsn(
                     INVOKESTATIC,
@@ -269,6 +271,11 @@ public final class ClassProfilingTransformer extends ClassVisitor {
                     this.registrarMetadataSelector.selectRegistrarSingletonAccessorSignature(),
                     false
             );
+
+            if (loadInstrumentedMethodNameAsParameter) {
+                mv.visitLdcInsn(this.methodName);
+            }
+
             mv.visitMethodInsn(
                     INVOKEVIRTUAL,
                     registrarClass,

@@ -34,6 +34,8 @@ abstract class ConfigurationProperties {
     static final String DYNAMIC_EXCLUDED_RESOURCES_MASK = createDynamicProperty(ABS_EXCLUDED_RESOURCES_MASK);
     static final String DYNAMIC_EXCLUDED_THREADS_MASK = createDynamicProperty("excluded_threads_mask");
     static final String DYNAMIC_PROFILING_DISABLED = createDynamicProperty("profiling_disabled");
+    static final String DYNAMIC_PROFILING_ROOTS = createDynamicProperty("profiling_roots");
+    static final String DYNAMIC_PROFILING_ROOTS_MASK = createDynamicProperty("profiling_roots_mask");
 
     static final String CONFIGURATION_FILE_PATH_ARG = "conf_file";
 

@@ -22,7 +22,7 @@ public final class ExecutionTimeRegistrarInitializer {
                         : new SimpleExecutionTimeRegistrar();
         final ExecutionTimeRegistrar resultRegistrar =
                 this.staticConfiguration.isDynamicConfigurationEnabled()
-                        ? new DynamicConfigurableExecutionTimeRegistrar(baseRegistrar, this.dynamicProfilingConfigurationHolder)
+                        ? new DynamicConfigurableExecutionTimeRegistrar(baseRegistrar, this.staticConfiguration, this.dynamicProfilingConfigurationHolder)
                         : baseRegistrar;
         resultRegistrar.init();
     }

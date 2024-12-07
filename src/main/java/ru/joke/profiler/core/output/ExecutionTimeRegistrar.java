@@ -1,9 +1,9 @@
 package ru.joke.profiler.core.output;
 
 import ru.joke.profiler.core.ProfilerException;
-import ru.joke.profiler.core.output.meta.MethodInstanceAccessorHandle;
 import ru.joke.profiler.core.output.meta.MethodEnterHandle;
 import ru.joke.profiler.core.output.meta.MethodExitHandle;
+import ru.joke.profiler.core.output.meta.MethodInstanceAccessorHandle;
 
 public abstract class ExecutionTimeRegistrar {
 
@@ -17,7 +17,7 @@ public abstract class ExecutionTimeRegistrar {
 
     @SuppressWarnings("unused")
     @MethodEnterHandle
-    public void registerMethodEnter() {
+    public void registerMethodEnter(final String method) {
 
     }
 
@@ -32,6 +32,10 @@ public abstract class ExecutionTimeRegistrar {
             final long methodEnterTimestamp,
             final long methodElapsedTime) {
         write(method, methodEnterTimestamp, methodElapsedTime);
+    }
+
+    protected boolean isRegistrationOccurredOnTrace() {
+        throw new ProfilerException("Such type of registrar doesn't support this method");
     }
 
     protected abstract void write(

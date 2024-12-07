@@ -15,13 +15,24 @@ public final class TracedExecutionTimeRegistrar extends ExecutionTimeRegistrar {
     }
 
     @Override
-    public void registerMethodEnter() {
+    protected boolean isRegistrationOccurredOnTrace() {
+        return traceData.get() != null;
+    }
+
+    @Override
+    public void registerMethodEnter(final String method) {
         final TraceData methodTraceData = traceData.get();
         if (methodTraceData == null) {
             traceData.set(new TraceData());
         } else {
             methodTraceData.currentSpanId++;
         }
+    }
+
+    @Override
+    public void registerMethodExit(String method, long methodEnterTimestamp, long methodElapsedTime) {
+        super.registerMethodExit(method, methodEnterTimestamp, methodElapsedTime);
+        registerMethodExit();
     }
 
     @Override
