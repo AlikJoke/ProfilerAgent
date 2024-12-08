@@ -7,7 +7,7 @@ import ru.joke.profiler.core.configuration.StaticProfilingConfiguration;
 
 public final class DynamicConfigurableExecutionTimeRegistrar extends ExecutionTimeRegistrar {
 
-    private final ThreadLocal<ConfigurationWrapper> threadProfilingConfiguration = new ThreadLocal<>();
+    private final ThreadLocal<DynamicExecutionContext> threadExecutionContext = new ThreadLocal<>();
 
     private final ExecutionTimeRegistrar delegate;
     private final DynamicProfilingConfigurationHolder dynamicProfilingConfigurationHolder;
@@ -24,40 +24,50 @@ public final class DynamicConfigurableExecutionTimeRegistrar extends ExecutionTi
 
     @Override
     public void registerMethodEnter(final String method) {
-        if (!isTracingRegistrationEnabled()) {
-            this.delegate.registerMethodEnter(method);
+
+        final DynamicExecutionContext executionContext = findOrCreateExecutionContext();
+        if (executionContext.configuration != null && ++executionContext.depth > executionContext.configuration.getProfiledTraceMaxDepth()) {
             return;
         }
 
-        final DynamicProfilingConfiguration dynamicConfig = findDynamicConfig();
         try {
-            if (dynamicConfig == null
-                    || dynamicConfig.getProfilingRootsFilter() == null
-                    || dynamicConfig.getProfilingRootsFilter().test(method)
-                    || this.delegate.isRegistrationOccurredOnTrace()) {
+            if (!isTracingRegistrationEnabled()) {
+                this.delegate.registerMethodEnter(method);
+                return;
+            }
+
+            if ((executionContext.configuration == null
+                    || executionContext.configuration.getProfilingRootsFilter() == null
+                    || executionContext.configuration.getProfilingRootsFilter().test(method)
+                    || this.delegate.isRegistrationOccurredOnTrace())) {
                 this.delegate.registerMethodEnter(method);
             }
         } finally {
             if (!this.delegate.isRegistrationOccurredOnTrace()) {
-                this.threadProfilingConfiguration.remove();
+                this.threadExecutionContext.remove();
             }
         }
     }
 
     @Override
     public void registerMethodExit() {
-        if (this.isTracingRegistrationEnabled()) {
-            this.delegate.registerMethodExit();
-            return;
-        }
-
+        final DynamicExecutionContext executionContext = findOrCreateExecutionContext();
         try {
+            if (executionContext.configuration != null && executionContext.depth-- > executionContext.configuration.getProfiledTraceMaxDepth()) {
+                return;
+            }
+
+            if (!isTracingRegistrationEnabled()) {
+                this.delegate.registerMethodExit();
+                return;
+            }
+
             if (this.delegate.isRegistrationOccurredOnTrace()) {
                 this.delegate.registerMethodExit();
             }
         } finally {
-            if (!this.delegate.isRegistrationOccurredOnTrace()) {
-                this.threadProfilingConfiguration.remove();
+            if (executionContext.depth == 0) {
+                this.threadExecutionContext.remove();
             }
         }
     }
@@ -68,28 +78,28 @@ public final class DynamicConfigurableExecutionTimeRegistrar extends ExecutionTi
             final long methodEnterTimestamp,
             final long methodElapsedTime) {
 
-        final boolean isTracingRegistrationEnabled = isTracingRegistrationEnabled();
-        if (isTracingRegistrationEnabled && !this.delegate.isRegistrationOccurredOnTrace()) {
-            return;
-        }
-
+        final DynamicExecutionContext executionContext = findOrCreateExecutionContext();
         try {
-            final DynamicProfilingConfiguration dynamicConfig = findDynamicConfig();
-            if (dynamicConfig == null) {
+            if (executionContext.configuration != null && executionContext.depth-- > executionContext.configuration.getProfiledTraceMaxDepth()
+                    || isTracingRegistrationEnabled() && !this.delegate.isRegistrationOccurredOnTrace()) {
+                return;
+            }
+
+            if (executionContext.configuration == null) {
                 this.delegate.registerMethodExit(method, methodEnterTimestamp, methodElapsedTime);
                 return;
             }
 
-            if (!isProfiled(dynamicConfig, method)
-                    || dynamicConfig.getMinExecutionThreshold() > methodElapsedTime) {
+            if (!isProfiled(executionContext.configuration, method)
+                    || executionContext.configuration.getMinExecutionThreshold() > methodElapsedTime) {
                 this.delegate.registerMethodExit();
                 return;
             }
 
             this.delegate.registerMethodExit(method, methodEnterTimestamp, methodElapsedTime);
         } finally {
-            if (isTracingRegistrationEnabled && !this.delegate.isRegistrationOccurredOnTrace()) {
-                this.threadProfilingConfiguration.remove();
+            if (executionContext.depth == 0) {
+                this.threadExecutionContext.remove();
             }
         }
     }
@@ -97,6 +107,11 @@ public final class DynamicConfigurableExecutionTimeRegistrar extends ExecutionTi
     @Override
     protected void write(String method, long methodEnterTimestamp, long methodElapsedTime) {
         throw new ProfilerException("Method doesn't supported in such type of registrar");
+    }
+
+    @Override
+    protected boolean isRegistrationOccurredOnTrace() {
+        return this.delegate.isRegistrationOccurredOnTrace();
     }
 
     private boolean isTracingRegistrationEnabled() {
@@ -110,22 +125,23 @@ public final class DynamicConfigurableExecutionTimeRegistrar extends ExecutionTi
                 && (dynamicConfig.getThreadsFilter() == null || dynamicConfig.getThreadsFilter().test(currentThread.getName()));
     }
 
-    private DynamicProfilingConfiguration findDynamicConfig() {
-        final ConfigurationWrapper profilingConfigurationWrapper = this.threadProfilingConfiguration.get();
-        final DynamicProfilingConfiguration dynamicConfig;
-        if (profilingConfigurationWrapper == null) {
-            dynamicConfig = this.dynamicProfilingConfigurationHolder.getDynamicConfiguration();
-            this.threadProfilingConfiguration.set(new ConfigurationWrapper(dynamicConfig));
-            return dynamicConfig;
+    private DynamicExecutionContext findOrCreateExecutionContext() {
+        final DynamicExecutionContext context = this.threadExecutionContext.get();
+        if (context == null) {
+            final DynamicProfilingConfiguration dynamicConfig = this.dynamicProfilingConfigurationHolder.getDynamicConfiguration();
+            final DynamicExecutionContext result = new DynamicExecutionContext(dynamicConfig);
+            this.threadExecutionContext.set(result);
+            return result;
         } else {
-            return profilingConfigurationWrapper.configuration;
+            return context;
         }
     }
 
-    private static class ConfigurationWrapper {
+    private static class DynamicExecutionContext {
         private final DynamicProfilingConfiguration configuration;
+        private int depth;
 
-        private ConfigurationWrapper(final DynamicProfilingConfiguration configuration) {
+        private DynamicExecutionContext(final DynamicProfilingConfiguration configuration) {
             this.configuration = configuration;
         }
     }

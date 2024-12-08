@@ -36,6 +36,7 @@ abstract class ConfigurationProperties {
     static final String DYNAMIC_PROFILING_DISABLED = createDynamicProperty("profiling_disabled");
     static final String DYNAMIC_PROFILING_ROOTS = createDynamicProperty("profiling_roots");
     static final String DYNAMIC_PROFILING_ROOTS_MASK = createDynamicProperty("profiling_roots_mask");
+    static final String DYNAMIC_PROFILED_STACKTRACE_MAX_DEPTH = createDynamicProperty("profiled_stacktrace_max_depth");
 
     static final String CONFIGURATION_FILE_PATH_ARG = "conf_file";
 

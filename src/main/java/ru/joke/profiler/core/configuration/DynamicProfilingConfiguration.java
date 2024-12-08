@@ -12,17 +12,20 @@ public final class DynamicProfilingConfiguration extends ProfilingConfiguration 
     private final boolean profilingDisabled;
     private final Predicate<String> threadsFilter;
     private final Predicate<String> profilingRootsFilter;
+    private final int profiledTraceMaxDepth;
 
     private DynamicProfilingConfiguration(
             final long minExecutionThresholdNs,
             final Predicate<String> resourcesFilter,
             final Predicate<String> threadsFilter,
             final Predicate<String> profilingRootsFilter,
-            final boolean profilingDisabled) {
+            final boolean profilingDisabled,
+            final int profiledTraceMaxDepth) {
         super(resourcesFilter, minExecutionThresholdNs);
         this.threadsFilter = threadsFilter;
         this.profilingDisabled = profilingDisabled;
         this.profilingRootsFilter = profilingRootsFilter;
+        this.profiledTraceMaxDepth = profiledTraceMaxDepth;
     }
 
     public boolean isProfilingDisabled() {
@@ -37,9 +40,20 @@ public final class DynamicProfilingConfiguration extends ProfilingConfiguration 
         return profilingRootsFilter;
     }
 
+    public int getProfiledTraceMaxDepth() {
+        return profiledTraceMaxDepth;
+    }
+
     @Override
     public String toString() {
-        return "DynamicProfilingConfiguration{" + "profilingDisabled=" + profilingDisabled + ", minExecutionThreshold=" + minExecutionThreshold + '}';
+        return "DynamicProfilingConfiguration{"
+                + "profilingDisabled=" + profilingDisabled
+                + ", threadsFilter=" + threadsFilter
+                + ", profilingRootsFilter=" + profilingRootsFilter
+                + ", profiledTraceMaxDepth=" + profiledTraceMaxDepth
+                + ", resourcesFilter=" + resourcesFilter
+                + ", minExecutionThreshold=" + minExecutionThreshold
+                + '}';
     }
 
     static DynamicProfilingConfiguration create(final Properties properties) {
@@ -65,12 +79,15 @@ public final class DynamicProfilingConfiguration extends ProfilingConfiguration 
         final String profilingRootsMask = properties.getProperty(DYNAMIC_PROFILING_ROOTS_MASK);
         final Predicate<String> profilingRootsFilter = composeResourcesFilter(profilingRoots, profilingRootsMask, false);
 
+        final String traceMaxDepthStr = properties.getProperty(DYNAMIC_PROFILED_STACKTRACE_MAX_DEPTH);
+        final int traceMaxDepth = traceMaxDepthStr == null || traceMaxDepthStr.isEmpty() ? Integer.MAX_VALUE : Integer.parseInt(traceMaxDepthStr);
         return new DynamicProfilingConfiguration(
                 minExecutionThresholdNs,
                 resourcesFilter,
                 threadsFilter,
                 profilingRootsFilter,
-                Boolean.parseBoolean(profilingDisabledStr)
+                Boolean.parseBoolean(profilingDisabledStr),
+                traceMaxDepth
         );
     }
 }

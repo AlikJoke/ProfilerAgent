@@ -35,7 +35,7 @@ public abstract class ExecutionTimeRegistrar {
     }
 
     protected boolean isRegistrationOccurredOnTrace() {
-        throw new ProfilerException("Such type of registrar doesn't support this method");
+        return false;
     }
 
     protected abstract void write(
