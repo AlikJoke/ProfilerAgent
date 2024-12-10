@@ -49,6 +49,6 @@ public final class ProfilerAgent {
                         configurationLoader,
                         staticConfiguration.getDynamicConfigurationRefreshInterval()
                 );
-        dynamicConfigRefreshService.run();
+        dynamicConfigRefreshService.start();
     }
 }

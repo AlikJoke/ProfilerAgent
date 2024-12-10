@@ -36,12 +36,12 @@ public final class DynamicProfilingConfigurationRefreshService {
             final DynamicProfilingConfiguration dynamicConfig = configurationLoader.loadDynamic();
             dynamicProfilingConfigurationHolder.setDynamicConfiguration(dynamicConfig);
         };
-
-        Runtime.getRuntime()
-                .addShutdownHook(new Thread(this.executorService::shutdownNow, SHUTDOWN_THREAD_NAME));
     }
 
-    public void run() {
+    public void start() {
+        Runtime.getRuntime()
+                .addShutdownHook(new Thread(this.executorService::shutdownNow, SHUTDOWN_THREAD_NAME));
+
         this.refreshAction.run();
         this.executorService.scheduleAtFixedRate(
                 this.refreshAction,

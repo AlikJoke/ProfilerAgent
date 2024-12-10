@@ -3,7 +3,7 @@ package ru.joke.profiler.core.configuration;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
-enum ProfilingTimeUnit {
+public enum ProfilingTimeUnit {
 
     NANOSECONDS("ns", TimeUnit.NANOSECONDS),
 

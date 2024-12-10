@@ -16,6 +16,7 @@ public final class ExecutionTimeRegistrarInitializer {
     }
 
     public void init() {
+        // TODO sink
         final ExecutionTimeRegistrar baseRegistrar =
                 this.staticConfiguration.isExecutionTracingEnabled()
                         ? new TracedExecutionTimeRegistrar()
