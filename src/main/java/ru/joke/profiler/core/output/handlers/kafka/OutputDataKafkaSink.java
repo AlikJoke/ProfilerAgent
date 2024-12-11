@@ -5,6 +5,7 @@ import ru.joke.profiler.core.output.handlers.OutputDataSink;
 
 // TODO
 public class OutputDataKafkaSink implements OutputDataSink {
+
     @Override
     public void init() {
         OutputDataSink.super.init();

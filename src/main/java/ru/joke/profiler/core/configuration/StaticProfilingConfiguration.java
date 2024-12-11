@@ -1,8 +1,11 @@
 package ru.joke.profiler.core.configuration;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static ru.joke.profiler.core.configuration.ConfigurationProperties.*;
 
@@ -13,17 +16,23 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
     private final boolean dynamicConfigurationEnabled;
     private final long dynamicConfigurationRefreshInterval;
     private final boolean executionTracingEnabled;
+    private final String sinkType;
+    private final Map<String, String> sinkProperties;
 
     StaticProfilingConfiguration(
             final Predicate<String> resourcesFilter,
             final long minExecutionThreshold,
             final boolean dynamicConfigurationEnabled,
             final long dynamicConfigurationRefreshIntervalMs,
-            final boolean executionTracingEnabled) {
+            final boolean executionTracingEnabled,
+            final String sinkType,
+            final Map<String, String> sinkProperties) {
         super(resourcesFilter, minExecutionThreshold);
         this.dynamicConfigurationEnabled = dynamicConfigurationEnabled;
         this.dynamicConfigurationRefreshInterval = dynamicConfigurationRefreshIntervalMs;
         this.executionTracingEnabled = executionTracingEnabled;
+        this.sinkType = sinkType;
+        this.sinkProperties = Collections.unmodifiableMap(sinkProperties);
     }
 
     public boolean isDynamicConfigurationEnabled() {
@@ -38,6 +47,14 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
         return executionTracingEnabled;
     }
 
+    public Map<String, String> getSinkProperties() {
+        return sinkProperties;
+    }
+
+    public String getSinkType() {
+        return sinkType;
+    }
+
     @Override
     public String toString() {
         return "StaticProfilingConfiguration{"
@@ -45,6 +62,8 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
                 + ", dynamicConfigurationRefreshInterval=" + dynamicConfigurationRefreshInterval
                 + ", executionTracingEnabled=" + executionTracingEnabled
                 + ", minExecutionThreshold=" + minExecutionThreshold
+                + ", sinkType=" + sinkType
+                + ", sinkProperties=" + sinkProperties
                 + '}';
     }
 
@@ -77,13 +96,23 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
         final long dynamicConfigurationRefreshIntervalMs = dynamicConfigurationRefreshIntervalTimeUnit.toJavaTimeUnit().toMillis(dynamicConfigurationRefreshInterval);
 
         final boolean executionTracingEnabled = Boolean.parseBoolean(props.getProperty(STATIC_EXECUTION_TRACING_ENABLED, ""));
+        final Map<String, String> sinkProperties =
+                props.entrySet()
+                        .stream()
+                        .filter(e -> e.getKey().toString().startsWith(SINK_PROPERTIES_PREFIX))
+                        .filter(e -> e.getValue() != null && !String.valueOf(e.getValue()).isEmpty())
+                        .collect(Collectors.toMap(e -> e.getKey().toString(), e -> String.valueOf(e.getValue())));
+
+        final String sinkType = props.getProperty(STATIC_SINK_TYPE);
 
         return new StaticProfilingConfiguration(
                 resourcesFilter,
                 executionThresholdNs,
                 dynamicConfigurationEnabled,
                 dynamicConfigurationRefreshIntervalMs,
-                executionTracingEnabled
+                executionTracingEnabled,
+                sinkType,
+                sinkProperties
         );
     }
 

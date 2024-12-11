@@ -55,6 +55,7 @@ public abstract class OutputDataAbsStreamSink implements OutputDataSink {
 
         try {
             this.writer.write(outputString);
+            this.writer.write(System.lineSeparator());
         } catch (IOException ex) {
             logger.log(Level.SEVERE, "Unable to write to sink", ex);
             throw new ProfilerException(ex);

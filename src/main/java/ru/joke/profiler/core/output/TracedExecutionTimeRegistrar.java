@@ -40,13 +40,19 @@ public final class TracedExecutionTimeRegistrar extends ExecutionTimeRegistrar {
     }
 
     @Override
-    public void registerMethodExit(String method, long methodEnterTimestamp, long methodElapsedTime) {
+    public void registerMethodExit(
+            final String method,
+            final long methodEnterTimestamp,
+            final long methodElapsedTime) {
         super.registerMethodExit(method, methodEnterTimestamp, methodElapsedTime);
         registerMethodExit();
     }
 
     @Override
-    protected void write(final String method, final long methodEnterTimestamp, final long methodElapsedTime) {
+    protected void write(
+            final String method,
+            final long methodEnterTimestamp,
+            final long methodElapsedTime) {
         final TraceData methodTraceData = traceData.get();
 
         final OutputData output = this.outputData.get();

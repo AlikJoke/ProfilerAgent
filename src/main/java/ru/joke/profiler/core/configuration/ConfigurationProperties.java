@@ -7,7 +7,7 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-abstract class ConfigurationProperties {
+public abstract class ConfigurationProperties {
 
     private static final String STATIC_PREFIX = "static.";
     private static final String DYNAMIC_PREFIX = "dynamic.";
@@ -16,6 +16,32 @@ abstract class ConfigurationProperties {
     private static final String ABS_MIN_EXECUTION_THRESHOLD_TU = "min_execution_threshold_tu";
     private static final String ABS_EXCLUDED_RESOURCES = "excluded_resources";
     private static final String ABS_EXCLUDED_RESOURCES_MASK = "excluded_resources_mask";
+
+    static final String SINK_PROPERTIES_PREFIX = STATIC_PREFIX + "sink.";
+    static final String STATIC_SINK_TYPE = createProperty(SINK_PROPERTIES_PREFIX, "type");
+
+    private static final String OUTPUT_DATA_FORMAT = "output_data_format";
+    private static final String OUTPUT_STREAM_BUFFER_SIZE = "output_stream_buffer_size";
+    private static final String OUTPUT_STREAM_FLUSH_INTERVAL = "output_stream_flush_interval_ms";
+
+    private static final String CONSOLE_SINK_PROPERTIES_PREFIX = createProperty(SINK_PROPERTIES_PREFIX, "console.");
+
+    public static final String STATIC_CONSOLE_SINK_DATA_FORMAT = createProperty(CONSOLE_SINK_PROPERTIES_PREFIX, OUTPUT_DATA_FORMAT);
+    public static final String STATIC_CONSOLE_SINK_BUFFER_SIZE = createProperty(CONSOLE_SINK_PROPERTIES_PREFIX, OUTPUT_STREAM_BUFFER_SIZE);
+    public static final String STATIC_CONSOLE_SINK_FLUSH_INTERVAL = createProperty(CONSOLE_SINK_PROPERTIES_PREFIX, OUTPUT_STREAM_FLUSH_INTERVAL);
+
+    private static final String FILE_SINK_PROPERTIES_PREFIX = createProperty(SINK_PROPERTIES_PREFIX, "file.");
+
+    public static final String STATIC_FILE_SINK_DATA_FORMAT = createProperty(FILE_SINK_PROPERTIES_PREFIX, OUTPUT_DATA_FORMAT);
+    public static final String STATIC_FILE_SINK_BUFFER_SIZE = createProperty(FILE_SINK_PROPERTIES_PREFIX, OUTPUT_STREAM_BUFFER_SIZE);
+    public static final String STATIC_FILE_SINK_FLUSH_INTERVAL = createProperty(FILE_SINK_PROPERTIES_PREFIX, OUTPUT_STREAM_FLUSH_INTERVAL);
+    public static final String STATIC_FILE_SINK_FILE = createProperty(FILE_SINK_PROPERTIES_PREFIX, "output_file");
+
+    private static final String LOGGER_SINK_PROPERTIES_PREFIX = createProperty(SINK_PROPERTIES_PREFIX, "logger.");
+
+    public static final String STATIC_LOGGER_SINK_DATA_FORMAT = createProperty(LOGGER_SINK_PROPERTIES_PREFIX, OUTPUT_DATA_FORMAT);
+    public static final String STATIC_LOGGER_SINK_CATEGORY = createProperty(LOGGER_SINK_PROPERTIES_PREFIX, "category");
+    public static final String STATIC_LOGGER_SINK_LEVEL = createProperty(LOGGER_SINK_PROPERTIES_PREFIX, "level");
 
     static final String STATIC_MIN_EXECUTION_THRESHOLD = createStaticProperty(ABS_MIN_EXECUTION_THRESHOLD);
     static final String STATIC_MIN_EXECUTION_THRESHOLD_TU = createStaticProperty(ABS_MIN_EXECUTION_THRESHOLD_TU);

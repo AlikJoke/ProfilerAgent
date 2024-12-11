@@ -13,7 +13,6 @@ public final class DynamicProfilingConfiguration extends ProfilingConfiguration 
     private final Predicate<String> threadsFilter;
     private final Predicate<String> profilingRootsFilter;
     private final int profiledTraceMaxDepth;
-    private final String outputDataPattern;
 
     private DynamicProfilingConfiguration(
             final long minExecutionThresholdNs,
@@ -43,10 +42,6 @@ public final class DynamicProfilingConfiguration extends ProfilingConfiguration 
 
     public int getProfiledTraceMaxDepth() {
         return profiledTraceMaxDepth;
-    }
-
-    public String getOutputDataPattern() {
-        return outputDataPattern;
     }
 
     @Override

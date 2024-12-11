@@ -26,8 +26,4 @@ public final class OutputDataLoggerSink implements OutputDataSink {
     public void write(final OutputData outputData) {
         this.logger.log(this.level, () -> this.formatter.format(outputData));
     }
-
-    @Override
-    public void close() {
-    }
 }

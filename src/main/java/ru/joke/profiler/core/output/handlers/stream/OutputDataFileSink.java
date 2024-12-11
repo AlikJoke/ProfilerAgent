@@ -7,7 +7,7 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
-public class OutputDataFileSink extends OutputDataAbsStreamSink {
+public final class OutputDataFileSink extends OutputDataAbsStreamSink {
 
     public OutputDataFileSink(
             final OutputStringDataFormatter formatter,

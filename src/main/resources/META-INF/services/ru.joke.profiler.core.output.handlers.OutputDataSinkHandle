@@ -1,0 +1,3 @@
+ru.joke.profiler.core.output.handlers.stream.OutputDataFileSinkHandle
+ru.joke.profiler.core.output.handlers.stream.OutputDataConsoleSinkHandle
+ru.joke.profiler.core.output.handlers.jul.OutputDataLoggerSinkHandle

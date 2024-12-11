@@ -1,5 +1,7 @@
 package ru.joke.profiler.core.configuration;
 
+import ru.joke.profiler.core.output.handlers.stream.OutputDataConsoleSinkHandle;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,6 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Properties;
 import java.util.function.Function;
 import java.util.logging.Logger;
@@ -56,7 +59,9 @@ public final class ProfilingConfigurationLoader {
                     0,
                     false,
                     0,
-                    false
+                    false,
+                    OutputDataConsoleSinkHandle.SINK_TYPE,
+                    Collections.emptyMap()
             );
         }
 

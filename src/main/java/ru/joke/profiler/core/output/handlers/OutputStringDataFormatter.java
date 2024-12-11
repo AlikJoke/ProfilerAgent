@@ -9,10 +9,12 @@ import java.util.concurrent.TimeUnit;
 
 public final class OutputStringDataFormatter {
 
+    private static final String PROFILER_LABEL = "joke-profiler";
     private static final String DEFAULT_TIMESTAMP_FORMAT = "yyyy-MM-dd hh:mm:ss.[SSSSSS][SSS]";
 
     private static final String PROPERTY_START = "${";
     private static final String PROPERTY_END = "}";
+    private static final char FORMAT_DELIMITER = ':';
 
     private static final String CURRENT_TS_PROPERTY = "current_ts";
     private static final String THREAD_PROPERTY = "thread";
@@ -21,6 +23,7 @@ public final class OutputStringDataFormatter {
     private static final String ELAPSED_TIME_PROPERTY = "elapsed";
     private static final String TRACE_ID_PROPERTY = "trace_id";
     private static final String DEPTH_PROPERTY = "depth";
+    private static final String SOURCE_PROPERTY = "source";
 
     private final DateTimeFormatter currentTimestampFormatter;
     private final TimeUnit enterTimestampUnit;
@@ -42,6 +45,7 @@ public final class OutputStringDataFormatter {
         result = injectProperty(result, METHOD_PROPERTY, outputData.method());
         result = injectProperty(result, ENTER_TS_PROPERTY, String.valueOf(this.enterTimestampUnit.convert(outputData.methodEnterTimestamp(), TimeUnit.NANOSECONDS)));
         result = injectProperty(result, ELAPSED_TIME_PROPERTY, String.valueOf(this.elapsedTimeUnit.convert(outputData.methodElapsedTime(), TimeUnit.NANOSECONDS)));
+        result = injectProperty(result, SOURCE_PROPERTY, PROFILER_LABEL);
         if (this.currentTimestampFormatter != null) {
             result = injectProperty(result, CURRENT_TS_PROPERTY, this.currentTimestampFormatter.format(LocalDateTime.now()));
         }
@@ -80,10 +84,11 @@ public final class OutputStringDataFormatter {
         }
 
         final int endPropertyIndex = pattern.indexOf(PROPERTY_END, propertyStartIndex + 1);
-        final String result = pattern.substring(propertyStartIndex + propertyName.length(), endPropertyIndex + 1);
-        pattern.delete(propertyStartIndex + propertyName.length(), endPropertyIndex + 1);
+        final int startFormatIndex = propertyStartIndex + PROPERTY_START.length() + propertyName.length();
+        final String result = pattern.substring(startFormatIndex, endPropertyIndex);
+        pattern.delete(startFormatIndex, endPropertyIndex);
 
-        return result;
+        return !result.isEmpty() && result.charAt(0) == FORMAT_DELIMITER ? result.substring(1) : result;
     }
 
     private StringBuilder injectProperties(final StringBuilder pattern) {
@@ -92,7 +97,7 @@ public final class OutputStringDataFormatter {
         while (startPropertyIndex >= 0) {
 
             int endPropertyIndex = pattern.indexOf(PROPERTY_END, startPropertyIndex + 1);
-            final String property = pattern.substring(startPropertyIndex, endPropertyIndex + 1);
+            final String property = pattern.substring(startPropertyIndex + PROPERTY_START.length(), endPropertyIndex);
             final String propertyValue;
             if (!property.isEmpty() && (propertyValue = properties.getProperty(property)) != null) {
                 pattern.replace(startPropertyIndex, endPropertyIndex + 1, propertyValue);

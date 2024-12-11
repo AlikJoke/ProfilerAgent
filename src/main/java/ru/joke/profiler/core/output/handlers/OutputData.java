@@ -8,7 +8,14 @@ public final class OutputData {
     private long methodElapsedTime;
     private long methodEnterTimestamp;
 
-    public OutputData fill(
+    public void fill(
+            final String method,
+            final long methodElapsedTime,
+            final long methodEnterTimestamp) {
+        fill(method, methodElapsedTime, methodEnterTimestamp, null, 0);
+    }
+
+    public void fill(
             final String method,
             final long methodElapsedTime,
             final long methodEnterTimestamp,
@@ -19,8 +26,6 @@ public final class OutputData {
         this.depth = depth;
         this.methodElapsedTime = methodElapsedTime;
         this.methodEnterTimestamp = methodEnterTimestamp;
-
-        return this;
     }
 
     public String method() {
