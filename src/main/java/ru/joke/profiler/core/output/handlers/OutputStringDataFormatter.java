@@ -1,7 +1,10 @@
 package ru.joke.profiler.core.output.handlers;
 
+import ru.joke.profiler.core.ProfilerException;
 import ru.joke.profiler.core.configuration.ProfilingTimeUnit;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Properties;
@@ -24,6 +27,8 @@ public final class OutputStringDataFormatter {
     private static final String TRACE_ID_PROPERTY = "trace_id";
     private static final String DEPTH_PROPERTY = "depth";
     private static final String SOURCE_PROPERTY = "source";
+    private static final String HOST_PROPERTY = "host";
+    private static final String IP_PROPERTY = "ip";
 
     private final DateTimeFormatter currentTimestampFormatter;
     private final TimeUnit enterTimestampUnit;
@@ -36,7 +41,7 @@ public final class OutputStringDataFormatter {
         this.currentTimestampFormatter = currentTimestampFormat == null ? null : DateTimeFormatter.ofPattern(currentTimestampFormat);
         this.enterTimestampUnit = extractEnterTimestampUnit(patternBuilder);
         this.elapsedTimeUnit = extractElapsedTimeUnit(patternBuilder);
-        this.outputDataPattern = injectProperties(patternBuilder).toString();
+        this.outputDataPattern = injectPredefinedProperties(patternBuilder).toString();
     }
 
     public String format(final OutputData outputData) {
@@ -91,15 +96,22 @@ public final class OutputStringDataFormatter {
         return !result.isEmpty() && result.charAt(0) == FORMAT_DELIMITER ? result.substring(1) : result;
     }
 
-    private StringBuilder injectProperties(final StringBuilder pattern) {
+    private StringBuilder injectPredefinedProperties(final StringBuilder pattern) {
         int startPropertyIndex = pattern.indexOf(PROPERTY_START);
         final Properties properties = System.getProperties();
         while (startPropertyIndex >= 0) {
 
             int endPropertyIndex = pattern.indexOf(PROPERTY_END, startPropertyIndex + 1);
             final String property = pattern.substring(startPropertyIndex + PROPERTY_START.length(), endPropertyIndex);
-            final String propertyValue;
-            if (!property.isEmpty() && (propertyValue = properties.getProperty(property)) != null) {
+            final String propertyValue =
+                    !property.isEmpty() && properties.containsKey(property)
+                            ? properties.getProperty(property)
+                            : property.equalsIgnoreCase(HOST_PROPERTY)
+                                ? findCurrentHost()
+                                : property.equalsIgnoreCase(IP_PROPERTY)
+                                    ? findCurrentHostAddress()
+                                    : null;
+            if (propertyValue != null) {
                 pattern.replace(startPropertyIndex, endPropertyIndex + 1, propertyValue);
                 endPropertyIndex = startPropertyIndex + propertyValue.length();
             }
@@ -108,5 +120,21 @@ public final class OutputStringDataFormatter {
         }
 
         return pattern;
+    }
+
+    private String findCurrentHost() {
+        try {
+            return InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException ex) {
+            throw new ProfilerException(ex);
+        }
+    }
+
+    private String findCurrentHostAddress() {
+        try {
+            return InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException ex) {
+            throw new ProfilerException(ex);
+        }
     }
 }

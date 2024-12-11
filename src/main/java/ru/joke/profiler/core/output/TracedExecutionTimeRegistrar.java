@@ -7,7 +7,6 @@ import java.util.UUID;
 
 public final class TracedExecutionTimeRegistrar extends ExecutionTimeRegistrar {
 
-    private final ThreadLocal<TraceData> traceData = new ThreadLocal<>();
     private final ThreadLocal<OutputData> outputData = ThreadLocal.withInitial(OutputData::new);
 
     private final OutputDataSink outputSink;
@@ -18,24 +17,27 @@ public final class TracedExecutionTimeRegistrar extends ExecutionTimeRegistrar {
 
     @Override
     public void registerMethodExit() {
-        final TraceData methodTraceData = traceData.get();
-        if (methodTraceData.currentDepth-- == 0) {
-            traceData.remove();
+        final OutputData methodData = outputData.get();
+        int currentDepth = methodData.depth();
+        methodData.withDepth(--currentDepth);
+        if (currentDepth == -1) {
+            methodData.withTraceId(null);
+            methodData.withDepth(0);
         }
     }
 
     @Override
     protected boolean isRegistrationOccurredOnTrace() {
-        return traceData.get() != null;
+        return outputData.get().traceId() != null;
     }
 
     @Override
     public void registerMethodEnter(final String method) {
-        final TraceData methodTraceData = traceData.get();
-        if (methodTraceData == null) {
-            traceData.set(new TraceData());
+        final OutputData methodData = outputData.get();
+        if (methodData.traceId() == null) {
+            methodData.withTraceId(generateTraceId(method));
         } else {
-            methodTraceData.currentDepth++;
+            methodData.withDepth(methodData.depth() + 1);
         }
     }
 
@@ -53,28 +55,24 @@ public final class TracedExecutionTimeRegistrar extends ExecutionTimeRegistrar {
             final String method,
             final long methodEnterTimestamp,
             final long methodElapsedTime) {
-        final TraceData methodTraceData = traceData.get();
+        final OutputData methodData = outputData.get();
 
         final OutputData output = this.outputData.get();
         output.fill(
                 method,
                 methodElapsedTime,
                 methodEnterTimestamp,
-                methodTraceData.traceId,
-                methodTraceData.currentDepth
+                methodData.traceId(),
+                methodData.depth()
         );
 
         this.outputSink.write(output);
     }
 
-    private static class TraceData {
-
-        private final String traceId;
-        private int currentDepth;
-        // TODO spanId
-
-        private TraceData() {
-            this.traceId = UUID.randomUUID().toString();
-        }
+    private String generateTraceId(final String method) {
+        final UUID uuid = UUID.randomUUID();
+        final long uuidLsb = uuid.getLeastSignificantBits();
+        final long result = (uuidLsb ^ method.hashCode()) * 3141592653589793L + System.nanoTime();
+        return uuid + "-" + Long.toHexString(result);
     }
 }

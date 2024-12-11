@@ -48,6 +48,14 @@ public final class OutputData {
         return this.methodElapsedTime;
     }
 
+    public void withDepth(int depth) {
+        this.depth = depth;
+    }
+
+    public void withTraceId(final String traceId) {
+        this.traceId = traceId;
+    }
+
     @Override
     public String toString() {
         return "OutputData{"
