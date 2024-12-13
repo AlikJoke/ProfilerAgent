@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 public final class OutputStringDataFormatter {
 
@@ -44,20 +45,50 @@ public final class OutputStringDataFormatter {
         this.outputDataPattern = injectPredefinedProperties(patternBuilder).toString();
     }
 
-    public String format(final OutputData outputData) {
+    public Supplier<String> formatLater(final OutputData outputData) {
+        final String method = outputData.method();
+        final long elapsedTime = outputData.methodElapsedTime();
+        final long methodEnterTimestamp = outputData.methodEnterTimestamp();
+        final String traceId = outputData.traceId();
+        final int depth = outputData.depth();
+        final String threadName = Thread.currentThread().getName();
+        final LocalDateTime timestamp = LocalDateTime.now();
 
-        String result = injectProperty(this.outputDataPattern, THREAD_PROPERTY, Thread.currentThread().getName());
-        result = injectProperty(result, METHOD_PROPERTY, outputData.method());
-        result = injectProperty(result, ENTER_TS_PROPERTY, String.valueOf(this.enterTimestampUnit.convert(outputData.methodEnterTimestamp(), TimeUnit.NANOSECONDS)));
-        result = injectProperty(result, ELAPSED_TIME_PROPERTY, String.valueOf(this.elapsedTimeUnit.convert(outputData.methodElapsedTime(), TimeUnit.NANOSECONDS)));
+        return () -> format(traceId, depth, method, methodEnterTimestamp, elapsedTime, threadName, timestamp);
+    }
+
+    public String format(final OutputData outputData) {
+        return format(
+                outputData.traceId(),
+                outputData.depth(),
+                outputData.method(),
+                outputData.methodEnterTimestamp(),
+                outputData.methodElapsedTime(),
+                Thread.currentThread().getName(),
+                LocalDateTime.now()
+        );
+    }
+
+    private String format(
+            final String traceId,
+            final int depth,
+            final String method,
+            final long methodEnterTimestamp,
+            final long elapsedTime,
+            final String threadName,
+            final LocalDateTime timestamp) {
+        String result = injectProperty(this.outputDataPattern, THREAD_PROPERTY, threadName);
+        result = injectProperty(result, METHOD_PROPERTY, method);
+        result = injectProperty(result, ENTER_TS_PROPERTY, String.valueOf(this.enterTimestampUnit.convert(methodEnterTimestamp, TimeUnit.NANOSECONDS)));
+        result = injectProperty(result, ELAPSED_TIME_PROPERTY, String.valueOf(this.elapsedTimeUnit.convert(elapsedTime, TimeUnit.NANOSECONDS)));
         result = injectProperty(result, SOURCE_PROPERTY, PROFILER_LABEL);
         if (this.currentTimestampFormatter != null) {
-            result = injectProperty(result, CURRENT_TS_PROPERTY, this.currentTimestampFormatter.format(LocalDateTime.now()));
+            result = injectProperty(result, CURRENT_TS_PROPERTY, this.currentTimestampFormatter.format(timestamp));
         }
 
-        if (outputData.traceId() != null) {
-            result = injectProperty(result, TRACE_ID_PROPERTY, outputData.traceId());
-            result = injectProperty(result, DEPTH_PROPERTY, String.valueOf(outputData.depth()));
+        if (traceId != null) {
+            result = injectProperty(result, TRACE_ID_PROPERTY, traceId);
+            result = injectProperty(result, DEPTH_PROPERTY, String.valueOf(depth));
         }
 
         return result;

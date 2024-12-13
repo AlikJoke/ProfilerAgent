@@ -4,7 +4,7 @@ import ru.joke.profiler.core.output.handlers.OutputData;
 import ru.joke.profiler.core.output.handlers.OutputDataSink;
 
 // TODO
-public class OutputDataJmsSink implements OutputDataSink {
+public class OutputDataJmsSink implements OutputDataSink<OutputData> {
     @Override
     public void init() {
         OutputDataSink.super.init();

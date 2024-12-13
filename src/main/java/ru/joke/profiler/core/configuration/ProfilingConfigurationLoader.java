@@ -1,6 +1,6 @@
 package ru.joke.profiler.core.configuration;
 
-import ru.joke.profiler.core.output.handlers.stream.OutputDataConsoleSinkHandle;
+import ru.joke.profiler.core.output.handlers.stream.console.OutputDataConsoleSinkHandle;
 
 import java.io.File;
 import java.io.IOException;

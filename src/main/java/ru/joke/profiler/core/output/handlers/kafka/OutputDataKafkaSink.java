@@ -4,7 +4,7 @@ import ru.joke.profiler.core.output.handlers.OutputData;
 import ru.joke.profiler.core.output.handlers.OutputDataSink;
 
 // TODO
-public class OutputDataKafkaSink implements OutputDataSink {
+public class OutputDataKafkaSink implements OutputDataSink<OutputData> {
 
     @Override
     public void init() {

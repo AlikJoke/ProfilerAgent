@@ -6,5 +6,5 @@ public interface OutputDataSinkHandle {
 
     String type();
 
-    OutputDataSink create(Map<String, String> properties) throws Exception;
+    OutputDataSink<OutputData> create(Map<String, String> properties) throws Exception;
 }

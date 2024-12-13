@@ -1,17 +1,20 @@
 package ru.joke.profiler.core.output.handlers.jul;
 
 import ru.joke.profiler.core.configuration.InvalidConfigurationException;
-import ru.joke.profiler.core.output.handlers.OutputDataSink;
-import ru.joke.profiler.core.output.handlers.OutputDataSinkHandle;
-import ru.joke.profiler.core.output.handlers.OutputStringDataFormatterFactory;
+import ru.joke.profiler.core.output.handlers.*;
+import ru.joke.profiler.core.output.handlers.async.AsyncOutputDataSinkHandleSupport;
 
+import java.util.Collections;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static ru.joke.profiler.core.configuration.ConfigurationProperties.*;
 
-public final class OutputDataLoggerSinkHandle implements OutputDataSinkHandle {
+public final class OutputDataLoggerSinkHandle extends AsyncOutputDataSinkHandleSupport<String> {
 
     public static final String SINK_TYPE = "logger";
+    private static final String FORMATTER_KEY = "formatter";
 
     @Override
     public String type() {
@@ -19,13 +22,39 @@ public final class OutputDataLoggerSinkHandle implements OutputDataSinkHandle {
     }
 
     @Override
-    public OutputDataSink create(final Map<String, String> properties) throws Exception {
-        final String format = properties.get(STATIC_LOGGER_SINK_DATA_FORMAT);
+    protected Function<OutputData, Supplier<String>> conversionFunction(
+            final Map<String, String> properties,
+            final Map<String, Object> context) {
+        final OutputStringDataFormatter formatter = (OutputStringDataFormatter) context.get(FORMATTER_KEY);
+        return formatter::formatLater;
+    }
+
+    @Override
+    protected OutputDataSink<String> createTerminalOutputSink(
+            final Map<String, String> properties,
+            final Map<String, Object> context) {
         return new OutputDataLoggerSink(
-                OutputStringDataFormatterFactory.create(format),
                 findRequiredPropertyValue(properties, STATIC_LOGGER_SINK_CATEGORY),
                 findRequiredPropertyValue(properties, STATIC_LOGGER_SINK_LEVEL)
         );
+    }
+
+    @Override
+    protected OutputDataSink<OutputData> createSyncOutputSink(
+            final Map<String, String> properties,
+            final Map<String, Object> context) {
+        final OutputStringDataFormatter formatter = (OutputStringDataFormatter) context.get(FORMATTER_KEY);
+        return new OutputDataConversionSinkWrapper<>(
+                createTerminalOutputSink(properties, context),
+                formatter::format
+        );
+    }
+
+    @Override
+    protected Map<String, Object> buildCreationContext(Map<String, String> properties) {
+        final String format = properties.get(STATIC_LOGGER_SINK_DATA_FORMAT);
+        final OutputStringDataFormatter formatter = OutputStringDataFormatterFactory.create(format);
+        return Collections.singletonMap(FORMATTER_KEY, formatter);
     }
 
     private String findRequiredPropertyValue(final Map<String, String> properties, final String propertyName) {
