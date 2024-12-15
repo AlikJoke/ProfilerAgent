@@ -2,35 +2,39 @@ package ru.joke.profiler.core.output.handlers.jdbc;
 
 import ru.joke.profiler.core.output.handlers.OutputData;
 import ru.joke.profiler.core.output.handlers.OutputDataSink;
+import ru.joke.profiler.core.output.handlers.ProfilerOutputSinkException;
 
-// TODO
-/**
- * db type +
- * db name +
- * server host +
- * server port +
- * connection properties -
- * auto create table -
- * table name -
- * columns to store (metadata: key -> column) -
- *
- * connection pool: max-pool-size, initial-pool-size, enable-batching, keep-alive-connections-time,
- * batch-size, batch-flush-interval, async-inserts
- *
- */
-public class OutputDataJdbcSink implements OutputDataSink<OutputData> {
+import java.sql.SQLException;
+import java.util.List;
+
+final class OutputDataJdbcSink implements OutputDataSink<OutputData> {
+
+    private final OutputDataJdbcStorage storage;
+    private final OutputDataTablePreparer outputDataTablePreparer;
+
+    OutputDataJdbcSink(
+            final OutputDataJdbcStorage storage,
+            final OutputDataTablePreparer outputDataTablePreparer) {
+        this.storage = storage;
+        this.outputDataTablePreparer = outputDataTablePreparer;
+    }
+
     @Override
     public void init() {
-
+        try {
+            this.outputDataTablePreparer.prepare();
+        } catch (SQLException ex) {
+            throw new ProfilerOutputSinkException(ex);
+        }
     }
 
     @Override
-    public void write(OutputData outputData) {
-
+    public void write(final OutputData dataItem) {
+        this.storage.store(dataItem);
     }
 
     @Override
-    public void close() {
-        OutputDataSink.super.close();
+    public void write(final List<OutputData> dataItems) {
+        this.storage.store(dataItems);
     }
 }

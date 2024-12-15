@@ -1,6 +1,8 @@
 package ru.joke.profiler.core.output.handlers;
 
+import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public final class OutputDataConversionSinkWrapper<T> implements OutputDataSink<OutputData> {
 
@@ -25,8 +27,18 @@ public final class OutputDataConversionSinkWrapper<T> implements OutputDataSink<
     }
 
     @Override
-    public void write(final OutputData dataType) {
-        final T result = this.conversionFunc.apply(dataType);
+    public void write(final OutputData dataItem) {
+        final T result = this.conversionFunc.apply(dataItem);
+        this.delegate.write(result);
+    }
+
+    @Override
+    public void write(final List<OutputData> dataItems) {
+        final List<T> result =
+                dataItems
+                        .stream()
+                        .map(this.conversionFunc)
+                        .collect(Collectors.toList());
         this.delegate.write(result);
     }
 }

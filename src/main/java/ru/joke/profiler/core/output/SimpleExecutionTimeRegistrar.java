@@ -6,9 +6,9 @@ import ru.joke.profiler.core.output.handlers.OutputDataSink;
 public final class SimpleExecutionTimeRegistrar extends ExecutionTimeRegistrar {
 
     private final ThreadLocal<OutputData> outputData;
-    private final OutputDataSink outputSink;
+    private final OutputDataSink<OutputData> outputSink;
 
-    public SimpleExecutionTimeRegistrar(final OutputDataSink outputSink) {
+    public SimpleExecutionTimeRegistrar(final OutputDataSink<OutputData> outputSink) {
         this.outputSink = outputSink;
         this.outputData = ThreadLocal.withInitial(OutputData::new);
     }

@@ -7,7 +7,7 @@ import java.util.ServiceLoader;
 
 public final class OutputDataSinkFactory {
 
-    public OutputDataSink create(final String type, final Map<String, String> properties) throws Exception {
+    public OutputDataSink<OutputData> create(final String type, final Map<String, String> properties) throws Exception {
         for (final OutputDataSinkHandle handle : ServiceLoader.load(OutputDataSinkHandle.class)) {
             if (handle.type().equalsIgnoreCase(type)) {
                 return handle.create(properties);

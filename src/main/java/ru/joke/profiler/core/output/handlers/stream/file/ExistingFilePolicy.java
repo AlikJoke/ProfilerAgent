@@ -1,6 +1,6 @@
 package ru.joke.profiler.core.output.handlers.stream.file;
 
-import ru.joke.profiler.core.ProfilerException;
+import ru.joke.profiler.core.output.handlers.ProfilerOutputSinkException;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -21,7 +21,7 @@ public enum ExistingFilePolicy {
             final File renamedFile = findNextAvailable(path);
             if (oldFile.exists()) {
                 if (!oldFile.renameTo(renamedFile)) {
-                    throw new ProfilerException(String.format("Unable to rotate existing file %s to %s", path, renamedFile.getAbsolutePath()));
+                    throw new ProfilerOutputSinkException(String.format("Unable to rotate existing file %s to %s", path, renamedFile.getAbsolutePath()));
                 }
             }
 

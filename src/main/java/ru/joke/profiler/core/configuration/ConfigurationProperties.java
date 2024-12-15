@@ -30,6 +30,7 @@ public abstract class ConfigurationProperties {
     public static final String ASYNC_FLUSHING_QUEUE_OVERFLOW_LIMIT = createProperty(SINK_PROPERTIES_PREFIX, "async_flushing_queue_overflow_limit");
     public static final String ASYNC_FLUSHING_QUEUE_OVERFLOW_POLICY = createProperty(SINK_PROPERTIES_PREFIX, "async_flushing_queue_overflow_policy");
     public static final String ASYNC_FLUSHING_FORCE_ON_EXIT = createProperty(SINK_PROPERTIES_PREFIX, "async_flushing_force_on_exit");
+    public static final String ASYNC_FLUSHING_MAX_BATCH_SIZE = createProperty(SINK_PROPERTIES_PREFIX, "async_flushing_max_batch_size");
 
     private static final String CONSOLE_SINK_PROPERTIES_PREFIX = createProperty(SINK_PROPERTIES_PREFIX, "console.");
 

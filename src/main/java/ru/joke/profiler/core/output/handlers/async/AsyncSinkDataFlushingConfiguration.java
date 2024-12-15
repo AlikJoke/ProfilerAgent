@@ -1,44 +1,51 @@
 package ru.joke.profiler.core.output.handlers.async;
 
-public final class AsyncSinkDataFlushingConfiguration {
+final class AsyncSinkDataFlushingConfiguration {
 
     private final long flushInterval;
     private final int overflowLimit;
     private final OverflowPolicy overflowPolicy;
     private final int flushingThreadPoolSize;
     private final boolean forceFlushOnExit;
+    private final int flushMaxBatchSize;
 
-    public AsyncSinkDataFlushingConfiguration(
+    AsyncSinkDataFlushingConfiguration(
             final long flushInterval,
             final int flushingThreadPoolSize,
             final int overflowLimit,
             final OverflowPolicy overflowPolicy,
-            final boolean forceFlushOnExit) {
+            final boolean forceFlushOnExit,
+            final int flushMaxBatchSize) {
         this.flushInterval = flushInterval;
         this.overflowLimit = overflowLimit;
         this.overflowPolicy = overflowPolicy;
         this.flushingThreadPoolSize = flushingThreadPoolSize;
         this.forceFlushOnExit = forceFlushOnExit;
+        this.flushMaxBatchSize = flushMaxBatchSize;
     }
 
-    public long getFlushInterval() {
+    long flushInterval() {
         return flushInterval;
     }
 
-    public int getOverflowLimit() {
+    int overflowLimit() {
         return overflowLimit;
     }
 
-    public OverflowPolicy getOverflowPolicy() {
+    OverflowPolicy overflowPolicy() {
         return overflowPolicy;
     }
 
-    public int getFlushingThreadPoolSize() {
+    int flushingThreadPoolSize() {
         return flushingThreadPoolSize;
     }
 
-    public boolean forceFlushOnExit() {
+    boolean forceFlushOnExit() {
         return forceFlushOnExit;
+    }
+
+    int flushMaxBatchSize() {
+        return flushMaxBatchSize;
     }
 
     @Override
@@ -49,6 +56,7 @@ public final class AsyncSinkDataFlushingConfiguration {
                 + ", overflowPolicy=" + overflowPolicy
                 + ", flushingThreadPoolSize=" + flushingThreadPoolSize
                 + ", forceFlushOnExit=" + forceFlushOnExit
+                + ", flushMaxBatchSize=" + flushMaxBatchSize
                 + '}';
     }
 }

@@ -4,6 +4,7 @@ import ru.joke.profiler.core.configuration.*;
 import ru.joke.profiler.core.output.ExecutionTimeRegistrar;
 import ru.joke.profiler.core.output.ExecutionTimeRegistrarInitializer;
 import ru.joke.profiler.core.output.ExecutionTimeRegistrarMetadataSelector;
+import ru.joke.profiler.core.output.handlers.OutputData;
 import ru.joke.profiler.core.output.handlers.OutputDataSink;
 import ru.joke.profiler.core.output.handlers.OutputDataSinkFactory;
 import ru.joke.profiler.core.transformation.ProfilingTransformer;
@@ -36,15 +37,15 @@ public final class ProfilerAgent {
         final DynamicProfilingConfigurationHolderFactory dynamicConfigHolderFactory = new DynamicProfilingConfigurationHolderFactory();
         final DynamicProfilingConfigurationHolder dynamicConfigHolder = dynamicConfigHolderFactory.create();
 
-        final OutputDataSink sink = createOutputSink(staticConfiguration);
+        final OutputDataSink<OutputData> sink = createOutputSink(staticConfiguration);
 
         final ExecutionTimeRegistrarInitializer registrarInitializer = new ExecutionTimeRegistrarInitializer(staticConfiguration, dynamicConfigHolder, sink);
         registrarInitializer.init();
     }
 
-    private static OutputDataSink createOutputSink(final StaticProfilingConfiguration configuration) throws Exception {
+    private static OutputDataSink<OutputData> createOutputSink(final StaticProfilingConfiguration configuration) throws Exception {
         final OutputDataSinkFactory sinkFactory = new OutputDataSinkFactory();
-        final OutputDataSink sink = sinkFactory.create(configuration.getSinkType(), configuration.getSinkProperties());
+        final OutputDataSink<OutputData> sink = sinkFactory.create(configuration.getSinkType(), configuration.getSinkProperties());
         sink.init();
 
         return sink;

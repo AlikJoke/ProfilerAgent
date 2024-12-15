@@ -9,13 +9,9 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static ru.joke.profiler.core.configuration.ConfigurationProperties.*;
+import static ru.joke.profiler.core.configuration.ConfigurationProperties.ASYNC_FLUSHING_ENABLED;
 
 public abstract class AsyncOutputDataSinkHandleSupport<T> implements OutputDataSinkHandle {
-
-    private static final long DEFAULT_FLUSHING_INTERVAL = 10_000;
-    private static final int DEFAULT_FLUSHING_POOL_SIZE = 2;
-    private static final int DEFAULT_OVERFLOW_LIMIT = 10_000;
 
     @Override
     public final OutputDataSink<OutputData> create(final Map<String, String> properties) throws Exception {
@@ -55,35 +51,7 @@ public abstract class AsyncOutputDataSinkHandleSupport<T> implements OutputDataS
     }
 
     private AsyncSinkDataFlushingConfiguration composeConfiguration(final Map<String, String> properties) {
-        final String flushingIntervalStr = properties.get(ASYNC_FLUSHING_INTERVAL);
-        final long flushingInterval =
-                flushingIntervalStr == null || flushingIntervalStr.isEmpty()
-                        ? DEFAULT_FLUSHING_INTERVAL
-                        : Long.parseLong(flushingIntervalStr);
-
-        final String flushingThreadPoolSizeStr = properties.get(ASYNC_FLUSHING_POOL_SIZE);
-        final int flushingThreadPoolSize =
-                flushingThreadPoolSizeStr == null || flushingThreadPoolSizeStr.isEmpty()
-                        ? DEFAULT_FLUSHING_POOL_SIZE
-                        : Integer.parseInt(flushingThreadPoolSizeStr);
-
-        final String flushingQueueOverflowLimitStr = properties.get(ASYNC_FLUSHING_QUEUE_OVERFLOW_LIMIT);
-        final int flushingQueueOverflowLimit =
-                flushingQueueOverflowLimitStr == null || flushingQueueOverflowLimitStr.isEmpty()
-                        ? DEFAULT_OVERFLOW_LIMIT
-                        : Integer.parseInt(flushingQueueOverflowLimitStr);
-
-        final String flushingOverflowPolicy = properties.get(ASYNC_FLUSHING_QUEUE_OVERFLOW_POLICY);
-        final OverflowPolicy overflowPolicy = OverflowPolicy.parse(flushingOverflowPolicy);
-
-        final boolean forceFlushOnExit = Boolean.parseBoolean(properties.get(ASYNC_FLUSHING_FORCE_ON_EXIT));
-
-        return new AsyncSinkDataFlushingConfiguration(
-                flushingInterval,
-                flushingThreadPoolSize,
-                flushingQueueOverflowLimit,
-                overflowPolicy,
-                forceFlushOnExit
-        );
+        final AsyncOutputSinkFlushingConfigurationLoader configurationLoader = new AsyncOutputSinkFlushingConfigurationLoader();
+        return configurationLoader.load(properties);
     }
 }

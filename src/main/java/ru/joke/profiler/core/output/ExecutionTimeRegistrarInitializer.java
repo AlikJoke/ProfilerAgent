@@ -2,18 +2,19 @@ package ru.joke.profiler.core.output;
 
 import ru.joke.profiler.core.configuration.DynamicProfilingConfigurationHolder;
 import ru.joke.profiler.core.configuration.StaticProfilingConfiguration;
+import ru.joke.profiler.core.output.handlers.OutputData;
 import ru.joke.profiler.core.output.handlers.OutputDataSink;
 
 public final class ExecutionTimeRegistrarInitializer {
 
     private final StaticProfilingConfiguration staticConfiguration;
     private final DynamicProfilingConfigurationHolder dynamicProfilingConfigurationHolder;
-    private final OutputDataSink outputSink;
+    private final OutputDataSink<OutputData> outputSink;
 
     public ExecutionTimeRegistrarInitializer(
             final StaticProfilingConfiguration staticConfiguration,
             final DynamicProfilingConfigurationHolder dynamicProfilingConfigurationHolder,
-            final OutputDataSink outputSink) {
+            final OutputDataSink<OutputData> outputSink) {
         this.staticConfiguration = staticConfiguration;
         this.outputSink = outputSink;
         this.dynamicProfilingConfigurationHolder = dynamicProfilingConfigurationHolder;

@@ -9,9 +9,9 @@ public final class TracedExecutionTimeRegistrar extends ExecutionTimeRegistrar {
 
     private final ThreadLocal<OutputData> outputData = ThreadLocal.withInitial(OutputData::new);
 
-    private final OutputDataSink outputSink;
+    private final OutputDataSink<OutputData> outputSink;
 
-    public TracedExecutionTimeRegistrar(final OutputDataSink outputSink) {
+    public TracedExecutionTimeRegistrar(final OutputDataSink<OutputData> outputSink) {
         this.outputSink = outputSink;
     }
 

@@ -1,35 +1,23 @@
 package ru.joke.profiler.core.output.handlers;
 
-import ru.joke.profiler.core.ProfilerException;
 import ru.joke.profiler.core.configuration.ProfilingTimeUnit;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
-public final class OutputStringDataFormatter {
+public final class OutputStringDataFormatter extends OutputPropertiesInjector<String> {
 
-    private static final String PROFILER_LABEL = "joke-profiler";
     private static final String DEFAULT_TIMESTAMP_FORMAT = "yyyy-MM-dd hh:mm:ss.[SSSSSS][SSS]";
 
     private static final String PROPERTY_START = "${";
     private static final String PROPERTY_END = "}";
     private static final char FORMAT_DELIMITER = ':';
-
-    private static final String CURRENT_TS_PROPERTY = "current_ts";
-    private static final String THREAD_PROPERTY = "thread";
-    private static final String METHOD_PROPERTY = "method";
-    private static final String ENTER_TS_PROPERTY = "enter_ts";
-    private static final String ELAPSED_TIME_PROPERTY = "elapsed";
-    private static final String TRACE_ID_PROPERTY = "trace_id";
-    private static final String DEPTH_PROPERTY = "depth";
-    private static final String SOURCE_PROPERTY = "source";
-    private static final String HOST_PROPERTY = "host";
-    private static final String IP_PROPERTY = "ip";
 
     private final DateTimeFormatter currentTimestampFormatter;
     private final TimeUnit enterTimestampUnit;
@@ -37,6 +25,7 @@ public final class OutputStringDataFormatter {
     private final String outputDataPattern;
 
     public OutputStringDataFormatter(final String outputDataPattern) {
+        super(collectRuntimeInjectedProperties(outputDataPattern));
         final StringBuilder patternBuilder = new StringBuilder(outputDataPattern);
         final String currentTimestampFormat = extractTimestampFormat(patternBuilder);
         this.currentTimestampFormatter = currentTimestampFormat == null ? null : DateTimeFormatter.ofPattern(currentTimestampFormat);
@@ -51,8 +40,8 @@ public final class OutputStringDataFormatter {
         final long methodEnterTimestamp = outputData.methodEnterTimestamp();
         final String traceId = outputData.traceId();
         final int depth = outputData.depth();
-        final String threadName = Thread.currentThread().getName();
-        final LocalDateTime timestamp = LocalDateTime.now();
+        final String threadName = outputData.thread();
+        final LocalDateTime timestamp = outputData.timestamp();
 
         return () -> format(traceId, depth, method, methodEnterTimestamp, elapsedTime, threadName, timestamp);
     }
@@ -64,9 +53,108 @@ public final class OutputStringDataFormatter {
                 outputData.method(),
                 outputData.methodEnterTimestamp(),
                 outputData.methodElapsedTime(),
-                Thread.currentThread().getName(),
-                LocalDateTime.now()
+                outputData.thread(),
+                outputData.timestamp()
         );
+    }
+
+    @Override
+    protected String injectMethodName(
+            final String template,
+            final String method,
+            final String property,
+            final int propertyIndex) {
+        return injectProperty(template, property, method);
+    }
+
+    @Override
+    protected String injectMethodEnterTimestamp(
+            final String template,
+            final long methodEnterTimestamp,
+            final String property,
+            final int propertyIndex) {
+        return injectProperty(template, property, String.valueOf(methodEnterTimestamp));
+    }
+
+    @Override
+    protected String injectMethodElapsedTime(
+            final String template,
+            final long methodElapsedTime,
+            final String property,
+            final int propertyIndex) {
+        return injectProperty(template, property, String.valueOf(methodElapsedTime));
+    }
+
+    @Override
+    protected String injectTraceId(
+            final String template,
+            final String traceId,
+            final String property,
+            final int propertyIndex) {
+        return injectProperty(template, property, traceId);
+    }
+
+    @Override
+    protected String injectDepth(
+            final String template,
+            final int depth,
+            final String property,
+            final int propertyIndex) {
+        return injectProperty(template, property, String.valueOf(depth));
+    }
+
+    @Override
+    protected String injectIp(
+            final String template,
+            final String ip,
+            final String property,
+            final int propertyIndex) {
+        return injectProperty(template, property, ip);
+    }
+
+    @Override
+    protected String injectHost(
+            final String template,
+            final String host,
+            final String property,
+            final int propertyIndex) {
+        return injectProperty(template, property, String.valueOf(host));
+    }
+
+    @Override
+    protected String injectSource(
+            final String template,
+            final String source,
+            final String property,
+            final int propertyIndex) {
+        return injectProperty(template, property, source);
+    }
+
+    @Override
+    protected String injectSystemProperty(
+            final String template,
+            final String value,
+            final String property,
+            final int propertyIndex) {
+        return injectProperty(template, property, value);
+    }
+
+    @Override
+    protected String injectThreadName(
+            final String template,
+            final String threadName,
+            final String property,
+            final int propertyIndex) {
+        return injectProperty(template, property, threadName);
+    }
+
+    @Override
+    protected String injectCurrentTimestamp(
+            final String template,
+            final LocalDateTime timestamp,
+            final String property,
+            final int propertyIndex) {
+        return injectProperty(template, property, this.currentTimestampFormatter.format(timestamp));
     }
 
     private String format(
@@ -79,8 +167,8 @@ public final class OutputStringDataFormatter {
             final LocalDateTime timestamp) {
         String result = injectProperty(this.outputDataPattern, THREAD_PROPERTY, threadName);
         result = injectProperty(result, METHOD_PROPERTY, method);
-        result = injectProperty(result, ENTER_TS_PROPERTY, String.valueOf(this.enterTimestampUnit.convert(methodEnterTimestamp, TimeUnit.NANOSECONDS)));
-        result = injectProperty(result, ELAPSED_TIME_PROPERTY, String.valueOf(this.elapsedTimeUnit.convert(elapsedTime, TimeUnit.NANOSECONDS)));
+        result = injectProperty(result, METHOD_ENTER_TS_PROPERTY, String.valueOf(this.enterTimestampUnit.convert(methodEnterTimestamp, TimeUnit.NANOSECONDS)));
+        result = injectProperty(result, METHOD_ELAPSED_TIME_PROPERTY, String.valueOf(this.elapsedTimeUnit.convert(elapsedTime, TimeUnit.NANOSECONDS)));
         result = injectProperty(result, SOURCE_PROPERTY, PROFILER_LABEL);
         if (this.currentTimestampFormatter != null) {
             result = injectProperty(result, CURRENT_TS_PROPERTY, this.currentTimestampFormatter.format(timestamp));
@@ -99,12 +187,12 @@ public final class OutputStringDataFormatter {
     }
 
     private TimeUnit extractEnterTimestampUnit(final StringBuilder pattern) {
-        final String result = extractPropertyFormat(pattern, ENTER_TS_PROPERTY);
+        final String result = extractPropertyFormat(pattern, METHOD_ENTER_TS_PROPERTY);
         return ProfilingTimeUnit.parse(result, ProfilingTimeUnit.NANOSECONDS).toJavaTimeUnit();
     }
 
     private TimeUnit extractElapsedTimeUnit(final StringBuilder pattern) {
-        final String result = extractPropertyFormat(pattern, ELAPSED_TIME_PROPERTY);
+        final String result = extractPropertyFormat(pattern, METHOD_ELAPSED_TIME_PROPERTY);
         return ProfilingTimeUnit.parse(result, ProfilingTimeUnit.NANOSECONDS).toJavaTimeUnit();
     }
 
@@ -129,18 +217,17 @@ public final class OutputStringDataFormatter {
 
     private StringBuilder injectPredefinedProperties(final StringBuilder pattern) {
         int startPropertyIndex = pattern.indexOf(PROPERTY_START);
-        final Properties properties = System.getProperties();
         while (startPropertyIndex >= 0) {
 
             int endPropertyIndex = pattern.indexOf(PROPERTY_END, startPropertyIndex + 1);
             final String property = pattern.substring(startPropertyIndex + PROPERTY_START.length(), endPropertyIndex);
             final String propertyValue =
-                    !property.isEmpty() && properties.containsKey(property)
-                            ? properties.getProperty(property)
+                    !property.isEmpty() && this.systemProperties.containsKey(property)
+                            ? this.systemProperties.get(property)
                             : property.equalsIgnoreCase(HOST_PROPERTY)
-                                ? findCurrentHost()
+                                ? this.host
                                 : property.equalsIgnoreCase(IP_PROPERTY)
-                                    ? findCurrentHostAddress()
+                                    ? this.ip
                                     : null;
             if (propertyValue != null) {
                 pattern.replace(startPropertyIndex, endPropertyIndex + 1, propertyValue);
@@ -153,19 +240,25 @@ public final class OutputStringDataFormatter {
         return pattern;
     }
 
-    private String findCurrentHost() {
-        try {
-            return InetAddress.getLocalHost().getHostName();
-        } catch (UnknownHostException ex) {
-            throw new ProfilerException(ex);
-        }
-    }
+    private static Set<String> collectRuntimeInjectedProperties(final String pattern) {
+        final Set<String> result = new HashSet<>();
 
-    private String findCurrentHostAddress() {
-        try {
-            return InetAddress.getLocalHost().getHostAddress();
-        } catch (UnknownHostException ex) {
-            throw new ProfilerException(ex);
+        int startIndex = pattern.indexOf(PROPERTY_START);
+        while (startIndex != -1) {
+            final int endIndex = pattern.indexOf(PROPERTY_END, startIndex + 1);
+
+            final String propertyPlaceholder = pattern.substring(startIndex, endIndex);
+            final int formatIndex = propertyPlaceholder.indexOf(":");
+            final String property = formatIndex != -1 ? propertyPlaceholder.substring(0, formatIndex) : propertyPlaceholder;
+            result.add(property);
+
+            startIndex = pattern.indexOf(PROPERTY_START, endIndex);
         }
+
+        final Properties systemProperties = System.getProperties();
+        return result
+                .stream()
+                .filter(p -> !systemProperties.containsKey(p) && !p.equals(HOST_PROPERTY) && !p.equals(IP_PROPERTY) && !p.equals(SOURCE_PROPERTY))
+                .collect(Collectors.toSet());
     }
 }

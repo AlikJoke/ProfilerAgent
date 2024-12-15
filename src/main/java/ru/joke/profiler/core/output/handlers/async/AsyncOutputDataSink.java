@@ -1,8 +1,10 @@
 package ru.joke.profiler.core.output.handlers.async;
 
-import ru.joke.profiler.core.ProfilerException;
 import ru.joke.profiler.core.output.handlers.OutputDataSink;
+import ru.joke.profiler.core.output.handlers.ProfilerOutputSinkException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -10,7 +12,7 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public final class AsyncOutputDataSink<S, T> implements OutputDataSink<S> {
+final class AsyncOutputDataSink<S, T> implements OutputDataSink<S> {
 
     private static final Logger logger = Logger.getLogger(OutputDataSink.class.getCanonicalName());
 
@@ -22,16 +24,16 @@ public final class AsyncOutputDataSink<S, T> implements OutputDataSink<S> {
     private final ScheduledExecutorService flushExecutor;
     private final Function<S, Supplier<T>> conversionFunc;
 
-    public AsyncOutputDataSink(
+    AsyncOutputDataSink(
             final OutputDataSink<T> delegateSink,
             final AsyncSinkDataFlushingConfiguration configuration,
             final Function<S, Supplier<T>> conversionFunc) {
         this.delegateSink = delegateSink;
         this.configuration = configuration;
-        this.queue = new LinkedBlockingQueue<>(configuration.getOverflowLimit());
+        this.queue = new LinkedBlockingQueue<>(configuration.overflowLimit());
         final AtomicInteger threadCounter = new AtomicInteger();
         this.flushExecutor = Executors.newScheduledThreadPool(
-                configuration.getFlushingThreadPoolSize(),
+                configuration.flushingThreadPoolSize(),
                 r -> {
                     final Thread thread = new Thread(r);
                     thread.setDaemon(true);
@@ -49,8 +51,8 @@ public final class AsyncOutputDataSink<S, T> implements OutputDataSink<S> {
         Runtime.getRuntime().addShutdownHook(new Thread(this::close));
         this.flushExecutor.scheduleAtFixedRate(
                 this::flush,
-                this.configuration.getFlushInterval(),
-                this.configuration.getFlushInterval(),
+                this.configuration.flushInterval(),
+                this.configuration.flushInterval(),
                 TimeUnit.MILLISECONDS
         );
     }
@@ -58,7 +60,7 @@ public final class AsyncOutputDataSink<S, T> implements OutputDataSink<S> {
     @Override
     public void write(final S outputData) {
         final Supplier<T> dataSupplier = this.conversionFunc.apply(outputData);
-        final OverflowPolicy overflowPolicy = this.configuration.getOverflowPolicy();
+        final OverflowPolicy overflowPolicy = this.configuration.overflowPolicy();
         while (!this.queue.offer(dataSupplier)) {
             if (overflowPolicy == OverflowPolicy.SYNC) {
                 this.delegateSink.write(dataSupplier.get());
@@ -67,7 +69,7 @@ public final class AsyncOutputDataSink<S, T> implements OutputDataSink<S> {
                 logger.severe("Async queue is full, data will be discarded");
                 return;
             } else if (overflowPolicy == OverflowPolicy.ERROR) {
-                throw new ProfilerException(String.format("Unable to offer data to async queue: %s", outputData));
+                throw new ProfilerOutputSinkException(String.format("Unable to offer data to async queue: %s", outputData));
             }
         }
     }
@@ -83,9 +85,20 @@ public final class AsyncOutputDataSink<S, T> implements OutputDataSink<S> {
 
     private void flush() {
         Supplier<T> data = this.queue.poll();
+        final List<T> dataItems = new ArrayList<>();
         while (data != null) {
-            this.delegateSink.write(data.get());
+            dataItems.add(data.get());
+
+            if (this.configuration.flushMaxBatchSize() == dataItems.size()) {
+                this.delegateSink.write(dataItems);
+                dataItems.clear();
+            }
+
             data = this.queue.poll();
+        }
+
+        if (!dataItems.isEmpty()) {
+            this.delegateSink.write(dataItems);
         }
     }
 }
