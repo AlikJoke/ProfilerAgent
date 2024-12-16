@@ -7,6 +7,8 @@ import ru.joke.profiler.core.output.handlers.async.AsyncOutputDataSinkHandleSupp
 import java.util.Collections;
 import java.util.Map;
 
+import static ru.joke.profiler.core.configuration.ConfigurationProperties.parseIntProperty;
+
 public abstract class OutputDataStreamSinkHandle extends AsyncOutputDataSinkHandleSupport<String> {
 
     protected static final String FORMATTER_KEY = "formatter";
@@ -19,8 +21,7 @@ public abstract class OutputDataStreamSinkHandle extends AsyncOutputDataSinkHand
     }
 
     protected int extractBufferSizeProperty(final Map<String, String> properties, final String property) {
-        final String bufferSizeStr = properties.get(property);
-        return bufferSizeStr == null || bufferSizeStr.isEmpty() ? DEFAULT_BUFFER_SIZE : Integer.parseInt(bufferSizeStr);
+        return parseIntProperty(properties, property, DEFAULT_BUFFER_SIZE);
     }
 
     protected OutputStringDataFormatter getFormatter(final Map<String, Object> context) {

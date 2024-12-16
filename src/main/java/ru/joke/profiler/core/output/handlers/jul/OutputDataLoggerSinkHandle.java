@@ -1,6 +1,5 @@
 package ru.joke.profiler.core.output.handlers.jul;
 
-import ru.joke.profiler.core.configuration.InvalidConfigurationException;
 import ru.joke.profiler.core.output.handlers.*;
 import ru.joke.profiler.core.output.handlers.async.AsyncOutputDataSinkHandleSupport;
 
@@ -34,8 +33,8 @@ public final class OutputDataLoggerSinkHandle extends AsyncOutputDataSinkHandleS
             final Map<String, String> properties,
             final Map<String, Object> context) {
         return new OutputDataLoggerSink(
-                findRequiredPropertyValue(properties, STATIC_LOGGER_SINK_CATEGORY),
-                findRequiredPropertyValue(properties, STATIC_LOGGER_SINK_LEVEL)
+                findRequiredProperty(properties, STATIC_LOGGER_SINK_CATEGORY),
+                findRequiredProperty(properties, STATIC_LOGGER_SINK_LEVEL)
         );
     }
 
@@ -55,14 +54,5 @@ public final class OutputDataLoggerSinkHandle extends AsyncOutputDataSinkHandleS
         final String format = properties.get(STATIC_LOGGER_SINK_DATA_FORMAT);
         final OutputStringDataFormatter formatter = OutputStringDataFormatterFactory.create(format);
         return Collections.singletonMap(FORMATTER_KEY, formatter);
-    }
-
-    private String findRequiredPropertyValue(final Map<String, String> properties, final String propertyName) {
-        final String propertyValue = properties.get(propertyName);
-        if (propertyValue == null || propertyValue.isEmpty()) {
-            throw new InvalidConfigurationException(String.format("Property (%s) is required for logger sink", propertyName));
-        }
-
-        return propertyValue;
     }
 }

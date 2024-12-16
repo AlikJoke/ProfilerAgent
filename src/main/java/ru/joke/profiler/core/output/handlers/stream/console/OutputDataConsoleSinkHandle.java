@@ -44,8 +44,9 @@ public final class OutputDataConsoleSinkHandle extends OutputDataStreamSinkHandl
     protected OutputDataSink<String> createTerminalOutputSink(
             final Map<String, String> properties,
             final Map<String, Object> context) throws UnsupportedEncodingException {
-        final boolean forceFlushOnWrites = Boolean.parseBoolean(properties.get(STATIC_CONSOLE_SINK_FORCE_FLUSH_ON_WRITES));
+        final boolean forceFlushOnWrites = parseBooleanProperty(properties, STATIC_CONSOLE_SINK_FORCE_FLUSH_ON_WRITES);
         final int bufferSize = extractBufferSizeProperty(properties, STATIC_CONSOLE_SINK_BUFFER_SIZE);
+
         return new OutputDataConsoleSink(
                 bufferSize,
                 forceFlushOnWrites

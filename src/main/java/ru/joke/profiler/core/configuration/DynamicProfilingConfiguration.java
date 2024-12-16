@@ -66,7 +66,6 @@ public final class DynamicProfilingConfiguration extends ProfilingConfiguration 
 
         final String excludedResourcesMask = properties.getProperty(DYNAMIC_EXCLUDED_RESOURCES_MASK);
         final String excludedThreadsMask = properties.getProperty(DYNAMIC_EXCLUDED_THREADS_MASK);
-        final String profilingDisabledStr = properties.getProperty(DYNAMIC_PROFILING_DISABLED);
         final Predicate<String> threadsFilter =
                 excludedThreadsMask == null || excludedThreadsMask.isEmpty()
                         ? null
@@ -79,14 +78,14 @@ public final class DynamicProfilingConfiguration extends ProfilingConfiguration 
         final String profilingRootsMask = properties.getProperty(DYNAMIC_PROFILING_ROOTS_MASK);
         final Predicate<String> profilingRootsFilter = composeResourcesFilter(profilingRoots, profilingRootsMask, false);
 
-        final String traceMaxDepthStr = properties.getProperty(DYNAMIC_PROFILED_STACKTRACE_MAX_DEPTH);
-        final int traceMaxDepth = traceMaxDepthStr == null || traceMaxDepthStr.isEmpty() ? Integer.MAX_VALUE : Integer.parseInt(traceMaxDepthStr);
+        final int traceMaxDepth = parseIntProperty(properties, DYNAMIC_PROFILED_STACKTRACE_MAX_DEPTH, Integer.MAX_VALUE);
+        final boolean profilingDisabled = parseBooleanProperty(properties, DYNAMIC_PROFILING_DISABLED);
         return new DynamicProfilingConfiguration(
                 minExecutionThresholdNs,
                 resourcesFilter,
                 threadsFilter,
                 profilingRootsFilter,
-                Boolean.parseBoolean(profilingDisabledStr),
+                profilingDisabled,
                 traceMaxDepth
         );
     }

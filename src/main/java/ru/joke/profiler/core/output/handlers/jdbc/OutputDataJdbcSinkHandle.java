@@ -39,9 +39,9 @@ public final class OutputDataJdbcSinkHandle extends AsyncOutputDataSinkHandleSup
         final JdbcSinkConfiguration configuration = configurationLoader.load(properties);
 
         final ConnectionFactory connectionFactory = new ConnectionFactory(configuration.connectionFactoryConfiguration());
+        final ConnectionPoolFactory poolFactory = new ConnectionPoolFactory(connectionFactory);
 
-        final ConnectionPool pool = new ConnectionPool(connectionFactory, configuration.connectionPoolConfiguration());
-        pool.init();
+        final ConnectionPool pool = poolFactory.create(configuration.connectionPoolConfiguration());
 
         final OutputPropertiesInjector<PreparedStatement> propertiesInjector = new JdbcStatementPropertiesInjector(configuration.outputTableConfiguration());
         final OutputDataJdbcStorage jdbcStorage = new OutputDataJdbcStorage(pool, configuration, propertiesInjector);

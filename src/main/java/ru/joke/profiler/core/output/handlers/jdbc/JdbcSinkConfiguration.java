@@ -183,20 +183,27 @@ final class JdbcSinkConfiguration {
 
     static class ConnectionPoolConfiguration {
 
+        private final boolean enablePooling;
         private final int maxPoolSize;
         private final int initialPoolSize;
         private final long keepAliveIdleTime;
         private final long maxConnectionWaitTime;
 
         ConnectionPoolConfiguration(
+                final boolean enablePooling,
                 final int maxPoolSize,
                 final int initialPoolSize,
                 final long keepAliveIdleTime,
                 final long maxConnectionWaitTime) {
+            this.enablePooling = enablePooling;
             this.maxPoolSize = maxPoolSize;
             this.initialPoolSize = initialPoolSize;
             this.keepAliveIdleTime = keepAliveIdleTime;
             this.maxConnectionWaitTime = maxConnectionWaitTime;
+        }
+
+        boolean enablePooling() {
+            return enablePooling;
         }
 
         int maxPoolSize() {
@@ -218,7 +225,8 @@ final class JdbcSinkConfiguration {
         @Override
         public String toString() {
             return "ConnectionPoolConfiguration{"
-                    + "maxPoolSize=" + maxPoolSize
+                    + "enablePooling=" + enablePooling
+                    + ", maxPoolSize=" + maxPoolSize
                     + ", initialPoolSize=" + initialPoolSize
                     + ", keepAliveIdleTime=" + keepAliveIdleTime
                     + ", maxConnectionWaitTime=" + maxConnectionWaitTime

@@ -10,12 +10,13 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static ru.joke.profiler.core.configuration.ConfigurationProperties.ASYNC_FLUSHING_ENABLED;
+import static ru.joke.profiler.core.configuration.ConfigurationProperties.parseBooleanProperty;
 
 public abstract class AsyncOutputDataSinkHandleSupport<T> implements OutputDataSinkHandle {
 
     @Override
     public final OutputDataSink<OutputData> create(final Map<String, String> properties) throws Exception {
-        final boolean asyncFlushingEnabled = Boolean.parseBoolean(properties.get(ASYNC_FLUSHING_ENABLED));
+        final boolean asyncFlushingEnabled = parseBooleanProperty(properties, ASYNC_FLUSHING_ENABLED);
         final Map<String, Object> creationContext = buildCreationContext(properties);
         return asyncFlushingEnabled
                 ? createAsyncOutputSync(properties, creationContext)

@@ -1,6 +1,5 @@
 package ru.joke.profiler.core.output.handlers.stream.file;
 
-import ru.joke.profiler.core.configuration.InvalidConfigurationException;
 import ru.joke.profiler.core.output.handlers.OutputData;
 import ru.joke.profiler.core.output.handlers.OutputDataConversionSinkWrapper;
 import ru.joke.profiler.core.output.handlers.OutputDataSink;
@@ -45,17 +44,13 @@ public final class OutputDataFileSinkHandle extends OutputDataStreamSinkHandle {
     protected OutputDataSink<String> createTerminalOutputSink(
             final Map<String, String> properties,
             final Map<String, Object> context) throws IOException {
-        final String filePath = properties.get(STATIC_FILE_SINK_FILE);
-        if (filePath == null || filePath.isEmpty()) {
-            throw new InvalidConfigurationException(String.format("File path property (%s) is required for file sink", STATIC_FILE_SINK_FILE));
-        }
-
+        final String filePath = findRequiredProperty(properties, STATIC_FILE_SINK_FILE);
         final int bufferSize = extractBufferSizeProperty(properties, STATIC_FILE_SINK_BUFFER_SIZE);
 
         final String existingFilePolicyStr = properties.get(STATIC_FILE_SINK_EXISTING_FILE_POLICY);
         final ExistingFilePolicy existingFilePolicy = ExistingFilePolicy.parse(existingFilePolicyStr);
 
-        final boolean forceFlushOnWrites = Boolean.parseBoolean(properties.get(STATIC_FILE_SINK_FORCE_FLUSH_ON_WRITES));
+        final boolean forceFlushOnWrites = parseBooleanProperty(properties, STATIC_FILE_SINK_FORCE_FLUSH_ON_WRITES);
         return new OutputDataFileSink(
                 bufferSize,
                 existingFilePolicy,

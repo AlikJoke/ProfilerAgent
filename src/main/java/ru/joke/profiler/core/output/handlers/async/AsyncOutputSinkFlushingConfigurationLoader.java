@@ -11,33 +11,15 @@ final class AsyncOutputSinkFlushingConfigurationLoader {
     private static final int DEFAULT_OVERFLOW_LIMIT = 10_000;
 
     AsyncSinkDataFlushingConfiguration load(final Map<String, String> sinkProperties) {
-        final String flushingIntervalStr = sinkProperties.get(ASYNC_FLUSHING_INTERVAL);
-        final long flushingInterval =
-                flushingIntervalStr == null || flushingIntervalStr.isEmpty()
-                        ? DEFAULT_FLUSHING_INTERVAL
-                        : Long.parseLong(flushingIntervalStr);
-
-        final String flushingThreadPoolSizeStr = sinkProperties.get(ASYNC_FLUSHING_POOL_SIZE);
-        final int flushingThreadPoolSize =
-                flushingThreadPoolSizeStr == null || flushingThreadPoolSizeStr.isEmpty()
-                        ? DEFAULT_FLUSHING_POOL_SIZE
-                        : Integer.parseInt(flushingThreadPoolSizeStr);
-
-        final String flushingQueueOverflowLimitStr = sinkProperties.get(ASYNC_FLUSHING_QUEUE_OVERFLOW_LIMIT);
-        final int flushingQueueOverflowLimit =
-                flushingQueueOverflowLimitStr == null || flushingQueueOverflowLimitStr.isEmpty()
-                        ? DEFAULT_OVERFLOW_LIMIT
-                        : Integer.parseInt(flushingQueueOverflowLimitStr);
+        final long flushingInterval = parseLongProperty(sinkProperties, ASYNC_FLUSHING_INTERVAL, DEFAULT_FLUSHING_INTERVAL);
+        final int flushingThreadPoolSize = parseIntProperty(sinkProperties, ASYNC_FLUSHING_POOL_SIZE, DEFAULT_FLUSHING_POOL_SIZE);
+        final int flushingQueueOverflowLimit = parseIntProperty(sinkProperties, ASYNC_FLUSHING_QUEUE_OVERFLOW_LIMIT, DEFAULT_OVERFLOW_LIMIT);
 
         final String flushingOverflowPolicy = sinkProperties.get(ASYNC_FLUSHING_QUEUE_OVERFLOW_POLICY);
         final OverflowPolicy overflowPolicy = OverflowPolicy.parse(flushingOverflowPolicy);
 
-        final boolean forceFlushOnExit = Boolean.parseBoolean(sinkProperties.get(ASYNC_FLUSHING_FORCE_ON_EXIT));
-        final String maxFlushBatchSizeStr = sinkProperties.get(ASYNC_FLUSHING_MAX_BATCH_SIZE);
-        final int maxFlushBatchSize =
-                maxFlushBatchSizeStr == null || maxFlushBatchSizeStr.isEmpty()
-                        ? Integer.MAX_VALUE
-                        : Integer.parseInt(maxFlushBatchSizeStr);
+        final boolean forceFlushOnExit = parseBooleanProperty(sinkProperties, ASYNC_FLUSHING_FORCE_ON_EXIT);
+        final int maxFlushBatchSize = parseIntProperty(sinkProperties, ASYNC_FLUSHING_MAX_BATCH_SIZE, Integer.MAX_VALUE);
 
         return new AsyncSinkDataFlushingConfiguration(
                 flushingInterval,

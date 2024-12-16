@@ -83,19 +83,15 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
         final Predicate<String> resourcesFilter = composeJoinedResourcesFilter(includedResources, includedResourcesMask, excludedResources, excludedResourcesMask);
         final long executionThresholdNs = parseExecutionThreshold(minExecutionThresholdStr, minExecThresholdTimeUnitStr);
 
-        final boolean dynamicConfigurationEnabled = Boolean.parseBoolean(props.getProperty(STATIC_DYNAMIC_CONFIGURATION_ENABLED));
-        
-        final String dynamicConfigurationRefreshIntervalStr = props.getProperty(STATIC_DYNAMIC_CONFIGURATION_REFRESH_INTERVAL);
-        final long dynamicConfigurationRefreshInterval =
-                dynamicConfigurationRefreshIntervalStr == null || dynamicConfigurationRefreshIntervalStr.isEmpty()
-                        ? DEFAULT_DYNAMIC_CONFIG_REFRESHING_INTERVAL
-                        : Long.parseLong(dynamicConfigurationRefreshIntervalStr);
+        final boolean dynamicConfigurationEnabled = parseBooleanProperty(props, STATIC_DYNAMIC_CONFIGURATION_ENABLED);
+
+        final long dynamicConfigurationRefreshInterval = parseLongProperty(props, STATIC_DYNAMIC_CONFIGURATION_REFRESH_INTERVAL, DEFAULT_DYNAMIC_CONFIG_REFRESHING_INTERVAL);
 
         final String dynamicConfigurationRefreshIntervalTimeUnitStr = props.getProperty(STATIC_DYNAMIC_CONFIGURATION_REFRESH_INTERVAL_TU);
         final ProfilingTimeUnit dynamicConfigurationRefreshIntervalTimeUnit = ProfilingTimeUnit.parse(dynamicConfigurationRefreshIntervalTimeUnitStr, ProfilingTimeUnit.MILLISECONDS);
         final long dynamicConfigurationRefreshIntervalMs = dynamicConfigurationRefreshIntervalTimeUnit.toJavaTimeUnit().toMillis(dynamicConfigurationRefreshInterval);
 
-        final boolean executionTracingEnabled = Boolean.parseBoolean(props.getProperty(STATIC_EXECUTION_TRACING_ENABLED, ""));
+        final boolean executionTracingEnabled = parseBooleanProperty(props, STATIC_EXECUTION_TRACING_ENABLED);
         final Map<String, String> sinkProperties =
                 props.entrySet()
                         .stream()
