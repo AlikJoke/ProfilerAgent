@@ -106,7 +106,8 @@ final class JdbcSinkConfigurationLoader {
         properties.forEach((p, v) -> {
             if (p.startsWith(JDBC_SINK_CONNECTION_FACTORY_PROPERTIES_PREFIX)
                     && !p.equals(STATIC_JDBC_SINK_CONNECTION_FACTORY_URL)) {
-                connectionProperties.put(p, v);
+                final String propertyName = p.substring(JDBC_SINK_CONNECTION_FACTORY_PROPERTIES_PREFIX.length());
+                connectionProperties.put(propertyName, v);
             }
         });
 

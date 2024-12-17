@@ -23,10 +23,11 @@ public final class ProfilerAgent {
     public static void agentmain(final String args, final Instrumentation instrumentation) throws Exception {
         final ProfilingConfigurationLoader configurationLoader = new ProfilingConfigurationLoader(args);
         final StaticProfilingConfiguration staticConfiguration = configurationLoader.loadStatic();
-        final Predicate<String> transformationFilter = new TransformationFilter(staticConfiguration);
 
         initializeRegistrar(staticConfiguration);
         final ExecutionTimeRegistrarMetadataSelector registrarMetadataSelector = new ExecutionTimeRegistrarMetadataSelector(ExecutionTimeRegistrar.class);
+
+        final Predicate<String> transformationFilter = new TransformationFilter(staticConfiguration, instrumentation);
 
         instrumentation.addTransformer(new ProfilingTransformer(transformationFilter, staticConfiguration, registrarMetadataSelector));
 

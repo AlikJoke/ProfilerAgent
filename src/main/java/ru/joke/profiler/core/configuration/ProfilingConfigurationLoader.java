@@ -77,7 +77,7 @@ public final class ProfilingConfigurationLoader {
         }
 
         try (final InputStream fis = Files.newInputStream(configurationFilePath, StandardOpenOption.READ)) {
-            final Properties props = new Properties(16);
+            final Properties props = new Properties();
             props.load(fis);
 
             return configurationFunc.apply(props);

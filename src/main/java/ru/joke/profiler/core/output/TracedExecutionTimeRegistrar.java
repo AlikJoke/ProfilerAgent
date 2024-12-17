@@ -46,8 +46,11 @@ public final class TracedExecutionTimeRegistrar extends ExecutionTimeRegistrar {
             final String method,
             final long methodEnterTimestamp,
             final long methodElapsedTime) {
-        super.registerMethodExit(method, methodEnterTimestamp, methodElapsedTime);
-        registerMethodExit();
+        try {
+            super.registerMethodExit(method, methodEnterTimestamp, methodElapsedTime);
+        } finally {
+            registerMethodExit();
+        }
     }
 
     @Override

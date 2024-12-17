@@ -43,7 +43,7 @@ public abstract class OutputPropertiesInjector<T> {
         int index = 0;
         T result = template;
         for (final String property : this.properties) {
-            result = injectProperty(result, data, property, index++);
+            result = injectProperty(result, data, property, ++index);
         }
 
         return result;

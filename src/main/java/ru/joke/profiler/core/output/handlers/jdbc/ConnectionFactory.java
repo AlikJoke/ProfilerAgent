@@ -16,7 +16,7 @@ final class ConnectionFactory {
 
     Connection create() {
         try {
-            return DriverManager.getConnection(this.configuration.url(), configuration.connectionProperties());
+            return DriverManager.getConnection(this.configuration.url(), this.configuration.connectionProperties());
         } catch (SQLException e) {
             throw new ProfilerOutputSinkException(e);
         }

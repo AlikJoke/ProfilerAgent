@@ -11,7 +11,7 @@ final class OutputDataTablePreparer {
 
     private static final String CHECK_TABLE_QUERY = "SELECT 1 FROM %s WHERE 1 = 0";
     private static final String CREATE_TABLE_QUERY = "CREATE TABLE %s (%s)";
-    private static final String DELETE_FROM_TABLE_QUERY = "DELETE FROM TABLE %s";
+    private static final String DELETE_FROM_TABLE_QUERY = "DELETE FROM %s";
     private static final String DROP_TABLE_QUERY = "DROP TABLE %s";
 
     private final ConnectionFactory connectionFactory;
