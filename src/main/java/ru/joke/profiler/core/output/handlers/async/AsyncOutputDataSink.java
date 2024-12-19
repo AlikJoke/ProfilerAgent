@@ -48,7 +48,6 @@ final class AsyncOutputDataSink<S, T> implements OutputDataSink<S> {
     @Override
     public void init() {
         this.delegateSink.init();
-        Runtime.getRuntime().addShutdownHook(new Thread(this::close));
         this.flushExecutor.scheduleAtFixedRate(
                 this::flush,
                 this.configuration.flushInterval(),
@@ -76,7 +75,7 @@ final class AsyncOutputDataSink<S, T> implements OutputDataSink<S> {
 
     @Override
     public void close() {
-        this.flushExecutor.shutdown();
+        this.flushExecutor.shutdownNow();
         if (this.configuration.forceFlushOnExit()) {
             flush();
         }

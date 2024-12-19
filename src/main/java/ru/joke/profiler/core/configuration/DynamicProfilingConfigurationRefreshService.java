@@ -11,7 +11,6 @@ public final class DynamicProfilingConfigurationRefreshService {
     private static final Logger logger = Logger.getLogger(DynamicProfilingConfigurationRefreshService.class.getCanonicalName());
 
     private static final String REFRESHING_THREAD_NAME = "profiler-dynamic-configuration-refreshing-thread";
-    private static final String SHUTDOWN_THREAD_NAME = "profiler-shutdown-thread";
 
     private final ScheduledExecutorService executorService;
     private final long dynamicConfigRefreshIntervalMs;
@@ -39,8 +38,7 @@ public final class DynamicProfilingConfigurationRefreshService {
     }
 
     public void start() {
-        Runtime.getRuntime()
-                .addShutdownHook(new Thread(this.executorService::shutdownNow, SHUTDOWN_THREAD_NAME));
+
 
         this.refreshAction.run();
         this.executorService.scheduleAtFixedRate(
@@ -49,5 +47,9 @@ public final class DynamicProfilingConfigurationRefreshService {
                 this.dynamicConfigRefreshIntervalMs,
                 TimeUnit.MILLISECONDS
         );
+    }
+
+    public void close() {
+        this.executorService.shutdownNow();
     }
 }

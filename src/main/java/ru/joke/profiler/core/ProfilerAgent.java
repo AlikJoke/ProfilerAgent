@@ -39,6 +39,8 @@ public final class ProfilerAgent {
         final DynamicProfilingConfigurationHolder dynamicConfigHolder = dynamicConfigHolderFactory.create();
 
         final OutputDataSink<OutputData> sink = createOutputSink(staticConfiguration);
+        Runtime.getRuntime()
+                .addShutdownHook(new Thread(sink::close));
 
         final ExecutionTimeRegistrarInitializer registrarInitializer = new ExecutionTimeRegistrarInitializer(staticConfiguration, dynamicConfigHolder, sink);
         registrarInitializer.init();
@@ -67,5 +69,8 @@ public final class ProfilerAgent {
                         staticConfiguration.getDynamicConfigurationRefreshInterval()
                 );
         dynamicConfigRefreshService.start();
+
+        Runtime.getRuntime()
+                .addShutdownHook(new Thread(dynamicConfigRefreshService::close));
     }
 }

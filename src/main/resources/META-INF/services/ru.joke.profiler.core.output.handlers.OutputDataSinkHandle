@@ -2,3 +2,4 @@ ru.joke.profiler.core.output.handlers.stream.file.OutputDataFileSinkHandle
 ru.joke.profiler.core.output.handlers.stream.console.OutputDataConsoleSinkHandle
 ru.joke.profiler.core.output.handlers.jul.OutputDataLoggerSinkHandle
 ru.joke.profiler.core.output.handlers.jdbc.OutputDataJdbcSinkHandle
+ru.joke.profiler.core.output.handlers.kafka.OutputDataKafkaSinkHandle

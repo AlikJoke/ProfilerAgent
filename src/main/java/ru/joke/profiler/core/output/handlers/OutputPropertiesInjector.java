@@ -41,12 +41,20 @@ public abstract class OutputPropertiesInjector<T> {
 
     public T inject(final T template, final OutputData data) {
         int index = 0;
-        T result = template;
+        T result = onStart(template);
         for (final String property : this.properties) {
             result = injectProperty(result, data, property, ++index);
         }
 
-        return result;
+        return onFinish(result);
+    }
+
+    protected T onStart(final T template) {
+        return template;
+    }
+
+    protected T onFinish(final T template) {
+        return template;
     }
 
     protected abstract T injectMethodName(

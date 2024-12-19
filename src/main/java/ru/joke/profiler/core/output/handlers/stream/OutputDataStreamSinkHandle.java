@@ -1,7 +1,7 @@
 package ru.joke.profiler.core.output.handlers.stream;
 
-import ru.joke.profiler.core.output.handlers.OutputStringDataFormatter;
-import ru.joke.profiler.core.output.handlers.OutputStringDataFormatterFactory;
+import ru.joke.profiler.core.output.handlers.util.OutputStringDataFormatter;
+import ru.joke.profiler.core.output.handlers.util.OutputStringDataFormatterFactory;
 import ru.joke.profiler.core.output.handlers.async.AsyncOutputDataSinkHandleSupport;
 
 import java.util.Collections;

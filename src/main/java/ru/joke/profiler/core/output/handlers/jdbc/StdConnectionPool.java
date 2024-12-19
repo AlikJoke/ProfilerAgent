@@ -4,8 +4,7 @@ import ru.joke.profiler.core.output.handlers.OutputDataSink;
 import ru.joke.profiler.core.output.handlers.ProfilerOutputSinkException;
 
 import java.sql.*;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -21,6 +20,7 @@ final class StdConnectionPool implements ConnectionPool {
     private final JdbcSinkConfiguration.ConnectionPoolConfiguration configuration;
     private final BlockingQueue<ConnectionWrapper> pool;
     private final ScheduledExecutorService idleConnectionsTerminator;
+    private final List<ConnectionWrapper> registry;
 
     StdConnectionPool(
             final ConnectionFactory connectionFactory,
@@ -28,6 +28,7 @@ final class StdConnectionPool implements ConnectionPool {
         this.connectionFactory = connectionFactory;
         this.configuration = poolConfiguration;
         this.pool = new LinkedBlockingQueue<>(poolConfiguration.maxPoolSize());
+        this.registry = new ArrayList<>();
         this.idleConnectionsTerminator =
                 poolConfiguration.keepAliveIdleTime() == -1
                         ? null
@@ -46,6 +47,8 @@ final class StdConnectionPool implements ConnectionPool {
         for (int i = 0; i < this.configuration.maxPoolSize(); i++) {
             this.pool.add(new ConnectionWrapper(this.connectionFactory::create, i < this.configuration.initialPoolSize()));
         }
+
+        this.registry.addAll(this.pool);
 
         if (this.idleConnectionsTerminator != null) {
             this.idleConnectionsTerminator.scheduleWithFixedDelay(
@@ -89,12 +92,12 @@ final class StdConnectionPool implements ConnectionPool {
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
         if (this.idleConnectionsTerminator != null) {
             this.idleConnectionsTerminator.shutdown();
         }
 
-        this.pool.forEach(ConnectionWrapper::close);
+        this.registry.forEach(ConnectionWrapper::close);
     }
 
     private void terminateExpiredIdleConnections() {
@@ -119,6 +122,7 @@ final class StdConnectionPool implements ConnectionPool {
         private final Supplier<Connection> connectionRetriever;
         private volatile Connection connection;
         private volatile long lastUsedTimestamp;
+        private volatile boolean isClosed;
 
         private ConnectionWrapper(final Supplier<Connection> connectionRetriever, final boolean eagerCreation) {
             this.connectionRetriever = connectionRetriever;
@@ -133,6 +137,10 @@ final class StdConnectionPool implements ConnectionPool {
 
         private synchronized void init() {
             try {
+                if (this.isClosed) {
+                    throw new ProfilerOutputSinkException("Sink already closed");
+                }
+
                 if (this.connection == null || this.connection.isClosed()) {
                     this.connection = connectionRetriever.get();
                     this.lastUsedTimestamp = System.currentTimeMillis();
@@ -184,6 +192,7 @@ final class StdConnectionPool implements ConnectionPool {
 
         @Override
         public synchronized void close() {
+            this.isClosed = true;
             if (this.connection == null) {
                 return;
             }
@@ -198,7 +207,7 @@ final class StdConnectionPool implements ConnectionPool {
 
         @Override
         public boolean isClosed() throws SQLException {
-            return connection.isClosed();
+            return connection == null || connection.isClosed();
         }
 
         @Override

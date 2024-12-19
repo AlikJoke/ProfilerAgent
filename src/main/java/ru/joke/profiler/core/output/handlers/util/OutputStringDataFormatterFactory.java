@@ -1,4 +1,4 @@
-package ru.joke.profiler.core.output.handlers;
+package ru.joke.profiler.core.output.handlers.util;
 
 public final class OutputStringDataFormatterFactory {
 

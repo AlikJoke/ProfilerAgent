@@ -16,6 +16,7 @@ public abstract class OutputDataAbsStreamSink implements OutputDataSink<String> 
 
     private final Writer writer;
     private final boolean forceFlushOnWrites;
+    private volatile boolean isClosed;
 
     protected OutputDataAbsStreamSink(
             final Writer writer,
@@ -35,6 +36,10 @@ public abstract class OutputDataAbsStreamSink implements OutputDataSink<String> 
                 this.writer.flush();
             }
         } catch (IOException ex) {
+            if (this.isClosed) {
+                return;
+            }
+
             logger.log(Level.SEVERE, "Unable to write to sink", ex);
             throw new ProfilerOutputSinkException(ex);
         }
@@ -47,8 +52,9 @@ public abstract class OutputDataAbsStreamSink implements OutputDataSink<String> 
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
         try {
+            this.isClosed = true;
             this.writer.close();
         } catch (IOException ex) {
             logger.log(Level.SEVERE, "Unable to close sink", ex);

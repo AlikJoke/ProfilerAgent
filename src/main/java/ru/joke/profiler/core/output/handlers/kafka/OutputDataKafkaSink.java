@@ -3,21 +3,21 @@ package ru.joke.profiler.core.output.handlers.kafka;
 import ru.joke.profiler.core.output.handlers.OutputData;
 import ru.joke.profiler.core.output.handlers.OutputDataSink;
 
-// TODO
-public class OutputDataKafkaSink implements OutputDataSink<OutputData> {
+final class OutputDataKafkaSink implements OutputDataSink<OutputData> {
 
-    @Override
-    public void init() {
-        OutputDataSink.super.init();
+    private final KafkaMessageChannel channel;
+
+    OutputDataKafkaSink(final KafkaMessageChannel channel) {
+        this.channel = channel;
     }
 
     @Override
-    public void write(OutputData outputData) {
-
+    public void write(final OutputData outputData) {
+        this.channel.send(outputData);
     }
 
     @Override
-    public void close() {
-        OutputDataSink.super.close();
+    public synchronized void close() {
+        this.channel.close();
     }
 }

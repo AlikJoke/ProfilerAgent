@@ -23,6 +23,7 @@ final class OutputDataJdbcSink implements OutputDataSink<OutputData> {
     public void init() {
         try {
             this.outputDataTablePreparer.prepare();
+            this.storage.init();
         } catch (SQLException ex) {
             throw new ProfilerOutputSinkException(ex);
         }
@@ -36,5 +37,10 @@ final class OutputDataJdbcSink implements OutputDataSink<OutputData> {
     @Override
     public void write(final List<OutputData> dataItems) {
         this.storage.store(dataItems);
+    }
+
+    @Override
+    public void close() {
+        this.storage.close();
     }
 }

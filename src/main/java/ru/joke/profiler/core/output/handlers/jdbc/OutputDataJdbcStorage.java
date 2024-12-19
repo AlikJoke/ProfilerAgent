@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-final class OutputDataJdbcStorage {
+final class OutputDataJdbcStorage implements AutoCloseable {
 
     private static final String INSERT_QUERY_TEMPLATE = "INSERT INTO %s(%s) VALUES(%s)";
 
@@ -20,6 +20,8 @@ final class OutputDataJdbcStorage {
     private final String insertQuery;
     private final OutputPropertiesInjector<PreparedStatement> parametersInjector;
     private final JdbcSinkConfiguration.OutputDataInsertionConfiguration insertionConfiguration;
+
+    private volatile boolean isClosed;
 
     OutputDataJdbcStorage(
             final ConnectionPool pool,
@@ -31,14 +33,26 @@ final class OutputDataJdbcStorage {
         this.insertionConfiguration = configuration.dataInsertionConfiguration();
     }
 
+    void init() {
+        this.pool.init();
+    }
+
     void store(final OutputData data) {
-        final Connection connection = this.pool.get();
+        final Connection connection = tryToTakeConnection();
+        if (connection == null) {
+            return;
+        }
+
         try (final PreparedStatement statement = connection.prepareStatement(this.insertQuery)) {
             connection.setAutoCommit(true);
 
             putParameters(statement, data);
             statement.executeUpdate();
         } catch (SQLException e) {
+            if (this.isClosed) {
+                return;
+            }
+
             throw new ProfilerOutputSinkException(e);
         } finally {
             this.pool.release(connection);
@@ -46,7 +60,11 @@ final class OutputDataJdbcStorage {
     }
 
     void store(final List<OutputData> data) {
-        final Connection connection = this.pool.get();
+        final Connection connection = tryToTakeConnection();
+        if (connection == null) {
+            return;
+        }
+
         try (final PreparedStatement statement = connection.prepareStatement(this.insertQuery)) {
             connection.setAutoCommit(true);
 
@@ -72,9 +90,25 @@ final class OutputDataJdbcStorage {
                 statement.executeBatch();
             }
         } catch (SQLException e) {
+            if (this.isClosed) {
+                return;
+            }
+
             throw new ProfilerOutputSinkException(e);
         } finally {
             this.pool.release(connection);
+        }
+    }
+
+    private Connection tryToTakeConnection() {
+        try {
+            return this.pool.get();
+        } catch (ProfilerOutputSinkException ex) {
+            if (this.isClosed) {
+                return null;
+            }
+
+            throw ex;
         }
     }
 
@@ -92,5 +126,11 @@ final class OutputDataJdbcStorage {
         final Collection<String> preparedParameters = Collections.nCopies(configuration.columnsMetadata().size(), "?");
         final String preparedParametersStr = String.join(",", preparedParameters);
         return String.format(INSERT_QUERY_TEMPLATE, configuration.tableName(), columns, preparedParametersStr);
+    }
+
+    @Override
+    public void close() {
+        this.isClosed = true;
+        this.pool.close();
     }
 }

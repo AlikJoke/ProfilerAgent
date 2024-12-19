@@ -9,12 +9,8 @@ final class ConnectionPoolFactory {
     }
 
     ConnectionPool create(final JdbcSinkConfiguration.ConnectionPoolConfiguration configuration) {
-        final ConnectionPool pool =
-                configuration.enablePooling()
-                        ? new StdConnectionPool(this.connectionFactory, configuration)
-                        : new NoPoolingConnectionPool(this.connectionFactory);
-        pool.init();
-
-        return pool;
+        return configuration.enablePooling()
+                ? new StdConnectionPool(this.connectionFactory, configuration)
+                : new NoPoolingConnectionPool(this.connectionFactory);
     }
 }
