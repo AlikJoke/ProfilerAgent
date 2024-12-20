@@ -2,6 +2,7 @@ package ru.joke.profiler.core.output.handlers.jdbc;
 
 import ru.joke.profiler.core.output.handlers.OutputDataSink;
 import ru.joke.profiler.core.output.handlers.ProfilerOutputSinkException;
+import ru.joke.profiler.core.output.handlers.util.ConcurrentLinkedBlockingQueue;
 
 import java.sql.*;
 import java.util.*;
@@ -18,7 +19,7 @@ final class StdConnectionPool implements ConnectionPool {
 
     private final ConnectionFactory connectionFactory;
     private final JdbcSinkConfiguration.ConnectionPoolConfiguration configuration;
-    private final BlockingQueue<ConnectionWrapper> pool;
+    private final ConcurrentLinkedBlockingQueue<ConnectionWrapper> pool;
     private final ScheduledExecutorService idleConnectionsTerminator;
     private final List<ConnectionWrapper> registry;
 
@@ -27,7 +28,7 @@ final class StdConnectionPool implements ConnectionPool {
             final JdbcSinkConfiguration.ConnectionPoolConfiguration poolConfiguration) {
         this.connectionFactory = connectionFactory;
         this.configuration = poolConfiguration;
-        this.pool = new LinkedBlockingQueue<>(poolConfiguration.maxPoolSize());
+        this.pool = new ConcurrentLinkedBlockingQueue<>(poolConfiguration.maxPoolSize());
         this.registry = new ArrayList<>();
         this.idleConnectionsTerminator =
                 poolConfiguration.keepAliveIdleTime() == -1
@@ -45,10 +46,10 @@ final class StdConnectionPool implements ConnectionPool {
     @Override
     public void init() {
         for (int i = 0; i < this.configuration.maxPoolSize(); i++) {
-            this.pool.add(new ConnectionWrapper(this.connectionFactory::create, i < this.configuration.initialPoolSize()));
+            this.pool.offer(new ConnectionWrapper(this.connectionFactory::create, i < this.configuration.initialPoolSize()));
         }
 
-        this.registry.addAll(this.pool);
+        this.pool.forEach(this.registry::add);
 
         if (this.idleConnectionsTerminator != null) {
             this.idleConnectionsTerminator.scheduleWithFixedDelay(
@@ -67,7 +68,7 @@ final class StdConnectionPool implements ConnectionPool {
             final ConnectionWrapper wrapper = (ConnectionWrapper) connection;
             wrapper.onRelease();
 
-            this.pool.add(wrapper);
+            this.pool.offer(wrapper);
         } else {
             throw new ClassCastException("Unsupported type of connection");
         }
@@ -102,7 +103,7 @@ final class StdConnectionPool implements ConnectionPool {
 
     private void terminateExpiredIdleConnections() {
         final long currentTimestamp = System.currentTimeMillis();
-        for (final ConnectionWrapper wrapper : this.pool) {
+        this.pool.forEach(wrapper -> {
             if (isConnectionExpired(wrapper, currentTimestamp)) {
                 synchronized (wrapper) {
                     if (isConnectionExpired(wrapper, currentTimestamp)) {
@@ -110,7 +111,7 @@ final class StdConnectionPool implements ConnectionPool {
                     }
                 }
             }
-        }
+        });
     }
 
     private boolean isConnectionExpired(final ConnectionWrapper connection, final long currentTimestamp) {

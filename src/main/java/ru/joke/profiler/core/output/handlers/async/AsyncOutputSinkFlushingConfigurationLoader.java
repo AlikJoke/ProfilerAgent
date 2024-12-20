@@ -14,6 +14,7 @@ final class AsyncOutputSinkFlushingConfigurationLoader {
         final long flushingInterval = parseLongProperty(sinkProperties, ASYNC_FLUSHING_INTERVAL, DEFAULT_FLUSHING_INTERVAL);
         final int flushingThreadPoolSize = parseIntProperty(sinkProperties, ASYNC_FLUSHING_POOL_SIZE, DEFAULT_FLUSHING_POOL_SIZE);
         final int flushingQueueOverflowLimit = parseIntProperty(sinkProperties, ASYNC_FLUSHING_QUEUE_OVERFLOW_LIMIT, DEFAULT_OVERFLOW_LIMIT);
+        final int resultOverflowLimit = flushingQueueOverflowLimit == -1 ? Integer.MAX_VALUE : flushingQueueOverflowLimit;
 
         final String flushingOverflowPolicy = sinkProperties.get(ASYNC_FLUSHING_QUEUE_OVERFLOW_POLICY);
         final OverflowPolicy overflowPolicy = OverflowPolicy.parse(flushingOverflowPolicy);
@@ -24,7 +25,7 @@ final class AsyncOutputSinkFlushingConfigurationLoader {
         return new AsyncSinkDataFlushingConfiguration(
                 flushingInterval,
                 flushingThreadPoolSize,
-                flushingQueueOverflowLimit,
+                resultOverflowLimit,
                 overflowPolicy,
                 forceFlushOnExit,
                 maxFlushBatchSize

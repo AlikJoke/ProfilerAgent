@@ -3,9 +3,8 @@ package ru.joke.profiler.core.output.handlers.util;
 import ru.joke.profiler.core.output.handlers.OutputDataSink;
 import ru.joke.profiler.core.output.handlers.ProfilerOutputSinkException;
 
-import java.security.SecureRandom;
 import java.util.Objects;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -52,7 +51,7 @@ public final class RecoveryProcessor {
 
     private boolean recover() {
 
-        final Random rand = new SecureRandom();
+        final ThreadLocalRandom rand = ThreadLocalRandom.current();
 
         long nextAttemptTimeout = 10;
         boolean isRecovered;

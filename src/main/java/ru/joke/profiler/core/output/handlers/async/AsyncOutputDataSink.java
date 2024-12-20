@@ -2,10 +2,13 @@ package ru.joke.profiler.core.output.handlers.async;
 
 import ru.joke.profiler.core.output.handlers.OutputDataSink;
 import ru.joke.profiler.core.output.handlers.ProfilerOutputSinkException;
+import ru.joke.profiler.core.output.handlers.util.ConcurrentLinkedBlockingQueue;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -20,7 +23,7 @@ final class AsyncOutputDataSink<S, T> implements OutputDataSink<S> {
 
     private final OutputDataSink<T> delegateSink;
     private final AsyncSinkDataFlushingConfiguration configuration;
-    private final BlockingQueue<Supplier<T>> queue;
+    private final ConcurrentLinkedBlockingQueue<Supplier<T>> queue;
     private final ScheduledExecutorService flushExecutor;
     private final Function<S, Supplier<T>> conversionFunc;
 
@@ -30,7 +33,7 @@ final class AsyncOutputDataSink<S, T> implements OutputDataSink<S> {
             final Function<S, Supplier<T>> conversionFunc) {
         this.delegateSink = delegateSink;
         this.configuration = configuration;
-        this.queue = new LinkedBlockingQueue<>(configuration.overflowLimit());
+        this.queue = new ConcurrentLinkedBlockingQueue<>(configuration.overflowLimit());
         final AtomicInteger threadCounter = new AtomicInteger();
         this.flushExecutor = Executors.newScheduledThreadPool(
                 configuration.flushingThreadPoolSize(),
