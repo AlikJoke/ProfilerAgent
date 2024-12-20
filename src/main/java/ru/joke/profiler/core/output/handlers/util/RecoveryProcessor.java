@@ -56,7 +56,7 @@ public final class RecoveryProcessor {
 
         long nextAttemptTimeout = 10;
         boolean isRecovered;
-        final long tryToRecoverBefore = System.currentTimeMillis() + this.maxRecoveryTimeoutMillis;
+        final long tryToRecoverBefore = Math.max(this.maxRecoveryTimeoutMillis, System.currentTimeMillis() + this.maxRecoveryTimeoutMillis);
 
         do {
             isRecovered = this.recoverTry();

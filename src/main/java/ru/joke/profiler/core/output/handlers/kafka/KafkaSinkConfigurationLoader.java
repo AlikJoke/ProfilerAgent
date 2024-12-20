@@ -48,13 +48,15 @@ final class KafkaSinkConfigurationLoader {
             throw new InvalidConfigurationException(String.format("'%s' property is required to connect to Kafka", ProducerConfig.BOOTSTRAP_SERVERS_CONFIG));
         }
 
+        final boolean validateClusterOnStart = !parseBooleanProperty(properties, STATIC_KAFKA_SINK_PRODUCER_DISABLE_CLUSTER_VALIDATION_ON_START);
         final boolean useCompression = !parseBooleanProperty(properties, STATIC_KAFKA_SINK_PRODUCER_DISABLE_COMPRESSION);
         final long waitOnCloseTimeout = parseLongProperty(properties, STATIC_KAFKA_SINK_PRODUCER_WAIT_ON_CLOSE_MS, DEFAULT_WAIT_ON_CLOSE_TIMEOUT_MS);
 
         return new KafkaSinkConfiguration.ProducerConfiguration(
                 producerProperties,
                 useCompression,
-                waitOnCloseTimeout
+                waitOnCloseTimeout,
+                validateClusterOnStart
         );
     }
 

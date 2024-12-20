@@ -1,17 +1,28 @@
 package ru.joke.profiler.core.output.handlers.util;
 
-import ru.joke.profiler.core.output.handlers.OutputPropertiesInjector;
-
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class JsonObjectPropertiesInjector extends OutputPropertiesInjector<StringBuilder> {
 
     private final Map<String, String> mappingMetadata;
 
+    private static final Map<String, String> defaultProperties = Stream.of(
+            CURRENT_TS_PROPERTY,
+            THREAD_PROPERTY,
+            TRACE_ID_PROPERTY,
+            DEPTH_PROPERTY,
+            METHOD_PROPERTY,
+            METHOD_ENTER_TS_PROPERTY,
+            METHOD_ELAPSED_TIME_PROPERTY
+    ).collect(Collectors.toMap(Function.identity(), Function.identity()));
+
     public JsonObjectPropertiesInjector(final Map<String, String> mappingMetadata) {
-        super(mappingMetadata.keySet());
-        this.mappingMetadata = mappingMetadata;
+        super(mappingMetadata.isEmpty() ? defaultProperties.keySet() : mappingMetadata.keySet());
+        this.mappingMetadata = mappingMetadata.isEmpty() ? defaultProperties : mappingMetadata;
     }
 
     @Override

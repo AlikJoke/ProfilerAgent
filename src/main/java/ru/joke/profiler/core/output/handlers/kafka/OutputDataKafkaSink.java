@@ -12,6 +12,11 @@ final class OutputDataKafkaSink implements OutputDataSink<OutputData> {
     }
 
     @Override
+    public void init() {
+        this.channel.init();
+    }
+
+    @Override
     public void write(final OutputData outputData) {
         this.channel.send(outputData);
     }

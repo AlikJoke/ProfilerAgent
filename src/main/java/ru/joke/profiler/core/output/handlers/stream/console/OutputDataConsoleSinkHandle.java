@@ -1,7 +1,8 @@
 package ru.joke.profiler.core.output.handlers.stream.console;
 
 import ru.joke.profiler.core.output.handlers.OutputData;
-import ru.joke.profiler.core.output.handlers.OutputDataConversionSinkWrapper;
+import ru.joke.profiler.core.output.handlers.util.NoProfilingOutputDataSinkWrapper;
+import ru.joke.profiler.core.output.handlers.util.OutputDataConversionSinkWrapper;
 import ru.joke.profiler.core.output.handlers.OutputDataSink;
 import ru.joke.profiler.core.output.handlers.stream.OutputDataStreamSinkHandle;
 
@@ -47,9 +48,11 @@ public final class OutputDataConsoleSinkHandle extends OutputDataStreamSinkHandl
         final boolean forceFlushOnWrites = parseBooleanProperty(properties, STATIC_CONSOLE_SINK_FORCE_FLUSH_ON_WRITES);
         final int bufferSize = extractBufferSizeProperty(properties, STATIC_CONSOLE_SINK_BUFFER_SIZE);
 
-        return new OutputDataConsoleSink(
+        final OutputDataSink<String> terminalSink = new OutputDataConsoleSink(
                 bufferSize,
                 forceFlushOnWrites
         );
+
+        return new NoProfilingOutputDataSinkWrapper<>(terminalSink);
     }
 }

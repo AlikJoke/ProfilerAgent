@@ -1,7 +1,7 @@
 package ru.joke.profiler.core.output.handlers.jdbc;
 
 import ru.joke.profiler.core.output.handlers.OutputData;
-import ru.joke.profiler.core.output.handlers.OutputPropertiesInjector;
+import ru.joke.profiler.core.output.handlers.util.OutputPropertiesInjector;
 import ru.joke.profiler.core.output.handlers.ProfilerOutputSinkException;
 
 import java.sql.Connection;

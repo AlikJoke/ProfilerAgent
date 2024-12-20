@@ -1,4 +1,7 @@
-package ru.joke.profiler.core.output.handlers;
+package ru.joke.profiler.core.output.handlers.util;
+
+import ru.joke.profiler.core.output.handlers.OutputData;
+import ru.joke.profiler.core.output.handlers.OutputDataSink;
 
 import java.util.List;
 import java.util.function.Function;

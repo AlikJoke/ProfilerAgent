@@ -1,9 +1,10 @@
 package ru.joke.profiler.core.output.handlers.jdbc;
 
 import ru.joke.profiler.core.output.handlers.OutputData;
-import ru.joke.profiler.core.output.handlers.OutputDataConversionSinkWrapper;
+import ru.joke.profiler.core.output.handlers.util.NoProfilingOutputDataSinkWrapper;
+import ru.joke.profiler.core.output.handlers.util.OutputDataConversionSinkWrapper;
 import ru.joke.profiler.core.output.handlers.OutputDataSink;
-import ru.joke.profiler.core.output.handlers.OutputPropertiesInjector;
+import ru.joke.profiler.core.output.handlers.util.OutputPropertiesInjector;
 import ru.joke.profiler.core.output.handlers.async.AsyncOutputDataSinkHandleSupport;
 
 import java.sql.PreparedStatement;
@@ -54,7 +55,8 @@ public final class OutputDataJdbcSinkHandle extends AsyncOutputDataSinkHandleSup
                         tableSchemaValidator
                 );
 
-        return new OutputDataJdbcSink(jdbcStorage, outputDataTablePreparer);
+        final OutputDataSink<OutputData> terminalSink = new OutputDataJdbcSink(jdbcStorage, outputDataTablePreparer);
+        return new NoProfilingOutputDataSinkWrapper<>(terminalSink);
     }
 
     @Override

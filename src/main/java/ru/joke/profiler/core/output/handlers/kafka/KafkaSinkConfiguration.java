@@ -44,14 +44,17 @@ final class KafkaSinkConfiguration {
         private final Map<String, String> producerProperties;
         private final boolean useCompression;
         private final long waitOnCloseTimeoutMs;
+        private final boolean checkClusterOnStart;
 
         ProducerConfiguration(
                 final Map<String, String> producerProperties,
                 final boolean useCompression,
-                final long waitOnCloseTimeoutMs) {
+                final long waitOnCloseTimeoutMs,
+                final boolean checkClusterOnStart) {
             this.producerProperties = producerProperties;
             this.useCompression = useCompression;
             this.waitOnCloseTimeoutMs = waitOnCloseTimeoutMs;
+            this.checkClusterOnStart = checkClusterOnStart;
         }
 
         Map<String, String> producerProperties() {
@@ -66,12 +69,17 @@ final class KafkaSinkConfiguration {
             return waitOnCloseTimeoutMs;
         }
 
+        public boolean checkClusterOnStart() {
+            return checkClusterOnStart;
+        }
+
         @Override
         public String toString() {
             return "ProducerConfiguration{"
                     + "producerProperties=" + producerProperties
                     + ", useCompression=" + useCompression
                     + ", waitOnCloseTimeoutMs=" + waitOnCloseTimeoutMs
+                    + ", checkClusterOnStart=" + checkClusterOnStart
                     + '}';
         }
     }

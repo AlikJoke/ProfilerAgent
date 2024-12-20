@@ -1,5 +1,11 @@
 package ru.joke.profiler.core.configuration;
 
+import ru.joke.profiler.core.output.handlers.jdbc.OutputDataJdbcSinkHandle;
+import ru.joke.profiler.core.output.handlers.jul.OutputDataLoggerSinkHandle;
+import ru.joke.profiler.core.output.handlers.kafka.OutputDataKafkaSinkHandle;
+import ru.joke.profiler.core.output.handlers.stream.console.OutputDataConsoleSinkHandle;
+import ru.joke.profiler.core.output.handlers.stream.file.OutputDataFileSinkHandle;
+
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
@@ -33,13 +39,13 @@ public abstract class ConfigurationProperties {
     public static final String ASYNC_FLUSHING_FORCE_ON_EXIT = createProperty(SINK_PROPERTIES_PREFIX, "async_flushing_force_on_exit");
     public static final String ASYNC_FLUSHING_MAX_BATCH_SIZE = createProperty(SINK_PROPERTIES_PREFIX, "async_flushing_max_batch_size");
 
-    public static final String CONSOLE_SINK_PROPERTIES_PREFIX = createProperty(SINK_PROPERTIES_PREFIX, "console.");
+    public static final String CONSOLE_SINK_PROPERTIES_PREFIX = createProperty(SINK_PROPERTIES_PREFIX, createProperty(OutputDataConsoleSinkHandle.SINK_TYPE, "."));
 
     public static final String STATIC_CONSOLE_SINK_DATA_FORMAT = createProperty(CONSOLE_SINK_PROPERTIES_PREFIX, OUTPUT_DATA_FORMAT);
     public static final String STATIC_CONSOLE_SINK_BUFFER_SIZE = createProperty(CONSOLE_SINK_PROPERTIES_PREFIX, OUTPUT_STREAM_BUFFER_SIZE);
     public static final String STATIC_CONSOLE_SINK_FORCE_FLUSH_ON_WRITES = createProperty(CONSOLE_SINK_PROPERTIES_PREFIX, OUTPUT_STREAM_FORCE_FLUSH_ON_WRITES);
 
-    public static final String FILE_SINK_PROPERTIES_PREFIX = createProperty(SINK_PROPERTIES_PREFIX, "file.");
+    public static final String FILE_SINK_PROPERTIES_PREFIX = createProperty(SINK_PROPERTIES_PREFIX, createProperty(OutputDataFileSinkHandle.SINK_TYPE, "."));
 
     public static final String STATIC_FILE_SINK_DATA_FORMAT = createProperty(FILE_SINK_PROPERTIES_PREFIX, OUTPUT_DATA_FORMAT);
     public static final String STATIC_FILE_SINK_BUFFER_SIZE = createProperty(FILE_SINK_PROPERTIES_PREFIX, OUTPUT_STREAM_BUFFER_SIZE);
@@ -47,13 +53,13 @@ public abstract class ConfigurationProperties {
     public static final String STATIC_FILE_SINK_EXISTING_FILE_POLICY = createProperty(FILE_SINK_PROPERTIES_PREFIX, "existing_output_file_policy");
     public static final String STATIC_FILE_SINK_FORCE_FLUSH_ON_WRITES = createProperty(FILE_SINK_PROPERTIES_PREFIX, OUTPUT_STREAM_FORCE_FLUSH_ON_WRITES);
 
-    public static final String LOGGER_SINK_PROPERTIES_PREFIX = createProperty(SINK_PROPERTIES_PREFIX, "logger.");
+    public static final String LOGGER_SINK_PROPERTIES_PREFIX = createProperty(SINK_PROPERTIES_PREFIX, createProperty(OutputDataLoggerSinkHandle.SINK_TYPE, "."));
 
     public static final String STATIC_LOGGER_SINK_DATA_FORMAT = createProperty(LOGGER_SINK_PROPERTIES_PREFIX, OUTPUT_DATA_FORMAT);
     public static final String STATIC_LOGGER_SINK_CATEGORY = createProperty(LOGGER_SINK_PROPERTIES_PREFIX, "category");
     public static final String STATIC_LOGGER_SINK_LEVEL = createProperty(LOGGER_SINK_PROPERTIES_PREFIX, "level");
 
-    public static final String JDBC_SINK_PROPERTIES_PREFIX = createProperty(SINK_PROPERTIES_PREFIX, "jdbc.");
+    public static final String JDBC_SINK_PROPERTIES_PREFIX = createProperty(SINK_PROPERTIES_PREFIX, createProperty(OutputDataJdbcSinkHandle.SINK_TYPE, "."));
 
     public static final String JDBC_SINK_INSERTION_PROPERTIES_PREFIX = createProperty(JDBC_SINK_PROPERTIES_PREFIX, "insertion.");
 
@@ -77,10 +83,11 @@ public abstract class ConfigurationProperties {
     public static final String STATIC_JDBC_SINK_SKIP_SCHEMA_VALIDATION = createProperty(JDBC_SINK_OUTPUT_TABLE_PROPERTIES_PREFIX, "skip_schema_validation");
     public static final String STATIC_JDBC_SINK_COLUMNS_METADATA = createProperty(JDBC_SINK_OUTPUT_TABLE_PROPERTIES_PREFIX, "columns_metadata");
 
-    public static final String KAFKA_SINK_PROPERTIES_PREFIX = createProperty(SINK_PROPERTIES_PREFIX, "kafka.");
+    public static final String KAFKA_SINK_PROPERTIES_PREFIX = createProperty(SINK_PROPERTIES_PREFIX, createProperty(OutputDataKafkaSinkHandle.SINK_TYPE, "."));
 
     public static final String STATIC_KAFKA_SINK_PRODUCER_PROPERTIES_PREFIX = createProperty(KAFKA_SINK_PROPERTIES_PREFIX, "producer.");
 
+    public static final String STATIC_KAFKA_SINK_PRODUCER_DISABLE_CLUSTER_VALIDATION_ON_START = createProperty(STATIC_KAFKA_SINK_PRODUCER_PROPERTIES_PREFIX, "disable_cluster_validation_on_start");
     public static final String STATIC_KAFKA_SINK_PRODUCER_DISABLE_COMPRESSION = createProperty(STATIC_KAFKA_SINK_PRODUCER_PROPERTIES_PREFIX, "disable_compression");
     public static final String STATIC_KAFKA_SINK_PRODUCER_WAIT_ON_CLOSE_MS = createProperty(STATIC_KAFKA_SINK_PRODUCER_PROPERTIES_PREFIX, "wait_on_close_timeout_ms");
 

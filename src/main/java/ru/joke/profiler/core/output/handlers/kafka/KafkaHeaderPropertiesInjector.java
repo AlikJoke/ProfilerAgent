@@ -1,7 +1,7 @@
 package ru.joke.profiler.core.output.handlers.kafka;
 
 import org.apache.kafka.common.header.Headers;
-import ru.joke.profiler.core.output.handlers.OutputPropertiesInjector;
+import ru.joke.profiler.core.output.handlers.util.OutputPropertiesInjector;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;

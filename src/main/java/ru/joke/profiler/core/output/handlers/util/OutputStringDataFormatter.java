@@ -2,7 +2,6 @@ package ru.joke.profiler.core.output.handlers.util;
 
 import ru.joke.profiler.core.configuration.ProfilingTimeUnit;
 import ru.joke.profiler.core.output.handlers.OutputData;
-import ru.joke.profiler.core.output.handlers.OutputPropertiesInjector;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;

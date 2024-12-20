@@ -12,6 +12,8 @@ import java.util.function.Predicate;
 
 public final class ProfilingTransformer implements ClassFileTransformer {
 
+    private static final ThreadLocal<Boolean> profilingDisabled = new ThreadLocal<>();
+
     private final Predicate<String> transformationFilter;
     private final StaticProfilingConfiguration configuration;
     private final ExecutionTimeRegistrarMetadataSelector registrarMetadataSelector;
@@ -33,7 +35,9 @@ public final class ProfilingTransformer implements ClassFileTransformer {
             final ProtectionDomain protectionDomain,
             final byte[] classFileBuffer) {
 
-        if (!this.transformationFilter.test(className)) {
+        final Boolean isProfilingDisabled = profilingDisabled.get();
+        if (isProfilingDisabled != null && isProfilingDisabled
+                || !this.transformationFilter.test(className)) {
             return null;
         }
 
@@ -43,5 +47,13 @@ public final class ProfilingTransformer implements ClassFileTransformer {
         cr.accept(cv, ClassReader.EXPAND_FRAMES);
 
         return cw.toByteArray();
+    }
+
+    public static void disable() {
+        profilingDisabled.set(true);
+    }
+
+    public static void enable() {
+        profilingDisabled.remove();
     }
 }

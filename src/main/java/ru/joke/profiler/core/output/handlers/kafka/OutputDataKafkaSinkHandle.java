@@ -1,7 +1,8 @@
 package ru.joke.profiler.core.output.handlers.kafka;
 
 import ru.joke.profiler.core.output.handlers.OutputData;
-import ru.joke.profiler.core.output.handlers.OutputDataConversionSinkWrapper;
+import ru.joke.profiler.core.output.handlers.util.NoProfilingOutputDataSinkWrapper;
+import ru.joke.profiler.core.output.handlers.util.OutputDataConversionSinkWrapper;
 import ru.joke.profiler.core.output.handlers.OutputDataSink;
 import ru.joke.profiler.core.output.handlers.async.AsyncOutputDataSinkHandleSupport;
 import ru.joke.profiler.core.output.handlers.util.JsonObjectPropertiesInjector;
@@ -40,7 +41,8 @@ public final class OutputDataKafkaSinkHandle extends AsyncOutputDataSinkHandleSu
 
         final KafkaMessageChannel kafkaMessageChannel = createKafkaChannel(configuration);
 
-        return new OutputDataKafkaSink(kafkaMessageChannel);
+        final OutputDataSink<OutputData> terminalSink = new OutputDataKafkaSink(kafkaMessageChannel);
+        return new NoProfilingOutputDataSinkWrapper<>(terminalSink);
     }
 
     @Override
@@ -66,10 +68,13 @@ public final class OutputDataKafkaSinkHandle extends AsyncOutputDataSinkHandleSu
                 bodyConversionFunc
         );
 
+        final KafkaClusterValidator clusterValidator = new KafkaClusterValidator();
+
         return new KafkaMessageChannel(
                 configuration,
                 producerSessionFactory,
-                messageFactory
+                messageFactory,
+                clusterValidator
         );
     }
 

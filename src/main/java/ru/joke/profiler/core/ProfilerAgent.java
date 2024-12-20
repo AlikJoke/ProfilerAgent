@@ -26,12 +26,11 @@ public final class ProfilerAgent {
 
         initializeRegistrar(staticConfiguration);
         final ExecutionTimeRegistrarMetadataSelector registrarMetadataSelector = new ExecutionTimeRegistrarMetadataSelector(ExecutionTimeRegistrar.class);
-
         final Predicate<String> transformationFilter = new TransformationFilter(staticConfiguration, instrumentation);
 
-        instrumentation.addTransformer(new ProfilingTransformer(transformationFilter, staticConfiguration, registrarMetadataSelector));
-
         handleDynamicConfiguration(configurationLoader, staticConfiguration);
+
+        instrumentation.addTransformer(new ProfilingTransformer(transformationFilter, staticConfiguration, registrarMetadataSelector));
     }
 
     private static void initializeRegistrar(final StaticProfilingConfiguration staticConfiguration) throws Exception {
@@ -42,16 +41,29 @@ public final class ProfilerAgent {
         Runtime.getRuntime()
                 .addShutdownHook(new Thread(sink::close));
 
-        final ExecutionTimeRegistrarInitializer registrarInitializer = new ExecutionTimeRegistrarInitializer(staticConfiguration, dynamicConfigHolder, sink);
+        final ExecutionTimeRegistrarInitializer registrarInitializer = new ExecutionTimeRegistrarInitializer(
+                staticConfiguration,
+                dynamicConfigHolder,
+                sink
+        );
         registrarInitializer.init();
     }
 
     private static OutputDataSink<OutputData> createOutputSink(final StaticProfilingConfiguration configuration) throws Exception {
         final OutputDataSinkFactory sinkFactory = new OutputDataSinkFactory();
         final OutputDataSink<OutputData> sink = sinkFactory.create(configuration.getSinkType(), configuration.getSinkProperties());
-        sink.init();
+        tryInitSink(sink);
 
         return sink;
+    }
+
+    private static void tryInitSink(final OutputDataSink<OutputData> sink) {
+        try {
+            sink.init();
+        } catch (RuntimeException ex) {
+            sink.close();
+            throw ex;
+        }
     }
 
     private static void handleDynamicConfiguration(

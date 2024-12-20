@@ -9,6 +9,7 @@ import ru.joke.profiler.core.output.handlers.OutputDataSink;
 import ru.joke.profiler.core.output.handlers.ProfilerOutputSinkException;
 import ru.joke.profiler.core.output.handlers.util.RecoveryProcessor;
 
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -27,6 +28,7 @@ final class KafkaMessageChannel implements AutoCloseable {
     private final KafkaProducerSessionFactory producerSessionFactory;
     private final KafkaSinkConfiguration configuration;
     private final KafkaMessageFactory messageFactory;
+    private final KafkaClusterValidator clusterValidator;
 
     private final AtomicBoolean inRecoveryState = new AtomicBoolean(false);
 
@@ -37,8 +39,10 @@ final class KafkaMessageChannel implements AutoCloseable {
     KafkaMessageChannel(
             final KafkaSinkConfiguration configuration,
             final KafkaProducerSessionFactory producerSessionFactory,
-            final KafkaMessageFactory messageFactory) {
+            final KafkaMessageFactory messageFactory,
+            final KafkaClusterValidator clusterValidator) {
         this.producerSessionFactory = producerSessionFactory;
+        this.clusterValidator = clusterValidator;
         this.configuration = configuration;
         this.messageFactory = messageFactory;
         this.producerSession = producerSessionFactory.create(configuration.producerConfiguration());
@@ -50,7 +54,13 @@ final class KafkaMessageChannel implements AutoCloseable {
 
             return thread;
         });
-
+    }
+    
+    void init() {
+        final boolean checkClusterOnStart = this.configuration.producerConfiguration().checkClusterOnStart();
+        if (checkClusterOnStart) {
+            validateClusterAvailable();
+        }
     }
 
     void send(final OutputData data) {
@@ -64,9 +74,14 @@ final class KafkaMessageChannel implements AutoCloseable {
         while ((producerSession = this.producerSession) != null) {
 
             try {
-                producerSession.producer().send(message, (recordMetadata, e) -> {
+                final KafkaProducerSession session = producerSession;
+                session.producer().send(message, (recordMetadata, e) -> {
                     if (e != null) {
                         logger.log(Level.SEVERE, "Unable to send message", e);
+                    }
+
+                    if (e instanceof RetriableException || e instanceof BrokerNotAvailableException) {
+                        tryToRecoverProducerSessionIfNeed(e, session);
                     }
                 });
 
@@ -99,6 +114,13 @@ final class KafkaMessageChannel implements AutoCloseable {
 
         this.recoveryExecutor.shutdownNow();
         this.producerSession.close();
+    }
+    
+    private void validateClusterAvailable() {
+        final Map<String, String> producerProperties = this.configuration.producerConfiguration().producerProperties();
+        if (!this.clusterValidator.isValid(producerProperties)) {
+            throw new ProfilerOutputSinkException("Kafka cluster is unavailable");
+        }
     }
 
     private boolean validateChannelState() {
@@ -135,52 +157,45 @@ final class KafkaMessageChannel implements AutoCloseable {
 
         final boolean goToRecoveryState = this.inRecoveryState.compareAndSet(false, true);
         switch (policy) {
-                case WAIT:
-                    recoverProducerSession(ex, session);
-                    return !this.isClosed;
-                case ERROR:
-                    if (goToRecoveryState) {
-                        this.recoveryFuture = this.recoveryExecutor.submit(() -> recoverProducerSession(ex, session));
-                    }
+            case WAIT:
+                recoverProducerSession(ex, session);
+                return !this.isClosed;
+            case ERROR:
+                if (goToRecoveryState) {
+                    this.recoveryFuture = this.recoveryExecutor.submit(() -> recoverProducerSession(ex, session));
+                }
 
-                    throw new ProfilerOutputSinkException("Unable to send output data due to connection recovery", ex);
-                case SKIP:
-                    if (goToRecoveryState) {
-                        this.recoveryFuture = this.recoveryExecutor.submit(() -> recoverProducerSession(ex, session));
-                    }
+                throw new ProfilerOutputSinkException("Unable to send output data due to connection recovery", ex);
+            case SKIP:
+                if (goToRecoveryState) {
+                    this.recoveryFuture = this.recoveryExecutor.submit(() -> recoverProducerSession(ex, session));
+                }
 
-                    return false;
-            }
+                return false;
+        }
 
-            return false;
+        return false;
     }
 
-    private void recoverProducerSession(final Exception ex, final KafkaProducerSession session) {
+    private synchronized void recoverProducerSession(final Exception ex, final KafkaProducerSession session) {
 
         try {
-            if (this.isClosed) {
-                return;
-            }
-
             // If it doesn't match, it means another thread has already restored the connection => it's safe to attempt message sending
-            if (this.producerSession != session) {
+            if (this.isClosed || this.producerSession != session) {
                 return;
             }
 
             final RecoveryProcessor recoveryProcessor = new RecoveryProcessor(
                     session::close,
-                    () -> this.producerSession = this.producerSessionFactory.create(this.configuration.producerConfiguration()),
+                    () -> {
+                        validateClusterAvailable();
+                        this.producerSession = this.producerSessionFactory.create(this.configuration.producerConfiguration());
+                    },
                     this.configuration.recoveryConfiguration().maxRetryRecoveryIntervalMs(),
                     this.configuration.recoveryConfiguration().recoveryTimeoutMs()
             );
 
-            try {
-                recoveryProcessor.recover(ex);
-            } catch (ProfilerOutputSinkException e) {
-                throw e;
-            } catch (RuntimeException e) {
-                throw new ProfilerOutputSinkException(e);
-            }
+            recoveryProcessor.recover(ex);
         } finally {
             this.inRecoveryState.compareAndSet(true, false);
         }

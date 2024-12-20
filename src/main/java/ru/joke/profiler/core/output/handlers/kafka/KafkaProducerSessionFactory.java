@@ -14,8 +14,8 @@ final class KafkaProducerSessionFactory {
     private static final int DEFAULT_LINGER_MS = 200;
     private static final int DEFAULT_BATCH_SIZE = 64 * 1024;
     private static final int DEFAULT_MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION = 100;
-    private static final int DEFAULT_DELIVERY_TIMEOUT_MS = 120_000;
-    private static final int DEFAULT_REQUEST_TIMEOUT_MS = 60_000;
+    private static final int DEFAULT_DELIVERY_TIMEOUT_MS = 20_000;
+    private static final int DEFAULT_REQUEST_TIMEOUT_MS = 10_000;
 
     private static final String DEFAULT_COMPRESSION_TYPE = "lz4";
     private static final String DEFAULT_ACKS = "1";

@@ -81,6 +81,41 @@
                     </exclusions>
                 </dependency>
             </dependencies>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-shade-plugin</artifactId>
+                            <executions>
+                                <execution>
+                                    <configuration>
+                                        <relocations>
+                                            <relocation>
+                                                <pattern>org.</pattern>
+                                                <shadedPattern>ru.joke_shaded.org.</shadedPattern>
+                                            </relocation>
+                                            <relocation>
+                                                <pattern>net.</pattern>
+                                                <shadedPattern>ru.joke_shaded.net.</shadedPattern>
+                                            </relocation>
+                                            <relocation>
+                                                <pattern>common.</pattern>
+                                                <shadedPattern>ru.joke_shaded.common.</shadedPattern>
+                                            </relocation>
+                                            <relocation>
+                                                <pattern>kafka.</pattern>
+                                                <shadedPattern>ru.joke_shaded.kafka.</shadedPattern>
+                                            </relocation>
+                                        </relocations>
+                                        <minimizeJar>false</minimizeJar>
+                                    </configuration>
+                                </execution>
+                            </executions>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
         </profile>
     </profiles>
     <build>
@@ -200,20 +235,8 @@
                             <configuration>
                                 <relocations>
                                     <relocation>
-                                        <pattern>org</pattern>
-                                        <shadedPattern>ru.joke_shaded.org</shadedPattern>
-                                    </relocation>
-                                    <relocation>
-                                        <pattern>net</pattern>
-                                        <shadedPattern>ru.joke_shaded.net</shadedPattern>
-                                    </relocation>
-                                    <relocation>
-                                        <pattern>common</pattern>
-                                        <shadedPattern>ru.joke_shaded.common</shadedPattern>
-                                    </relocation>
-                                    <relocation>
-                                        <pattern>kafka</pattern>
-                                        <shadedPattern>ru.joke_shaded.kafka</shadedPattern>
+                                        <pattern>org.objectweb</pattern>
+                                        <shadedPattern>ru.joke_shaded.org.objectweb</shadedPattern>
                                     </relocation>
                                 </relocations>
                                 <minimizeJar>true</minimizeJar>

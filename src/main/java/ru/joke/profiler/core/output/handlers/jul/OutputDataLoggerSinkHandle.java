@@ -2,6 +2,8 @@ package ru.joke.profiler.core.output.handlers.jul;
 
 import ru.joke.profiler.core.output.handlers.*;
 import ru.joke.profiler.core.output.handlers.async.AsyncOutputDataSinkHandleSupport;
+import ru.joke.profiler.core.output.handlers.util.NoProfilingOutputDataSinkWrapper;
+import ru.joke.profiler.core.output.handlers.util.OutputDataConversionSinkWrapper;
 import ru.joke.profiler.core.output.handlers.util.OutputStringDataFormatter;
 import ru.joke.profiler.core.output.handlers.util.OutputStringDataFormatterFactory;
 
@@ -34,10 +36,12 @@ public final class OutputDataLoggerSinkHandle extends AsyncOutputDataSinkHandleS
     protected OutputDataSink<String> createTerminalOutputSink(
             final Map<String, String> properties,
             final Map<String, Object> context) {
-        return new OutputDataLoggerSink(
+        final OutputDataSink<String> terminalSink = new OutputDataLoggerSink(
                 findRequiredProperty(properties, STATIC_LOGGER_SINK_CATEGORY),
                 findRequiredProperty(properties, STATIC_LOGGER_SINK_LEVEL)
         );
+
+        return new NoProfilingOutputDataSinkWrapper<>(terminalSink);
     }
 
     @Override

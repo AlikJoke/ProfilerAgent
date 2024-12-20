@@ -1,7 +1,8 @@
 package ru.joke.profiler.core.output.handlers.stream.file;
 
 import ru.joke.profiler.core.output.handlers.OutputData;
-import ru.joke.profiler.core.output.handlers.OutputDataConversionSinkWrapper;
+import ru.joke.profiler.core.output.handlers.util.NoProfilingOutputDataSinkWrapper;
+import ru.joke.profiler.core.output.handlers.util.OutputDataConversionSinkWrapper;
 import ru.joke.profiler.core.output.handlers.OutputDataSink;
 import ru.joke.profiler.core.output.handlers.stream.OutputDataStreamSinkHandle;
 
@@ -51,11 +52,13 @@ public final class OutputDataFileSinkHandle extends OutputDataStreamSinkHandle {
         final ExistingFilePolicy existingFilePolicy = ExistingFilePolicy.parse(existingFilePolicyStr);
 
         final boolean forceFlushOnWrites = parseBooleanProperty(properties, STATIC_FILE_SINK_FORCE_FLUSH_ON_WRITES);
-        return new OutputDataFileSink(
+        final OutputDataSink<String> terminalSink = new OutputDataFileSink(
                 bufferSize,
                 existingFilePolicy,
                 filePath,
                 forceFlushOnWrites
         );
+
+        return new NoProfilingOutputDataSinkWrapper<>(terminalSink);
     }
 }
