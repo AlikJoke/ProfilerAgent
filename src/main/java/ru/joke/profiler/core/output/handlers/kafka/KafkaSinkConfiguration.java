@@ -7,12 +7,12 @@ final class KafkaSinkConfiguration {
 
     private final ProducerConfiguration producerConfiguration;
     private final OutputMessageConfiguration outputMessageConfiguration;
-    private final RecoveryConfiguration recoveryConfiguration;
+    private final ConnectionRecoveryConfiguration recoveryConfiguration;
 
     KafkaSinkConfiguration(
             final ProducerConfiguration producerConfiguration,
             final OutputMessageConfiguration outputMessageConfiguration,
-            final RecoveryConfiguration recoveryConfiguration) {
+            final ConnectionRecoveryConfiguration recoveryConfiguration) {
         this.producerConfiguration = producerConfiguration;
         this.outputMessageConfiguration = outputMessageConfiguration;
         this.recoveryConfiguration = recoveryConfiguration;
@@ -26,7 +26,7 @@ final class KafkaSinkConfiguration {
         return outputMessageConfiguration;
     }
 
-    RecoveryConfiguration recoveryConfiguration() {
+    ConnectionRecoveryConfiguration recoveryConfiguration() {
         return recoveryConfiguration;
     }
 
@@ -129,13 +129,13 @@ final class KafkaSinkConfiguration {
         }
     }
 
-    static class RecoveryConfiguration {
+    static class ConnectionRecoveryConfiguration {
 
         private final long recoveryTimeoutMs;
         private final long maxRetryRecoveryIntervalMs;
         private final ProcessingInRecoveryStatePolicy processingInRecoveryStatePolicy;
 
-        RecoveryConfiguration(
+        ConnectionRecoveryConfiguration(
                 final long recoveryTimeoutMs,
                 final long maxRetryRecoveryIntervalMs,
                 final ProcessingInRecoveryStatePolicy processingInRecoveryStatePolicy) {

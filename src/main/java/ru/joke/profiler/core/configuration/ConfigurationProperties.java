@@ -77,6 +77,27 @@ public abstract class ConfigurationProperties {
     public static final String STATIC_JDBC_SINK_SKIP_SCHEMA_VALIDATION = createProperty(JDBC_SINK_OUTPUT_TABLE_PROPERTIES_PREFIX, "skip_schema_validation");
     public static final String STATIC_JDBC_SINK_COLUMNS_METADATA = createProperty(JDBC_SINK_OUTPUT_TABLE_PROPERTIES_PREFIX, "columns_metadata");
 
+    public static final String KAFKA_SINK_PROPERTIES_PREFIX = createProperty(SINK_PROPERTIES_PREFIX, "kafka.");
+
+    public static final String STATIC_KAFKA_SINK_PRODUCER_PROPERTIES_PREFIX = createProperty(KAFKA_SINK_PROPERTIES_PREFIX, "producer.");
+
+    public static final String STATIC_KAFKA_SINK_PRODUCER_DISABLE_COMPRESSION = createProperty(STATIC_KAFKA_SINK_PRODUCER_PROPERTIES_PREFIX, "disable_compression");
+    public static final String STATIC_KAFKA_SINK_PRODUCER_WAIT_ON_CLOSE_MS = createProperty(STATIC_KAFKA_SINK_PRODUCER_PROPERTIES_PREFIX, "wait_on_close_timeout_ms");
+
+    public static final String STATIC_KAFKA_SINK_OUTPUT_MESSAGE_CONFIGURATION_PREFIX = createProperty(KAFKA_SINK_PROPERTIES_PREFIX, "output-message.");
+
+    public static final String STATIC_KAFKA_SINK_MESSAGE_OUTPUT_QUEUE = createProperty(STATIC_KAFKA_SINK_OUTPUT_MESSAGE_CONFIGURATION_PREFIX, "target_queue");
+    public static final String STATIC_KAFKA_SINK_MESSAGE_TYPE = createProperty(STATIC_KAFKA_SINK_OUTPUT_MESSAGE_CONFIGURATION_PREFIX, "message_type");
+    public static final String STATIC_KAFKA_SINK_MESSAGE_TYPE_HEADER = createProperty(STATIC_KAFKA_SINK_OUTPUT_MESSAGE_CONFIGURATION_PREFIX, "message_type_header");
+    public static final String STATIC_KAFKA_SINK_MESSAGE_PROPERTIES_MAPPING = createProperty(STATIC_KAFKA_SINK_OUTPUT_MESSAGE_CONFIGURATION_PREFIX, "properties_mapping");
+    public static final String STATIC_KAFKA_SINK_MESSAGE_HEADERS_MAPPING = createProperty(STATIC_KAFKA_SINK_OUTPUT_MESSAGE_CONFIGURATION_PREFIX, "headers_mapping");
+
+    public static final String STATIC_KAFKA_SINK_CONN_RECOVERY_CONFIGURATION_PREFIX = createProperty(KAFKA_SINK_PROPERTIES_PREFIX, "connection-recovery.");
+
+    public static final String STATIC_KAFKA_SINK_RECOVERY_TIMEOUT_MS = createProperty(STATIC_KAFKA_SINK_CONN_RECOVERY_CONFIGURATION_PREFIX, "timeout_ms");
+    public static final String STATIC_KAFKA_SINK_RECOVERY_MAX_RETRY_INTERVAL_MS = createProperty(STATIC_KAFKA_SINK_CONN_RECOVERY_CONFIGURATION_PREFIX, "max_retry_interval_ms");
+    public static final String STATIC_KAFKA_SINK_RECOVERY_PROCESSING_POLICY = createProperty(STATIC_KAFKA_SINK_CONN_RECOVERY_CONFIGURATION_PREFIX, "processing_policy");
+
     static final String STATIC_MIN_EXECUTION_THRESHOLD = createStaticProperty(ABS_MIN_EXECUTION_THRESHOLD);
     static final String STATIC_MIN_EXECUTION_THRESHOLD_TU = createStaticProperty(ABS_MIN_EXECUTION_THRESHOLD_TU);
     static final String STATIC_INCLUDED_RESOURCES = createStaticProperty("included_resources");

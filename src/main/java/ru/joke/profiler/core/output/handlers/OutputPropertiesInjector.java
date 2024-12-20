@@ -20,6 +20,16 @@ public abstract class OutputPropertiesInjector<T> {
     public static final String HOST_PROPERTY = "host";
     public static final String IP_PROPERTY = "ip";
 
+    private static final List<String> defaultProperties = Arrays.asList(
+            CURRENT_TS_PROPERTY,
+            THREAD_PROPERTY,
+            TRACE_ID_PROPERTY,
+            DEPTH_PROPERTY,
+            METHOD_PROPERTY,
+            METHOD_ENTER_TS_PROPERTY,
+            METHOD_ELAPSED_TIME_PROPERTY
+    );
+
     protected static final String PROFILER_LABEL = "joke-profiler";
     private static final String UNKNOWN_FALLBACK = "unknown";
 
@@ -29,7 +39,7 @@ public abstract class OutputPropertiesInjector<T> {
     protected final Map<String, String> systemProperties;
 
     protected OutputPropertiesInjector(final Set<String> properties) {
-        this.properties = Collections.unmodifiableSet(properties);
+        this.properties = properties.isEmpty() ? new HashSet<>(defaultProperties) : Collections.unmodifiableSet(properties);
         this.host = properties.contains(HOST_PROPERTY) ? findCurrentHost() : null;
         this.ip = properties.contains(IP_PROPERTY) ? findCurrentHostAddress() : null;
         this.systemProperties = new HashMap<>();

@@ -1,10 +1,20 @@
 package ru.joke.profiler.core.output.handlers.kafka;
 
-public enum ProcessingInRecoveryStatePolicy {
+enum ProcessingInRecoveryStatePolicy {
 
     SKIP,
 
     WAIT,
 
-    ERROR
+    ERROR;
+
+    static ProcessingInRecoveryStatePolicy parse(final String alias) {
+        for (final ProcessingInRecoveryStatePolicy policy : values()) {
+            if (policy.name().equalsIgnoreCase(alias)) {
+                return policy;
+            }
+        }
+
+        return SKIP;
+    }
 }
