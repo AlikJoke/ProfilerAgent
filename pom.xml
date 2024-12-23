@@ -17,6 +17,7 @@
 
         <asm.version>9.7.1</asm.version>
         <kafka.version>3.9.0</kafka.version>
+        <http2.client.version>5.4.1</http2.client.version>
     </properties>
 
     <scm>
@@ -30,13 +31,19 @@
         <dependency>
             <groupId>org.ow2.asm</groupId>
             <artifactId>asm-commons</artifactId>
-            <version>9.7.1</version>
+            <version>${asm.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.ow2.asm</groupId>
                     <artifactId>asm-tree</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+            <version>${http2.client.version}</version>
         </dependency>
 
     </dependencies>
@@ -131,8 +138,9 @@
                                 <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                             </manifest>
                             <manifestEntries>
-                                <Agent-Class>ru.joke.profiler.core.ProfilerAgent</Agent-Class>
-                                <Premain-Class>ru.joke.profiler.core.ProfilerAgent</Premain-Class>
+                                <Multi-Release>true</Multi-Release>
+                                <Agent-Class>ru.joke.profiler.ProfilerAgent</Agent-Class>
+                                <Premain-Class>ru.joke.profiler.ProfilerAgent</Premain-Class>
                                 <Can-Retransform-Classes>true</Can-Retransform-Classes>
                                 <Implementation-Title>${project.name}</Implementation-Title>
                                 <Implementation-Version>${project.version}</Implementation-Version>
@@ -235,8 +243,8 @@
                             <configuration>
                                 <relocations>
                                     <relocation>
-                                        <pattern>org.objectweb</pattern>
-                                        <shadedPattern>ru.joke_shaded.org.objectweb</shadedPattern>
+                                        <pattern>org.</pattern>
+                                        <shadedPattern>ru.joke_shaded.org.</shadedPattern>
                                     </relocation>
                                 </relocations>
                                 <minimizeJar>true</minimizeJar>
