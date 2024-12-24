@@ -74,7 +74,7 @@ final class Http2ClientFactory {
                                                 .setInitialWindowSize(requestConfiguration.initialWindowSize())
                                                 .setMaxConcurrentStreams(requestConfiguration.maxConcurrentStreams())
                                                 .setPushEnabled(false)
-                                                .setCompressionEnabled(!requestConfiguration.compressionDisabled())
+                                                .setCompressionEnabled(requestConfiguration.compressionEnabled())
                                             .build()
                             )
                             .setIOReactorConfig(IOReactorConfig.custom()
@@ -93,10 +93,10 @@ final class Http2ClientFactory {
                                     .build())
                             .setDefaultConnectionConfig(
                                     ConnectionConfig.custom()
-                                                        .setValidateAfterInactivity(Timeout.ofMilliseconds(connectionConfiguration.validateAfterInactivityIntervalMs()))
-                                                        .setSocketTimeout(Timeout.ofMilliseconds(connectionConfiguration.socketTimeoutMs()))
-                                                        .setConnectTimeout(Timeout.ofMilliseconds(connectionConfiguration.connectTimeoutMs()))
-                                                        .setTimeToLive(Timeout.ofMilliseconds(connectionConfiguration.connectionTimeToLiveMs()))
+                                                        .setValidateAfterInactivity(createTimeout(connectionConfiguration.validateAfterInactivityIntervalMs()))
+                                                        .setSocketTimeout(createTimeout(connectionConfiguration.socketTimeoutMs()))
+                                                        .setConnectTimeout(createTimeout(connectionConfiguration.connectTimeoutMs()))
+                                                        .setTimeToLive(createTimeout(connectionConfiguration.connectionTimeToLiveMs()))
                                                     .build()
                             )
                             .setDefaultRequestConfig(
@@ -105,17 +105,21 @@ final class Http2ClientFactory {
                                                     .setCircularRedirectsAllowed(requestConfiguration.circularRedirectsAllowed())
                                                     .setConnectionKeepAlive(TimeValue.ofMilliseconds(requestConfiguration.keepAliveMs()))
                                                     .setConnectionRequestTimeout(Timeout.ofMilliseconds(requestConfiguration.connectionManagerRequestTimeoutMs()))
-                                                    .setContentCompressionEnabled(!requestConfiguration.disableContentCompression())
+                                                    .setContentCompressionEnabled(requestConfiguration.compressionEnabled())
                                                     .setExpectContinueEnabled(requestConfiguration.expectContinueEnabled())
                                                     .setMaxRedirects(requestConfiguration.maxRedirects())
                                                     .setProtocolUpgradeEnabled(!requestConfiguration.disableProtocolUpgrade())
-                                                    .setRedirectsEnabled(!requestConfiguration.disableRedirects())
+                                                    .setRedirectsEnabled(requestConfiguration.maxRedirects() > 0)
                                                     .setCookieSpec(StandardCookieSpec.STRICT)
                                                 .build()
                             )
                 .build();
 
         return new Http2Client(client, configuration);
+    }
+
+    private Timeout createTimeout(final long timeoutMs) {
+        return timeoutMs == -1 ? null : Timeout.ofMilliseconds(timeoutMs);
     }
 
     private TlsStrategy buildTlsStrategy(final Http2SinkConfiguration.Http2ClientConfiguration clientConfiguration) {
@@ -152,7 +156,7 @@ final class Http2ClientFactory {
                 return new SystemDefaultCredentialsProvider();
             case BASIC:
                 final Http2SinkConfiguration.Http2ClientConfiguration.AuthenticationConfiguration.Scope authScope = configuration.scope();
-                final HttpHost host = new HttpHost(authScope.host(), authScope.port());
+                final HttpHost host = new HttpHost(authScope.scheme(), authScope.host(), authScope.port());
                 final AuthScope scope = new AuthScope(host, authScope.realm(), null);
                 final Http2SinkConfiguration.Http2ClientConfiguration.AuthenticationConfiguration.BasicCredentials credentials = (Http2SinkConfiguration.Http2ClientConfiguration.AuthenticationConfiguration.BasicCredentials) configuration.credentials();
                 return CredentialsProviderBuilder

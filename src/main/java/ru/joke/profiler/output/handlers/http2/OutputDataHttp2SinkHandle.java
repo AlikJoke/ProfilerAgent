@@ -11,11 +11,11 @@ import java.util.function.Supplier;
 
 public final class OutputDataHttp2SinkHandle extends AsyncOutputDataSinkHandleSupport<OutputData> {
 
-    public static final String TYPE = "http2";
+    public static final String SINK_TYPE = "http2";
 
     @Override
     public String type() {
-        return TYPE;
+        return SINK_TYPE;
     }
 
     @Override

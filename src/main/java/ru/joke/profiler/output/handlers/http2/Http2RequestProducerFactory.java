@@ -19,7 +19,7 @@ final class Http2RequestProducerFactory {
     Http2RequestProducerFactory(final Http2SinkConfiguration.OutputMessageConfiguration configuration) {
         this.outputEndpoint = configuration.outputEndpoint();
         this.contentType = ContentType.create(configuration.contentType(), StandardCharsets.UTF_8);
-        this.targetHost = new HttpHost(configuration.outputHost(), configuration.outputPort());
+        this.targetHost = new HttpHost(configuration.outputScheme(), configuration.outputHost(), configuration.outputPort());
     }
 
     AsyncRequestProducer create(final Http2Message message) {

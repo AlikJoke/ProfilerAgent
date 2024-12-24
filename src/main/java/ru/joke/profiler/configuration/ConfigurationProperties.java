@@ -1,5 +1,6 @@
 package ru.joke.profiler.configuration;
 
+import ru.joke.profiler.output.handlers.http2.OutputDataHttp2SinkHandle;
 import ru.joke.profiler.output.handlers.jdbc.OutputDataJdbcSinkHandle;
 import ru.joke.profiler.output.handlers.jul.OutputDataLoggerSinkHandle;
 import ru.joke.profiler.output.handlers.kafka.OutputDataKafkaSinkHandle;
@@ -104,6 +105,88 @@ public abstract class ConfigurationProperties {
     public static final String STATIC_KAFKA_SINK_RECOVERY_TIMEOUT_MS = createProperty(STATIC_KAFKA_SINK_CONN_RECOVERY_CONFIGURATION_PREFIX, "timeout_ms");
     public static final String STATIC_KAFKA_SINK_RECOVERY_MAX_RETRY_INTERVAL_MS = createProperty(STATIC_KAFKA_SINK_CONN_RECOVERY_CONFIGURATION_PREFIX, "max_retry_interval_ms");
     public static final String STATIC_KAFKA_SINK_RECOVERY_PROCESSING_POLICY = createProperty(STATIC_KAFKA_SINK_CONN_RECOVERY_CONFIGURATION_PREFIX, "processing_policy");
+
+    public static final String HTTP2_SINK_PROPERTIES_PREFIX = createProperty(SINK_PROPERTIES_PREFIX, createProperty(OutputDataHttp2SinkHandle.SINK_TYPE, "."));
+
+    public static final String STATIC_HTTP2_SINK_OUTPUT_MESSAGE_CONFIGURATION_PREFIX = createProperty(HTTP2_SINK_PROPERTIES_PREFIX, "output-message.");
+
+    public static final String STATIC_HTTP2_SINK_MESSAGE_OUTPUT_ENDPOINT = createProperty(STATIC_KAFKA_SINK_OUTPUT_MESSAGE_CONFIGURATION_PREFIX, "target_endpoint");
+    public static final String STATIC_HTTP2_SINK_MESSAGE_OUTPUT_HOST = createProperty(STATIC_KAFKA_SINK_OUTPUT_MESSAGE_CONFIGURATION_PREFIX, "target_host");
+    public static final String STATIC_HTTP2_SINK_MESSAGE_OUTPUT_PORT = createProperty(STATIC_KAFKA_SINK_OUTPUT_MESSAGE_CONFIGURATION_PREFIX, "target_port");
+    public static final String STATIC_HTTP2_SINK_MESSAGE_OUTPUT_SCHEME = createProperty(STATIC_KAFKA_SINK_OUTPUT_MESSAGE_CONFIGURATION_PREFIX, "target_scheme");
+    public static final String STATIC_HTTP2_SINK_CONTENT_TYPE = createProperty(STATIC_KAFKA_SINK_OUTPUT_MESSAGE_CONFIGURATION_PREFIX, "content_type");
+    public static final String STATIC_HTTP2_SINK_MESSAGE_PROPERTIES_MAPPING = createProperty(STATIC_HTTP2_SINK_OUTPUT_MESSAGE_CONFIGURATION_PREFIX, "properties_mapping");
+    public static final String STATIC_HTTP2_SINK_MESSAGE_HEADERS_MAPPING = createProperty(STATIC_HTTP2_SINK_OUTPUT_MESSAGE_CONFIGURATION_PREFIX, "headers_mapping");
+
+    public static final String STATIC_HTTP2_SINK_PROCESSING_CONFIGURATION_PREFIX = createProperty(HTTP2_SINK_PROPERTIES_PREFIX, "processing.");
+
+    public static final String STATIC_HTTP2_SINK_DISABLE_ASYNC_SENDING = createProperty(STATIC_HTTP2_SINK_PROCESSING_CONFIGURATION_PREFIX, "disable_async");
+    public static final String STATIC_HTTP2_SINK_ON_SENDING_ERROR_POLICY = createProperty(STATIC_HTTP2_SINK_PROCESSING_CONFIGURATION_PREFIX, "on_error_policy");
+    public static final String STATIC_HTTP2_SINK_MAX_RETRIES_ON_ERROR = createProperty(STATIC_HTTP2_SINK_PROCESSING_CONFIGURATION_PREFIX, "max_retries");
+    public static final String STATIC_HTTP2_SINK_SYNC_SENDING_WAIT_MS = createProperty(STATIC_HTTP2_SINK_PROCESSING_CONFIGURATION_PREFIX, "sync_wait_ms");
+
+    public static final String STATIC_HTTP2_SINK_CLIENT_CONFIGURATION_PREFIX = createProperty(HTTP2_SINK_PROPERTIES_PREFIX, "client.");
+
+    public static final String STATIC_HTTP2_SINK_CLIENT_GRACEFUL_SHUTDOWN = createProperty(STATIC_HTTP2_SINK_CLIENT_CONFIGURATION_PREFIX, "graceful_shutdown");
+
+    public static final String STATIC_HTTP2_SINK_CLIENT_CONNECTION_CONFIGURATION_PREFIX = createProperty(STATIC_HTTP2_SINK_CLIENT_CONFIGURATION_PREFIX, "connection.");
+
+    public static final String STATIC_HTTP2_SINK_IDLE_TIMEOUT_MS = createProperty(STATIC_HTTP2_SINK_CLIENT_CONNECTION_CONFIGURATION_PREFIX, "idle_timeout_ms");
+    public static final String STATIC_HTTP2_SINK_VALIDATE_AFTER_INACTIVITY_MS = createProperty(STATIC_HTTP2_SINK_CLIENT_CONNECTION_CONFIGURATION_PREFIX, "validate_after_inactivity_interval_ms");
+    public static final String STATIC_HTTP2_SINK_CONN_SOCKET_TIMEOUT_MS = createProperty(STATIC_HTTP2_SINK_CLIENT_CONNECTION_CONFIGURATION_PREFIX, "socket_timeout_ms");
+    public static final String STATIC_HTTP2_SINK_CONN_CONNECT_TIMEOUT_MS = createProperty(STATIC_HTTP2_SINK_CLIENT_CONNECTION_CONFIGURATION_PREFIX, "connect_timeout_ms");
+    public static final String STATIC_HTTP2_SINK_CONN_TTL_MS = createProperty(STATIC_HTTP2_SINK_CLIENT_CONNECTION_CONFIGURATION_PREFIX, "time_to_live_ms");
+
+    public static final String STATIC_HTTP2_SINK_CLIENT_AUTH_CONFIGURATION_PREFIX = createProperty(STATIC_HTTP2_SINK_CLIENT_CONFIGURATION_PREFIX, "auth.");
+
+    public static final String STATIC_HTTP2_SINK_AUTH_PROVIDER = createProperty(STATIC_HTTP2_SINK_CLIENT_AUTH_CONFIGURATION_PREFIX, "auth_provider");
+    public static final String STATIC_HTTP2_SINK_AUTH_REALM = createProperty(STATIC_HTTP2_SINK_CLIENT_AUTH_CONFIGURATION_PREFIX, "realm");
+    public static final String STATIC_HTTP2_SINK_AUTH_USERNAME = createProperty(STATIC_HTTP2_SINK_CLIENT_AUTH_CONFIGURATION_PREFIX, "basic_user_name");
+    public static final String STATIC_HTTP2_SINK_AUTH_PWD = createProperty(STATIC_HTTP2_SINK_CLIENT_AUTH_CONFIGURATION_PREFIX, "basic_password");
+
+    public static final String STATIC_HTTP2_SINK_CLIENT_TLS_CONFIGURATION_PREFIX = createProperty(STATIC_HTTP2_SINK_CLIENT_CONFIGURATION_PREFIX, "tls.");
+
+    public static final String STATIC_HTTP2_SINK_TLS_ENABLED = createProperty(STATIC_HTTP2_SINK_CLIENT_TLS_CONFIGURATION_PREFIX, "use_tls");
+    public static final String STATIC_HTTP2_SINK_MTLS_ENABLED = createProperty(STATIC_HTTP2_SINK_CLIENT_TLS_CONFIGURATION_PREFIX, "use_mtls");
+    public static final String STATIC_HTTP2_SINK_TLS_PROTOCOL = createProperty(STATIC_HTTP2_SINK_CLIENT_TLS_CONFIGURATION_PREFIX, "protocol");
+    public static final String STATIC_HTTP2_SINK_TLS_TRUSTSTORE_TYPE = createProperty(STATIC_HTTP2_SINK_CLIENT_TLS_CONFIGURATION_PREFIX, "truststore_type");
+    public static final String STATIC_HTTP2_SINK_TLS_TRUSTSTORE_LOCATION = createProperty(STATIC_HTTP2_SINK_CLIENT_TLS_CONFIGURATION_PREFIX, "truststore_location");
+    public static final String STATIC_HTTP2_SINK_TLS_TRUSTSTORE_PWD = createProperty(STATIC_HTTP2_SINK_CLIENT_TLS_CONFIGURATION_PREFIX, "truststore_password");
+    public static final String STATIC_HTTP2_SINK_TLS_KEYSTORE_TYPE = createProperty(STATIC_HTTP2_SINK_CLIENT_TLS_CONFIGURATION_PREFIX, "keystore_type");
+    public static final String STATIC_HTTP2_SINK_TLS_KEYSTORE_LOCATION = createProperty(STATIC_HTTP2_SINK_CLIENT_TLS_CONFIGURATION_PREFIX, "keystore_location");
+    public static final String STATIC_HTTP2_SINK_TLS_KEYSTORE_PWD = createProperty(STATIC_HTTP2_SINK_CLIENT_TLS_CONFIGURATION_PREFIX, "keystore_password");
+    public static final String STATIC_HTTP2_SINK_TLS_KEYSTORE_KEY_PWD = createProperty(STATIC_HTTP2_SINK_CLIENT_TLS_CONFIGURATION_PREFIX, "keystore_key_password");
+
+    public static final String STATIC_HTTP2_SINK_CLIENT_IO_CONFIGURATION_PREFIX = createProperty(STATIC_HTTP2_SINK_CLIENT_CONFIGURATION_PREFIX, "io.");
+
+    public static final String STATIC_HTTP2_SINK_IO_THREAD_COUNT = createProperty(STATIC_HTTP2_SINK_CLIENT_IO_CONFIGURATION_PREFIX, "thread_count");
+    public static final String STATIC_HTTP2_SINK_IO_SEND_BUFFER_SIZE = createProperty(STATIC_HTTP2_SINK_CLIENT_IO_CONFIGURATION_PREFIX, "send_buffer_size");
+    public static final String STATIC_HTTP2_SINK_IO_LINGER_MS = createProperty(STATIC_HTTP2_SINK_CLIENT_IO_CONFIGURATION_PREFIX, "linger_ms");
+    public static final String STATIC_HTTP2_SINK_IO_TCP_NO_DELAY = createProperty(STATIC_HTTP2_SINK_CLIENT_IO_CONFIGURATION_PREFIX, "tcp_no_delay");
+    public static final String STATIC_HTTP2_SINK_IO_TCP_KEEP_ALIVE_PROBE_INTERVAL_MS = createProperty(STATIC_HTTP2_SINK_CLIENT_IO_CONFIGURATION_PREFIX, "tcp_keep_alive_probe_interval_ms");
+    public static final String STATIC_HTTP2_SINK_IO_TCP_IDLE_TIMEOUT_MS = createProperty(STATIC_HTTP2_SINK_CLIENT_IO_CONFIGURATION_PREFIX, "tcp_idle_timeout_ms");
+    public static final String STATIC_HTTP2_SINK_IO_MAX_KEEP_ALIVE_PROBES_BEFORE_DROP = createProperty(STATIC_HTTP2_SINK_CLIENT_IO_CONFIGURATION_PREFIX, "tcp_max_keep_alive_probes_before_drop");
+    public static final String STATIC_HTTP2_SINK_IO_SOCKS_PROXY_HOST = createProperty(STATIC_HTTP2_SINK_CLIENT_IO_CONFIGURATION_PREFIX, "socks_proxy_host");
+    public static final String STATIC_HTTP2_SINK_IO_SOCKS_PROXY_PORT = createProperty(STATIC_HTTP2_SINK_CLIENT_IO_CONFIGURATION_PREFIX, "socks_proxy_port");
+    public static final String STATIC_HTTP2_SINK_IO_SOCKS_PROXY_USERNAME = createProperty(STATIC_HTTP2_SINK_CLIENT_IO_CONFIGURATION_PREFIX, "socks_proxy_username");
+    public static final String STATIC_HTTP2_SINK_IO_SOCKS_PROXY_PWD = createProperty(STATIC_HTTP2_SINK_CLIENT_IO_CONFIGURATION_PREFIX, "socks_proxy_password");
+    public static final String STATIC_HTTP2_SINK_IO_SOCKET_TIMEOUT_MS = createProperty(STATIC_HTTP2_SINK_CLIENT_IO_CONFIGURATION_PREFIX, "socket_timeout_ms");
+
+    public static final String STATIC_HTTP2_SINK_CLIENT_REQUEST_CONFIGURATION_PREFIX = createProperty(STATIC_HTTP2_SINK_CLIENT_CONFIGURATION_PREFIX, "request.");
+
+    public static final String STATIC_HTTP2_SINK_REQUEST_MAX_RETRIES = createProperty(STATIC_HTTP2_SINK_CLIENT_REQUEST_CONFIGURATION_PREFIX, "max_retries");
+    public static final String STATIC_HTTP2_SINK_REQUEST_RETRY_INTERVAL_MS = createProperty(STATIC_HTTP2_SINK_CLIENT_REQUEST_CONFIGURATION_PREFIX, "retry_interval_ms");
+    public static final String STATIC_HTTP2_SINK_REQUEST_AUTH_ENABLED = createProperty(STATIC_HTTP2_SINK_CLIENT_REQUEST_CONFIGURATION_PREFIX, "auth_enabled");
+    public static final String STATIC_HTTP2_SINK_REQUEST_CIRCULAR_REDIRECTS_ALLOWED = createProperty(STATIC_HTTP2_SINK_CLIENT_REQUEST_CONFIGURATION_PREFIX, "circular_redirects_allowed");
+    public static final String STATIC_HTTP2_SINK_REQUEST_KEEP_ALIVE_MS = createProperty(STATIC_HTTP2_SINK_CLIENT_REQUEST_CONFIGURATION_PREFIX, "keep_alive_ms");
+    public static final String STATIC_HTTP2_SINK_REQUEST_CONN_MANAGER_TIMEOUT_MS = createProperty(STATIC_HTTP2_SINK_CLIENT_REQUEST_CONFIGURATION_PREFIX, "conn_manager_timeout_ms");
+    public static final String STATIC_HTTP2_SINK_REQUEST_DISABLE_COMPRESSION = createProperty(STATIC_HTTP2_SINK_CLIENT_REQUEST_CONFIGURATION_PREFIX, "disable_compression");
+    public static final String STATIC_HTTP2_SINK_REQUEST_EXPECT_CONTINUE = createProperty(STATIC_HTTP2_SINK_CLIENT_REQUEST_CONFIGURATION_PREFIX, "expect_continue");
+    public static final String STATIC_HTTP2_SINK_REQUEST_MAX_REDIRECTS = createProperty(STATIC_HTTP2_SINK_CLIENT_REQUEST_CONFIGURATION_PREFIX, "max_redirects");
+    public static final String STATIC_HTTP2_SINK_REQUEST_DISABLE_PROTOCOL_UPGRADE = createProperty(STATIC_HTTP2_SINK_CLIENT_REQUEST_CONFIGURATION_PREFIX, "disable_protocol_upgrade");
+    public static final String STATIC_HTTP2_SINK_REQUEST_MAX_FRAME_SIZE = createProperty(STATIC_HTTP2_SINK_CLIENT_REQUEST_CONFIGURATION_PREFIX, "max_frame_size");
+    public static final String STATIC_HTTP2_SINK_REQUEST_MAX_CONCURRENT_STREAMS = createProperty(STATIC_HTTP2_SINK_CLIENT_REQUEST_CONFIGURATION_PREFIX, "max_concurrent_streams");
+    public static final String STATIC_HTTP2_SINK_REQUEST_INITIAL_WINDOW_SIZE = createProperty(STATIC_HTTP2_SINK_CLIENT_REQUEST_CONFIGURATION_PREFIX, "initial_window_size");
 
     static final String STATIC_MIN_EXECUTION_THRESHOLD = createStaticProperty(ABS_MIN_EXECUTION_THRESHOLD);
     static final String STATIC_MIN_EXECUTION_THRESHOLD_TU = createStaticProperty(ABS_MIN_EXECUTION_THRESHOLD_TU);

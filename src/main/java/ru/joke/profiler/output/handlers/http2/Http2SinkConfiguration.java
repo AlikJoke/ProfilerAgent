@@ -2,6 +2,7 @@ package ru.joke.profiler.output.handlers.http2;
 
 import org.apache.hc.core5.ssl.SSLContextBuilder;
 import org.apache.hc.core5.ssl.SSLContexts;
+import ru.joke.profiler.configuration.InvalidConfigurationException;
 
 import javax.net.ssl.SSLContext;
 import java.io.File;
@@ -53,6 +54,7 @@ final class Http2SinkConfiguration {
 
     static class OutputMessageConfiguration {
 
+        private final String outputScheme;
         private final String outputHost;
         private final int outputPort;
         private final String outputEndpoint;
@@ -61,12 +63,14 @@ final class Http2SinkConfiguration {
         private final Map<String, String> headersMapping;
 
         OutputMessageConfiguration(
+                final String outputScheme,
                 final String outputHost,
                 final int outputPort,
                 final String outputEndpoint,
                 final String contentType,
                 final Map<String, String> propertiesMapping,
                 final Map<String, String> headersMapping) {
+            this.outputScheme = outputScheme;
             this.outputHost = outputHost;
             this.outputPort = outputPort;
             this.outputEndpoint = outputEndpoint;
@@ -77,6 +81,10 @@ final class Http2SinkConfiguration {
 
         public String outputHost() {
             return outputHost;
+        }
+
+        public String outputScheme() {
+            return outputScheme;
         }
 
         public int outputPort() {
@@ -104,6 +112,7 @@ final class Http2SinkConfiguration {
             return "OutputMessageConfiguration{"
                     + "outputHost='" + outputHost + '\''
                     + ", outputPort=" + outputPort
+                    + ", outputScheme=" + outputScheme + '\''
                     + ", outputEndpoint='" + outputEndpoint + '\''
                     + ", contentType='" + contentType + '\''
                     + ", propertiesMapping=" + propertiesMapping
@@ -160,7 +169,21 @@ final class Http2SinkConfiguration {
 
             SKIP,
 
-            RETRY
+            RETRY;
+
+            static OnErrorPolicy parse(final String alias) {
+                for (final OnErrorPolicy policy : values()) {
+                    if (policy.name().equals(alias)) {
+                        return policy;
+                    }
+                }
+
+                if (alias == null || alias.isEmpty()) {
+                    return SKIP;
+                }
+
+                throw new InvalidConfigurationException("Unknown type of policy: " + alias);
+            }
         }
     }
 
@@ -232,10 +255,8 @@ final class Http2SinkConfiguration {
             private final boolean circularRedirectsAllowed;
             private final long keepAliveMs;
             private final long connectionManagerRequestTimeoutMs;
-            private final boolean disableContentCompression;
             private final boolean expectContinueEnabled;
             private final int maxRedirects;
-            private final boolean disableRedirects;
             private final boolean disableProtocolUpgrade;
             private final int maxFrameSize;
             private final boolean compressionDisabled;
@@ -249,10 +270,8 @@ final class Http2SinkConfiguration {
                     final boolean circularRedirectsAllowed,
                     final long keepAliveMs,
                     final long connectionManagerRequestTimeoutMs,
-                    final boolean disableContentCompression,
                     final boolean expectContinueEnabled,
                     final int maxRedirects,
-                    final boolean disableRedirects,
                     final boolean disableProtocolUpgrade,
                     final int maxFrameSize,
                     final boolean compressionDisabled,
@@ -264,10 +283,8 @@ final class Http2SinkConfiguration {
                 this.circularRedirectsAllowed = circularRedirectsAllowed;
                 this.keepAliveMs = keepAliveMs;
                 this.connectionManagerRequestTimeoutMs = connectionManagerRequestTimeoutMs;
-                this.disableContentCompression = disableContentCompression;
                 this.expectContinueEnabled = expectContinueEnabled;
                 this.maxRedirects = maxRedirects;
-                this.disableRedirects = disableRedirects;
                 this.disableProtocolUpgrade = disableProtocolUpgrade;
                 this.maxFrameSize = maxFrameSize;
                 this.compressionDisabled = compressionDisabled;
@@ -299,20 +316,12 @@ final class Http2SinkConfiguration {
                 return connectionManagerRequestTimeoutMs;
             }
 
-            public boolean disableContentCompression() {
-                return disableContentCompression;
-            }
-
             public boolean expectContinueEnabled() {
                 return expectContinueEnabled;
             }
 
             public int maxRedirects() {
                 return maxRedirects;
-            }
-
-            public boolean disableRedirects() {
-                return disableRedirects;
             }
 
             public boolean disableProtocolUpgrade() {
@@ -323,8 +332,8 @@ final class Http2SinkConfiguration {
                 return maxFrameSize;
             }
 
-            public boolean compressionDisabled() {
-                return compressionDisabled;
+            public boolean compressionEnabled() {
+                return !compressionDisabled;
             }
 
             public int maxConcurrentStreams() {
@@ -344,10 +353,8 @@ final class Http2SinkConfiguration {
                         + ", circularRedirectsAllowed=" + circularRedirectsAllowed
                         + ", keepAliveMs=" + keepAliveMs
                         + ", connectionManagerRequestTimeoutMs=" + connectionManagerRequestTimeoutMs
-                        + ", disableContentCompression=" + disableContentCompression
                         + ", expectContinueEnabled=" + expectContinueEnabled
                         + ", maxRedirects=" + maxRedirects
-                        + ", disableRedirects=" + disableRedirects
                         + ", disableProtocolUpgrade=" + disableProtocolUpgrade
                         + ", maxFrameSize=" + maxFrameSize
                         + ", compressionDisabled=" + compressionDisabled
@@ -559,17 +566,33 @@ final class Http2SinkConfiguration {
 
                 BASIC,
 
-                NONE
+                NONE;
+
+                static AuthProvider parse(final String alias) {
+                    for (final AuthProvider provider : values()) {
+                        if (provider.name().equals(alias)) {
+                            return provider;
+                        }
+                    }
+
+                    if (alias == null || alias.isEmpty()) {
+                        return NONE;
+                    }
+
+                    throw new InvalidConfigurationException("Unknown type of auth provider: " + alias);
+                }
             }
 
             static class Scope {
 
                 private final String realm;
+                private final String scheme;
                 private final String host;
                 private final int port;
 
-                Scope(final String realm, final String host, final int port) {
+                Scope(final String realm, final String scheme, final String host, final int port) {
                     this.realm = realm;
+                    this.scheme = scheme;
                     this.host = host;
                     this.port = port;
                 }
@@ -582,6 +605,10 @@ final class Http2SinkConfiguration {
                     return host;
                 }
 
+                public String scheme() {
+                    return scheme;
+                }
+
                 public int port() {
                     return port;
                 }
@@ -590,6 +617,7 @@ final class Http2SinkConfiguration {
                 public String toString() {
                     return "Scope{"
                             + "realm='" + realm + '\''
+                            + ", scheme='" + scheme + '\''
                             + ", host='" + host + '\''
                             + ", port=" + port
                             + '}';
