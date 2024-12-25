@@ -173,7 +173,7 @@ final class Http2SinkConfiguration {
 
             static OnErrorPolicy parse(final String alias) {
                 for (final OnErrorPolicy policy : values()) {
-                    if (policy.name().equals(alias)) {
+                    if (policy.name().equalsIgnoreCase(alias)) {
                         return policy;
                     }
                 }

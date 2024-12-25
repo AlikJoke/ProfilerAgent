@@ -70,14 +70,14 @@ final class Http2MessageChannel implements AutoCloseable {
                         }
 
                         if (asyncEnabled) {
-                            handleOnError(message, requestId + 1);
+                            handleOnError(message, requestId, null);
                         }
                     }
 
                     @Override
                     public void failed(final Exception e) {
                         logger.log(Level.WARNING, "Error on send profiling data", e);
-                        handleOnError(message, requestId + 1);
+                        handleOnError(message, requestId, e);
                     }
 
                     @Override
@@ -107,7 +107,7 @@ final class Http2MessageChannel implements AutoCloseable {
         try {
             future.get(timeout, TimeUnit.MILLISECONDS);
         } catch (TimeoutException | ExecutionException e) {
-            if (!handleOnError(message, requestId)) {
+            if (!handleOnError(message, requestId, e)) {
                 throw new ProfilerOutputSinkException(e);
             }
         } catch (InterruptedException e) {
@@ -115,7 +115,7 @@ final class Http2MessageChannel implements AutoCloseable {
         }
     }
 
-    private boolean handleOnError(final Http2Message message, final int requestId) {
+    private boolean handleOnError(final Http2Message message, final int requestId, final Exception ex) {
         if (this.configuration.onErrorPolicy() != Http2SinkConfiguration.ProcessingConfiguration.OnErrorPolicy.RETRY) {
             return true;
         }
@@ -125,9 +125,15 @@ final class Http2MessageChannel implements AutoCloseable {
             return true;
         }
 
-        if (requestId <= this.configuration.maxRetriesOnError()) {
+        if (requestId < this.configuration.maxRetriesOnError()) {
             sendRequest(message, requestId + 1);
             return true;
+        }
+
+        if (ex == null) {
+            logger.severe("Error on message sending (server return unallowed response code)");
+        } else {
+            logger.log(Level.SEVERE, "Error on message sending", ex);
         }
 
         return false;

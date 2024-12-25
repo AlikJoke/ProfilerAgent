@@ -26,6 +26,32 @@
         <developerConnection>scm:git:https://github.com/AlikJoke/ProfilerAgent.git</developerConnection>
     </scm>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.apache.kafka</groupId>
+                <artifactId>kafka-clients</artifactId>
+                <version>${kafka.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.xerial.snappy</groupId>
+                        <artifactId>snappy-java</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.github.luben</groupId>
+                        <artifactId>zstd-jni</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.httpcomponents.client5</groupId>
+                <artifactId>httpclient5</artifactId>
+                <version>${http2.client.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
 
         <dependency>
@@ -43,31 +69,23 @@
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5</artifactId>
-            <version>${http2.client.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <scope>provided</scope>
         </dependency>
 
     </dependencies>
 
     <profiles>
         <profile>
-            <id>default</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>org.apache.kafka</groupId>
-                    <artifactId>kafka-clients</artifactId>
-                    <version>${kafka.version}</version>
-                    <scope>provided</scope>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <id>include-kafka</id>
+            <id>full</id>
             <activation>
                 <property>
-                    <name>include-kafka</name>
+                    <name>full</name>
                     <value>true</value>
                 </property>
             </activation>
@@ -75,17 +93,59 @@
                 <dependency>
                     <groupId>org.apache.kafka</groupId>
                     <artifactId>kafka-clients</artifactId>
-                    <version>${kafka.version}</version>
-                    <exclusions>
-                        <exclusion>
-                            <groupId>org.xerial.snappy</groupId>
-                            <artifactId>snappy-java</artifactId>
-                        </exclusion>
-                        <exclusion>
-                            <groupId>com.github.luben</groupId>
-                            <artifactId>zstd-jni</artifactId>
-                        </exclusion>
-                    </exclusions>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.apache.httpcomponents.client5</groupId>
+                    <artifactId>httpclient5</artifactId>
+                </dependency>
+
+            </dependencies>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-shade-plugin</artifactId>
+                            <executions>
+                                <execution>
+                                    <configuration>
+                                        <minimizeJar>false</minimizeJar>
+                                    </configuration>
+                                </execution>
+                            </executions>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
+        <profile>
+            <id>http2</id>
+            <activation>
+                <property>
+                    <name>http2</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.apache.httpcomponents.client5</groupId>
+                    <artifactId>httpclient5</artifactId>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>kafka</id>
+            <activation>
+                <property>
+                    <name>kafka</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.apache.kafka</groupId>
+                    <artifactId>kafka-clients</artifactId>
                 </dependency>
             </dependencies>
             <build>
@@ -97,24 +157,6 @@
                             <executions>
                                 <execution>
                                     <configuration>
-                                        <relocations>
-                                            <relocation>
-                                                <pattern>org.</pattern>
-                                                <shadedPattern>ru.joke_shaded.org.</shadedPattern>
-                                            </relocation>
-                                            <relocation>
-                                                <pattern>net.</pattern>
-                                                <shadedPattern>ru.joke_shaded.net.</shadedPattern>
-                                            </relocation>
-                                            <relocation>
-                                                <pattern>common.</pattern>
-                                                <shadedPattern>ru.joke_shaded.common.</shadedPattern>
-                                            </relocation>
-                                            <relocation>
-                                                <pattern>kafka.</pattern>
-                                                <shadedPattern>ru.joke_shaded.kafka.</shadedPattern>
-                                            </relocation>
-                                        </relocations>
                                         <minimizeJar>false</minimizeJar>
                                     </configuration>
                                 </execution>
@@ -246,6 +288,18 @@
                                         <pattern>org.</pattern>
                                         <shadedPattern>ru.joke_shaded.org.</shadedPattern>
                                     </relocation>
+                                    <relocation>
+                                        <pattern>net.</pattern>
+                                        <shadedPattern>ru.joke_shaded.net.</shadedPattern>
+                                    </relocation>
+                                    <relocation>
+                                        <pattern>common.</pattern>
+                                        <shadedPattern>ru.joke_shaded.common.</shadedPattern>
+                                    </relocation>
+                                    <relocation>
+                                        <pattern>kafka.</pattern>
+                                        <shadedPattern>ru.joke_shaded.kafka.</shadedPattern>
+                                    </relocation>
                                 </relocations>
                                 <minimizeJar>true</minimizeJar>
                                 <createDependencyReducedPom>false</createDependencyReducedPom>
@@ -253,7 +307,10 @@
                                     <filter>
                                         <artifact>org.*:*</artifact>
                                         <excludes>
+                                            <exclude>META-INF/DEPENDENCIES</exclude>
+                                            <exclude>META-INF/LICENSE</exclude>
                                             <exclude>META-INF/MANIFEST.MF</exclude>
+                                            <exclude>META-INF/NOTICE</exclude>
                                             <exclude>module-info.class</exclude>
                                         </excludes>
                                     </filter>

@@ -110,11 +110,11 @@ public abstract class ConfigurationProperties {
 
     public static final String STATIC_HTTP2_SINK_OUTPUT_MESSAGE_CONFIGURATION_PREFIX = createProperty(HTTP2_SINK_PROPERTIES_PREFIX, "output-message.");
 
-    public static final String STATIC_HTTP2_SINK_MESSAGE_OUTPUT_ENDPOINT = createProperty(STATIC_KAFKA_SINK_OUTPUT_MESSAGE_CONFIGURATION_PREFIX, "target_endpoint");
-    public static final String STATIC_HTTP2_SINK_MESSAGE_OUTPUT_HOST = createProperty(STATIC_KAFKA_SINK_OUTPUT_MESSAGE_CONFIGURATION_PREFIX, "target_host");
-    public static final String STATIC_HTTP2_SINK_MESSAGE_OUTPUT_PORT = createProperty(STATIC_KAFKA_SINK_OUTPUT_MESSAGE_CONFIGURATION_PREFIX, "target_port");
-    public static final String STATIC_HTTP2_SINK_MESSAGE_OUTPUT_SCHEME = createProperty(STATIC_KAFKA_SINK_OUTPUT_MESSAGE_CONFIGURATION_PREFIX, "target_scheme");
-    public static final String STATIC_HTTP2_SINK_CONTENT_TYPE = createProperty(STATIC_KAFKA_SINK_OUTPUT_MESSAGE_CONFIGURATION_PREFIX, "content_type");
+    public static final String STATIC_HTTP2_SINK_MESSAGE_OUTPUT_ENDPOINT = createProperty(STATIC_HTTP2_SINK_OUTPUT_MESSAGE_CONFIGURATION_PREFIX, "target_endpoint");
+    public static final String STATIC_HTTP2_SINK_MESSAGE_OUTPUT_HOST = createProperty(STATIC_HTTP2_SINK_OUTPUT_MESSAGE_CONFIGURATION_PREFIX, "target_host");
+    public static final String STATIC_HTTP2_SINK_MESSAGE_OUTPUT_PORT = createProperty(STATIC_HTTP2_SINK_OUTPUT_MESSAGE_CONFIGURATION_PREFIX, "target_port");
+    public static final String STATIC_HTTP2_SINK_MESSAGE_OUTPUT_SCHEME = createProperty(STATIC_HTTP2_SINK_OUTPUT_MESSAGE_CONFIGURATION_PREFIX, "target_scheme");
+    public static final String STATIC_HTTP2_SINK_CONTENT_TYPE = createProperty(STATIC_HTTP2_SINK_OUTPUT_MESSAGE_CONFIGURATION_PREFIX, "content_type");
     public static final String STATIC_HTTP2_SINK_MESSAGE_PROPERTIES_MAPPING = createProperty(STATIC_HTTP2_SINK_OUTPUT_MESSAGE_CONFIGURATION_PREFIX, "properties_mapping");
     public static final String STATIC_HTTP2_SINK_MESSAGE_HEADERS_MAPPING = createProperty(STATIC_HTTP2_SINK_OUTPUT_MESSAGE_CONFIGURATION_PREFIX, "headers_mapping");
 

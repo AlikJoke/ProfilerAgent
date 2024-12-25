@@ -26,9 +26,8 @@ final class Http2SinkConfigurationLoader {
 
     private static final int DEFAULT_REQUEST_MAX_RETRIES = 3;
     private static final int DEFAULT_REQUEST_MAX_REDIRECTS = 0;
-    private static final int DEFAULT_REQUEST_MAX_CONCURRENT_STREAMS = 1_000;
     private static final int DEFAULT_REQUEST_INITIAL_WINDOW_SIZE = Short.MAX_VALUE * 2 + 1;
-    private static final int DEFAULT_REQUEST_MAX_FRAME_SIZE = 2 ^ 20;
+    private static final int DEFAULT_REQUEST_MAX_FRAME_SIZE = power(2, 20);
 
     private static final long DEFAULT_REQUEST_RETRY_INTERVAL_MS = TimeUnit.SECONDS.toMillis(5);
     private static final long DEFAULT_REQUEST_KEEP_ALIVE_INTERVAL_MS = TimeUnit.MINUTES.toMillis(3);
@@ -42,8 +41,8 @@ final class Http2SinkConfigurationLoader {
     
     private static final long DEFAULT_SYNC_SENDING_WAIT_MS = TimeUnit.SECONDS.toMillis(10);
     
-    private static final long DEFAULT_IO_TCP_KEEP_ALIVE_PROBES_INTERVAL_MS = TimeUnit.SECONDS.toMillis(1);
-    private static final long DEFAULT_IO_TCP_IDLE_TIMEOUT_MS = TimeUnit.MINUTES.toMillis(1);
+    private static final long DEFAULT_IO_TCP_KEEP_ALIVE_PROBES_INTERVAL_MS = -1;
+    private static final long DEFAULT_IO_TCP_IDLE_TIMEOUT_MS = -1;
     private static final long DEFAULT_IO_SOCKET_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(2);
 
 
@@ -169,7 +168,7 @@ final class Http2SinkConfigurationLoader {
         final boolean disableProtocolUpgrade = parseBooleanProperty(properties, STATIC_HTTP2_SINK_REQUEST_DISABLE_PROTOCOL_UPGRADE);
         final int maxFrameSize = parseIntProperty(properties, STATIC_HTTP2_SINK_REQUEST_MAX_FRAME_SIZE, DEFAULT_REQUEST_MAX_FRAME_SIZE);
         final boolean compressionDisabled = parseBooleanProperty(properties, STATIC_HTTP2_SINK_REQUEST_DISABLE_COMPRESSION);
-        final int maxConcurrentStreams = parseIntProperty(properties, STATIC_HTTP2_SINK_REQUEST_MAX_CONCURRENT_STREAMS, DEFAULT_REQUEST_MAX_CONCURRENT_STREAMS);
+        final int maxConcurrentStreams = parseIntProperty(properties, STATIC_HTTP2_SINK_REQUEST_MAX_CONCURRENT_STREAMS, Integer.MAX_VALUE);
         final int initialWindowSize = parseIntProperty(properties, STATIC_HTTP2_SINK_REQUEST_INITIAL_WINDOW_SIZE, DEFAULT_REQUEST_INITIAL_WINDOW_SIZE);
         
         return new Http2SinkConfiguration.Http2ClientConfiguration.RequestConfiguration(
@@ -289,5 +288,9 @@ final class Http2SinkConfigurationLoader {
         return Arrays.stream(mappingString.split(";"))
                         .map(mappingParts -> mappingParts.split(":"))
                         .collect(Collectors.toMap(mapping -> mapping[0], mapping -> mapping[mapping.length - 1]));
+    }
+
+    private static int power(final int base, final int degree) {
+        return degree == 0 ? base : base * power(base, degree - 1);
     }
 }
