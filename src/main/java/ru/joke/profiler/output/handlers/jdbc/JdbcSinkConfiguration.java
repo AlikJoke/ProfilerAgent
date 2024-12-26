@@ -1,5 +1,7 @@
 package ru.joke.profiler.output.handlers.jdbc;
 
+import ru.joke.profiler.output.handlers.util.pool.ConnectionPoolConfiguration;
+
 import java.util.Map;
 import java.util.Properties;
 
@@ -177,59 +179,6 @@ final class JdbcSinkConfiguration {
             return "ConnectionFactoryConfiguration{"
                     + "url='" + url + '\''
                     + ", connectionProperties=" + connectionProperties
-                    + '}';
-        }
-    }
-
-    static class ConnectionPoolConfiguration {
-
-        private final boolean enablePooling;
-        private final int maxPoolSize;
-        private final int initialPoolSize;
-        private final long keepAliveIdleTime;
-        private final long maxConnectionWaitTime;
-
-        ConnectionPoolConfiguration(
-                final boolean enablePooling,
-                final int maxPoolSize,
-                final int initialPoolSize,
-                final long keepAliveIdleTime,
-                final long maxConnectionWaitTime) {
-            this.enablePooling = enablePooling;
-            this.maxPoolSize = maxPoolSize;
-            this.initialPoolSize = initialPoolSize;
-            this.keepAliveIdleTime = keepAliveIdleTime;
-            this.maxConnectionWaitTime = maxConnectionWaitTime;
-        }
-
-        boolean enablePooling() {
-            return enablePooling;
-        }
-
-        int maxPoolSize() {
-            return maxPoolSize;
-        }
-
-        int initialPoolSize() {
-            return initialPoolSize;
-        }
-
-        long keepAliveIdleTime() {
-            return keepAliveIdleTime;
-        }
-
-        long maxConnectionWaitTime() {
-            return maxConnectionWaitTime;
-        }
-
-        @Override
-        public String toString() {
-            return "ConnectionPoolConfiguration{"
-                    + "enablePooling=" + enablePooling
-                    + ", maxPoolSize=" + maxPoolSize
-                    + ", initialPoolSize=" + initialPoolSize
-                    + ", keepAliveIdleTime=" + keepAliveIdleTime
-                    + ", maxConnectionWaitTime=" + maxConnectionWaitTime
                     + '}';
         }
     }

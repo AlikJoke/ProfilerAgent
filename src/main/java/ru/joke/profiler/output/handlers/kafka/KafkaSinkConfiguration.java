@@ -1,5 +1,7 @@
 package ru.joke.profiler.output.handlers.kafka;
 
+import ru.joke.profiler.output.handlers.util.recovery.ConnectionRecoveryConfiguration;
+
 import java.util.Collections;
 import java.util.Map;
 
@@ -133,43 +135,6 @@ final class KafkaSinkConfiguration {
                     + ", messageTypeHeader='" + messageTypeHeader + '\''
                     + ", propertiesMapping=" + propertiesMapping
                     + ", headersMapping=" + headersMapping
-                    + '}';
-        }
-    }
-
-    static class ConnectionRecoveryConfiguration {
-
-        private final long recoveryTimeoutMs;
-        private final long maxRetryRecoveryIntervalMs;
-        private final ProcessingInRecoveryStatePolicy processingInRecoveryStatePolicy;
-
-        ConnectionRecoveryConfiguration(
-                final long recoveryTimeoutMs,
-                final long maxRetryRecoveryIntervalMs,
-                final ProcessingInRecoveryStatePolicy processingInRecoveryStatePolicy) {
-            this.recoveryTimeoutMs = recoveryTimeoutMs;
-            this.maxRetryRecoveryIntervalMs = maxRetryRecoveryIntervalMs;
-            this.processingInRecoveryStatePolicy = processingInRecoveryStatePolicy;
-        }
-
-        long recoveryTimeoutMs() {
-            return recoveryTimeoutMs;
-        }
-
-        long maxRetryRecoveryIntervalMs() {
-            return maxRetryRecoveryIntervalMs;
-        }
-
-        ProcessingInRecoveryStatePolicy processingInRecoveryStatePolicy() {
-            return processingInRecoveryStatePolicy;
-        }
-
-        @Override
-        public String toString() {
-            return "RecoveryConfiguration{"
-                    + "recoveryTimeoutMs=" + recoveryTimeoutMs
-                    + ", maxRetryRecoveryIntervalMs=" + maxRetryRecoveryIntervalMs
-                    + ", processingInRecoveryStatePolicy=" + processingInRecoveryStatePolicy
                     + '}';
         }
     }

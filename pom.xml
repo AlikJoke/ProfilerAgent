@@ -18,6 +18,7 @@
         <asm.version>9.7.1</asm.version>
         <kafka.version>3.9.0</kafka.version>
         <http2.client.version>5.4.1</http2.client.version>
+        <jms.version>3.0.0</jms.version>
     </properties>
 
     <scm>
@@ -49,6 +50,13 @@
                 <artifactId>httpclient5</artifactId>
                 <version>${http2.client.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>jakarta.jms</groupId>
+                <artifactId>jakarta.jms-api</artifactId>
+                <version>${jms.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -75,6 +83,12 @@
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-clients</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>jakarta.jms</groupId>
+            <artifactId>jakarta.jms-api</artifactId>
             <scope>provided</scope>
         </dependency>
 

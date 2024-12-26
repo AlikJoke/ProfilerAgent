@@ -1,6 +1,7 @@
 package ru.joke.profiler.output.handlers.jdbc;
 
 import ru.joke.profiler.configuration.InvalidConfigurationException;
+import ru.joke.profiler.output.handlers.util.pool.ConnectionPoolConfiguration;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -19,7 +20,7 @@ final class JdbcSinkConfigurationLoader {
     JdbcSinkConfiguration load(final Map<String, String> properties) {
         final JdbcSinkConfiguration.OutputDataInsertionConfiguration insertionConfiguration = loadInsertionConfiguration(properties);
         final JdbcSinkConfiguration.ConnectionFactoryConfiguration connectionFactoryConfiguration = loadConnectionFactoryConfiguration(properties);
-        final JdbcSinkConfiguration.ConnectionPoolConfiguration poolConfiguration = loadConnectionPoolConfiguration(properties);
+        final ConnectionPoolConfiguration poolConfiguration = loadConnectionPoolConfiguration(properties);
         final JdbcSinkConfiguration.OutputTableConfiguration outputTableConfiguration = loadOutputTableConfiguration(properties);
 
         return new JdbcSinkConfiguration(
@@ -85,19 +86,22 @@ final class JdbcSinkConfigurationLoader {
         return result;
     }
 
-    private JdbcSinkConfiguration.ConnectionPoolConfiguration loadConnectionPoolConfiguration(final Map<String, String> properties) {
+    private ConnectionPoolConfiguration loadConnectionPoolConfiguration(final Map<String, String> properties) {
         final boolean enablePooling = parseBooleanProperty(properties, STATIC_JDBC_SINK_CONNECTION_POOL_ENABLED);
         final int maxPoolSize = parseIntProperty(properties, STATIC_JDBC_SINK_CONNECTION_POOL_MAX_POOL, DEFAULT_MAX_POOL_SIZE);
         final int initialPoolSize = parseIntProperty(properties, STATIC_JDBC_SINK_CONNECTION_POOL_INIT_POOL, DEFAULT_INIT_POOL_SIZE);
         final long keepAliveIdleTime = parseLongProperty(properties, STATIC_JDBC_SINK_CONNECTION_POOL_KEEP_ALIVE_IDLE, DEFAULT_KEEP_ALIVE_IDLE_TIME);
         final long maxWaitTime = parseLongProperty(properties, STATIC_JDBC_SINK_CONNECTION_POOL_MAX_WAIT, DEFAULT_MAX_WAIT_TIME);
+        final String connectionUnavailabilityPolicyStr = properties.get(STATIC_JDBC_SINK_CONNECTION_POOL_CONN_UNAVAILABILITY_POLICY);
+        final ConnectionPoolConfiguration.ConnectionUnavailabilityPolicy connectionUnavailabilityPolicy = ConnectionPoolConfiguration.ConnectionUnavailabilityPolicy.parse(connectionUnavailabilityPolicyStr);
 
-        return new JdbcSinkConfiguration.ConnectionPoolConfiguration(
+        return new ConnectionPoolConfiguration(
                 enablePooling,
                 maxPoolSize,
                 initialPoolSize,
                 keepAliveIdleTime,
-                maxWaitTime
+                maxWaitTime,
+                connectionUnavailabilityPolicy
         );
     }
 

@@ -1,4 +1,4 @@
-package ru.joke.profiler.output.handlers.util;
+package ru.joke.profiler.output.handlers.util.recovery;
 
 import ru.joke.profiler.output.handlers.OutputDataSink;
 import ru.joke.profiler.output.handlers.ProfilerOutputSinkException;

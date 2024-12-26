@@ -1,8 +1,8 @@
 package ru.joke.profiler.output.handlers.jdbc;
 
 import ru.joke.profiler.output.handlers.ProfilerOutputSinkException;
+import ru.joke.profiler.output.handlers.util.pool.ConnectionFactory;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.stream.Collectors;
@@ -14,13 +14,13 @@ final class OutputDataTablePreparer {
     private static final String DELETE_FROM_TABLE_QUERY = "DELETE FROM %s";
     private static final String DROP_TABLE_QUERY = "DROP TABLE %s";
 
-    private final ConnectionFactory connectionFactory;
+    private final ConnectionFactory<JdbcConnectionWrapper> connectionFactory;
     private final JdbcSinkConfiguration.OutputTableConfiguration configuration;
     private final OutputDataTableSchemaValidator tableSchemaValidator;
 
     OutputDataTablePreparer(
             final JdbcSinkConfiguration.OutputTableConfiguration configuration,
-            final ConnectionFactory connectionFactory,
+            final ConnectionFactory<JdbcConnectionWrapper> connectionFactory,
             final OutputDataTableSchemaValidator tableSchemaValidator) {
         this.configuration = configuration;
         this.connectionFactory = connectionFactory;
@@ -28,8 +28,12 @@ final class OutputDataTablePreparer {
     }
 
     void prepare() throws SQLException {
-        try (final Connection connection = this.connectionFactory.create();
-             final Statement statement = connection.createStatement()) {
+        final JdbcConnectionWrapper connection = this.connectionFactory.create();
+        if (!connection.init()) {
+            throw new ProfilerOutputSinkException("Unable to create jdbc connection");
+        }
+
+        try (final Statement statement = connection.createStatement()) {
             connection.setAutoCommit(true);
 
             final boolean isTableExists = checkTableExistence(statement);
@@ -48,6 +52,8 @@ final class OutputDataTablePreparer {
             if (!this.configuration.skipSchemaValidation()) {
                 this.tableSchemaValidator.validate(statement);
             }
+        } finally {
+            connection.close();
         }
     }
 

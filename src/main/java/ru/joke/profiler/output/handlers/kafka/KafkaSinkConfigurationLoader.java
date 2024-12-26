@@ -2,6 +2,8 @@ package ru.joke.profiler.output.handlers.kafka;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
 import ru.joke.profiler.configuration.InvalidConfigurationException;
+import ru.joke.profiler.output.handlers.util.recovery.ConnectionRecoveryConfiguration;
+import ru.joke.profiler.output.handlers.util.recovery.ProcessingInRecoveryStatePolicy;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -23,7 +25,7 @@ final class KafkaSinkConfigurationLoader {
 
         final KafkaSinkConfiguration.ProducerConfiguration producerConfiguration = loadProducerConfiguration(properties);
         final KafkaSinkConfiguration.OutputMessageConfiguration outputMessageConfiguration = loadOutputMessageConfiguration(properties);
-        final KafkaSinkConfiguration.ConnectionRecoveryConfiguration recoveryConfiguration = loadRecoveryConfiguration(properties);
+        final ConnectionRecoveryConfiguration recoveryConfiguration = loadRecoveryConfiguration(properties);
 
         return new KafkaSinkConfiguration(
                 producerConfiguration,
@@ -81,14 +83,14 @@ final class KafkaSinkConfigurationLoader {
         );
     }
 
-    private KafkaSinkConfiguration.ConnectionRecoveryConfiguration loadRecoveryConfiguration(final Map<String, String> properties) {
+    private ConnectionRecoveryConfiguration loadRecoveryConfiguration(final Map<String, String> properties) {
         final long recoveryTimeoutMs = parseLongProperty(properties, STATIC_KAFKA_SINK_RECOVERY_TIMEOUT_MS, Long.MAX_VALUE);
         final long maxRetryIntervalMs = parseLongProperty(properties, STATIC_KAFKA_SINK_RECOVERY_MAX_RETRY_INTERVAL_MS, DEFAULT_RECOVERY_MAX_RETRY_INTERVAL_MS);
 
         final String processingPolicyStr = properties.get(STATIC_KAFKA_SINK_RECOVERY_PROCESSING_POLICY);
         final ProcessingInRecoveryStatePolicy policy = ProcessingInRecoveryStatePolicy.parse(processingPolicyStr);
 
-        return new KafkaSinkConfiguration.ConnectionRecoveryConfiguration(
+        return new ConnectionRecoveryConfiguration(
                 recoveryTimeoutMs,
                 maxRetryIntervalMs,
                 policy

@@ -1,10 +1,10 @@
 package ru.joke.profiler.output.handlers.jdbc;
 
 import ru.joke.profiler.output.handlers.OutputData;
-import ru.joke.profiler.output.handlers.util.OutputPropertiesInjector;
 import ru.joke.profiler.output.handlers.ProfilerOutputSinkException;
+import ru.joke.profiler.output.handlers.util.OutputPropertiesInjector;
+import ru.joke.profiler.output.handlers.util.pool.ConnectionPool;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -16,7 +16,7 @@ final class OutputDataJdbcStorage implements AutoCloseable {
 
     private static final String INSERT_QUERY_TEMPLATE = "INSERT INTO %s(%s) VALUES(%s)";
 
-    private final ConnectionPool pool;
+    private final ConnectionPool<JdbcConnectionWrapper> pool;
     private final String insertQuery;
     private final OutputPropertiesInjector<PreparedStatement> parametersInjector;
     private final JdbcSinkConfiguration.OutputDataInsertionConfiguration insertionConfiguration;
@@ -24,7 +24,7 @@ final class OutputDataJdbcStorage implements AutoCloseable {
     private volatile boolean isClosed;
 
     OutputDataJdbcStorage(
-            final ConnectionPool pool,
+            final ConnectionPool<JdbcConnectionWrapper> pool,
             final JdbcSinkConfiguration configuration,
             final OutputPropertiesInjector<PreparedStatement> parametersInjector) {
         this.pool = pool;
@@ -38,7 +38,7 @@ final class OutputDataJdbcStorage implements AutoCloseable {
     }
 
     void store(final OutputData data) {
-        final Connection connection = tryToTakeConnection();
+        final JdbcConnectionWrapper connection = tryToTakeConnection();
         if (connection == null) {
             return;
         }
@@ -60,7 +60,7 @@ final class OutputDataJdbcStorage implements AutoCloseable {
     }
 
     void store(final List<OutputData> data) {
-        final Connection connection = tryToTakeConnection();
+        final JdbcConnectionWrapper connection = tryToTakeConnection();
         if (connection == null) {
             return;
         }
@@ -100,7 +100,7 @@ final class OutputDataJdbcStorage implements AutoCloseable {
         }
     }
 
-    private Connection tryToTakeConnection() {
+    private JdbcConnectionWrapper tryToTakeConnection() {
         try {
             return this.pool.get();
         } catch (ProfilerOutputSinkException ex) {

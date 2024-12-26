@@ -5,6 +5,9 @@ import ru.joke.profiler.output.handlers.OutputDataSink;
 import ru.joke.profiler.output.handlers.async.AsyncOutputDataSinkHandleSupport;
 import ru.joke.profiler.output.handlers.util.NoProfilingOutputDataSinkWrapper;
 import ru.joke.profiler.output.handlers.util.OutputPropertiesInjector;
+import ru.joke.profiler.output.handlers.util.pool.ConnectionFactory;
+import ru.joke.profiler.output.handlers.util.pool.ConnectionPool;
+import ru.joke.profiler.output.handlers.util.pool.ConnectionPoolFactory;
 
 import java.sql.PreparedStatement;
 import java.util.Map;
@@ -38,10 +41,10 @@ public final class OutputDataJdbcSinkHandle extends AsyncOutputDataSinkHandleSup
         final JdbcSinkConfigurationLoader configurationLoader = new JdbcSinkConfigurationLoader();
         final JdbcSinkConfiguration configuration = configurationLoader.load(properties);
 
-        final ConnectionFactory connectionFactory = new ConnectionFactory(configuration.connectionFactoryConfiguration());
-        final ConnectionPoolFactory poolFactory = new ConnectionPoolFactory(connectionFactory);
+        final ConnectionFactory<JdbcConnectionWrapper> connectionFactory = new JdbcConnectionFactory(configuration.connectionFactoryConfiguration());
+        final ConnectionPoolFactory<JdbcConnectionWrapper> poolFactory = new ConnectionPoolFactory<>(connectionFactory);
 
-        final ConnectionPool pool = poolFactory.create(configuration.connectionPoolConfiguration());
+        final ConnectionPool<JdbcConnectionWrapper> pool = poolFactory.create(configuration.connectionPoolConfiguration());
 
         final OutputDataSink<OutputData> terminalSink = buildJdbcSink(configuration, pool, connectionFactory);
         return new NoProfilingOutputDataSinkWrapper<>(terminalSink);
@@ -56,8 +59,8 @@ public final class OutputDataJdbcSinkHandle extends AsyncOutputDataSinkHandleSup
 
     private OutputDataSink<OutputData> buildJdbcSink(
             final JdbcSinkConfiguration configuration,
-            final ConnectionPool pool,
-            final ConnectionFactory connectionFactory) {
+            final ConnectionPool<JdbcConnectionWrapper> pool,
+            final ConnectionFactory<JdbcConnectionWrapper> connectionFactory) {
         final OutputPropertiesInjector<PreparedStatement> propertiesInjector = new JdbcStatementPropertiesInjector(configuration.outputTableConfiguration());
         final OutputDataJdbcStorage jdbcStorage = new OutputDataJdbcStorage(pool, configuration, propertiesInjector);
 

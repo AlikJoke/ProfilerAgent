@@ -1,20 +1,26 @@
 package ru.joke.profiler.output.handlers.jdbc;
 
 import ru.joke.profiler.output.handlers.ProfilerOutputSinkException;
+import ru.joke.profiler.output.handlers.util.pool.ConnectionFactory;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-final class ConnectionFactory {
+final class JdbcConnectionFactory implements ConnectionFactory<JdbcConnectionWrapper> {
 
     private final JdbcSinkConfiguration.ConnectionFactoryConfiguration configuration;
 
-    ConnectionFactory(final JdbcSinkConfiguration.ConnectionFactoryConfiguration configuration) {
+    JdbcConnectionFactory(final JdbcSinkConfiguration.ConnectionFactoryConfiguration configuration) {
         this.configuration = configuration;
     }
 
-    Connection create() {
+    @Override
+    public JdbcConnectionWrapper create() {
+        return new JdbcConnectionWrapper(this::createJdbcConnection);
+    }
+
+    private Connection createJdbcConnection() {
         try {
             return DriverManager.getConnection(this.configuration.url(), this.configuration.connectionProperties());
         } catch (SQLException e) {

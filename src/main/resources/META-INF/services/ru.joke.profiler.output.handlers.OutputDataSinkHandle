@@ -4,3 +4,4 @@ ru.joke.profiler.output.handlers.jul.OutputDataLoggerSinkHandle
 ru.joke.profiler.output.handlers.jdbc.OutputDataJdbcSinkHandle
 ru.joke.profiler.output.handlers.kafka.OutputDataKafkaSinkHandle
 ru.joke.profiler.output.handlers.http2.OutputDataHttp2SinkHandle
+ru.joke.profiler.output.handlers.jms.OutputDataJmsSinkHandle

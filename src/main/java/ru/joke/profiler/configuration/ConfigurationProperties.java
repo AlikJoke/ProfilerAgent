@@ -76,6 +76,7 @@ public abstract class ConfigurationProperties {
     public static final String STATIC_JDBC_SINK_CONNECTION_POOL_INIT_POOL = createProperty(JDBC_SINK_CONNECTION_POOL_PROPERTIES_PREFIX, "initial_pool_size");
     public static final String STATIC_JDBC_SINK_CONNECTION_POOL_KEEP_ALIVE_IDLE = createProperty(JDBC_SINK_CONNECTION_POOL_PROPERTIES_PREFIX, "keep_alive_idle_time");
     public static final String STATIC_JDBC_SINK_CONNECTION_POOL_MAX_WAIT = createProperty(JDBC_SINK_CONNECTION_POOL_PROPERTIES_PREFIX, "max_connection_wait_time");
+    public static final String STATIC_JDBC_SINK_CONNECTION_POOL_CONN_UNAVAILABILITY_POLICY = createProperty(JDBC_SINK_CONNECTION_POOL_PROPERTIES_PREFIX, "connection_unavailability_policy");
 
     public static final String JDBC_SINK_OUTPUT_TABLE_PROPERTIES_PREFIX = createProperty(JDBC_SINK_PROPERTIES_PREFIX, "output-table.");
     public static final String STATIC_JDBC_SINK_OUTPUT_TABLE_NAME = createProperty(JDBC_SINK_OUTPUT_TABLE_PROPERTIES_PREFIX, "table_name");
