@@ -4,7 +4,7 @@ import ru.joke.profiler.configuration.meta.ConfigurationParser;
 import ru.joke.profiler.output.handlers.OutputData;
 import ru.joke.profiler.output.handlers.OutputDataSink;
 import ru.joke.profiler.output.handlers.async.AsyncOutputDataSinkHandleSupport;
-import ru.joke.profiler.output.handlers.util.JsonObjectPropertiesInjector;
+import ru.joke.profiler.output.handlers.util.injectors.JsonObjectPropertiesInjector;
 import ru.joke.profiler.output.handlers.util.NoProfilingOutputDataSinkWrapper;
 import ru.joke.profiler.output.handlers.util.pool.ConnectionFactory;
 import ru.joke.profiler.output.handlers.util.pool.ConnectionPoolFactory;
@@ -60,7 +60,7 @@ public final class OutputDataJmsSinkHandle extends AsyncOutputDataSinkHandleSupp
         final JsonObjectPropertiesInjector bodyInjector = new JsonObjectPropertiesInjector(messageConfiguration.bodyPropertiesMapping());
         final JmsProducerPropertiesInjector producerPropertiesInjector = new JmsProducerPropertiesInjector(messageConfiguration.messagePropertiesMapping());
 
-        final ConnectionFactory<JmsContextWrapper> connectionFactory = new JmsConnectionFactory(configuration.connectionConfiguration());
+        final ConnectionFactory<JmsContextWrapper> connectionFactory = new JmsConnectionFactory(configuration.outputDestinationConfiguration());
         final ConnectionPoolFactory<JmsContextWrapper> connectionPoolFactory = new ConnectionPoolFactory<>(connectionFactory);
 
         return new JmsMessageChannel(

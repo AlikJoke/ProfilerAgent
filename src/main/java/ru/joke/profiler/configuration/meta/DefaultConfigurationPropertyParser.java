@@ -22,7 +22,8 @@ public final class DefaultConfigurationPropertyParser implements ConfigurationPr
         convertors.put(Long.class, Long::valueOf);
         convertors.put(boolean.class, Boolean::valueOf);
         convertors.put(Boolean.class, Boolean::valueOf);
-        convertors.put(String.class, Function.identity());
+        convertors.put(String.class, s -> s.isEmpty() ? null : s);
+        convertors.put(char[].class, String::toCharArray);
 
         this.convertors = Collections.unmodifiableMap(convertors);
     }

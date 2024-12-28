@@ -7,8 +7,8 @@ import org.apache.kafka.common.errors.RetriableException;
 import ru.joke.profiler.output.handlers.OutputData;
 import ru.joke.profiler.output.handlers.OutputDataSink;
 import ru.joke.profiler.output.handlers.ProfilerOutputSinkException;
+import ru.joke.profiler.output.handlers.util.recovery.ConnectionRecoveryConfiguration;
 import ru.joke.profiler.output.handlers.util.recovery.RecoveryProcessor;
-import ru.joke.profiler.output.handlers.util.recovery.ProcessingInRecoveryStatePolicy;
 
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -152,7 +152,7 @@ final class KafkaMessageChannel implements AutoCloseable {
     }
 
     private synchronized boolean tryToRecoverProducerSessionIfNeed(final Exception ex, final KafkaProducerSession session) {
-        final ProcessingInRecoveryStatePolicy policy = this.configuration.recoveryConfiguration().processingInRecoveryStatePolicy();
+        final ConnectionRecoveryConfiguration.ProcessingInRecoveryStatePolicy policy = this.configuration.recoveryConfiguration().processingInRecoveryStatePolicy();
         if (this.isClosed || this.producerSession != session) {
             return false;
         }

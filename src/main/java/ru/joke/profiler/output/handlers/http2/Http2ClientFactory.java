@@ -1,7 +1,6 @@
 package ru.joke.profiler.output.handlers.http2;
 
 import org.apache.hc.client5.http.HttpRequestRetryStrategy;
-import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.hc.client5.http.auth.CredentialsProvider;
 import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
@@ -11,9 +10,6 @@ import org.apache.hc.client5.http.impl.DefaultHttpRequestRetryStrategy;
 import org.apache.hc.client5.http.impl.LaxRedirectStrategy;
 import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient;
 import org.apache.hc.client5.http.impl.async.HttpAsyncClients;
-import org.apache.hc.client5.http.impl.auth.CredentialsProviderBuilder;
-import org.apache.hc.client5.http.impl.auth.SystemDefaultCredentialsProvider;
-import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.http.nio.ssl.TlsStrategy;
 import org.apache.hc.core5.http2.config.H2Config;
 import org.apache.hc.core5.http2.ssl.H2ClientTlsStrategy;
@@ -41,9 +37,14 @@ final class Http2ClientFactory {
     private static final String HTTP2_CLIENT_THREAD_NAME = "profiler-http2-thread-";
 
     private final Http2SinkConfiguration.Http2ClientConfiguration configuration;
+    private final Http2ClientCredentialsProviderFactory credentialsProviderFactory;
 
-    Http2ClientFactory(final Http2SinkConfiguration.Http2ClientConfiguration configuration) {
+    Http2ClientFactory(
+            final Http2SinkConfiguration.Http2ClientConfiguration configuration,
+            final Http2ClientCredentialsProviderFactory credentialsProviderFactory
+    ) {
         this.configuration = configuration;
+        this.credentialsProviderFactory = credentialsProviderFactory;
     }
 
     Http2Client create() {
@@ -53,7 +54,7 @@ final class Http2ClientFactory {
         final Http2SinkConfiguration.Http2ClientConfiguration.IOConfiguration ioConfiguration = configuration.ioConfiguration();
 
         final HttpRequestRetryStrategy retryStrategy = new DefaultHttpRequestRetryStrategy(requestConfiguration.maxRetries(), TimeValue.ofMilliseconds(requestConfiguration.retriesIntervalMs()));
-        final CredentialsProvider credentialsProvider = createCredentialsProvider(configuration.authenticationConfiguration());
+        final CredentialsProvider credentialsProvider = this.credentialsProviderFactory.create();
 
         final CloseableHttpAsyncClient client =
                 HttpAsyncClients
@@ -148,23 +149,5 @@ final class Http2ClientFactory {
 
             return thread;
         };
-    }
-
-    private CredentialsProvider createCredentialsProvider(final Http2SinkConfiguration.Http2ClientConfiguration.AuthenticationConfiguration configuration) {
-        switch (configuration.authProvider()) {
-            case SYSTEM_DEFAULT:
-                return new SystemDefaultCredentialsProvider();
-            case BASIC:
-                final Http2SinkConfiguration.Http2ClientConfiguration.AuthenticationConfiguration.Scope authScope = configuration.scope();
-                final HttpHost host = new HttpHost(authScope.scheme(), authScope.host(), authScope.port());
-                final AuthScope scope = new AuthScope(host, authScope.realm(), null);
-                final Http2SinkConfiguration.Http2ClientConfiguration.AuthenticationConfiguration.BasicCredentials credentials = (Http2SinkConfiguration.Http2ClientConfiguration.AuthenticationConfiguration.BasicCredentials) configuration.credentials();
-                return CredentialsProviderBuilder
-                        .create()
-                            .add(scope, credentials.username(), credentials.password())
-                        .build();
-            default:
-                return null;
-        }
     }
 }

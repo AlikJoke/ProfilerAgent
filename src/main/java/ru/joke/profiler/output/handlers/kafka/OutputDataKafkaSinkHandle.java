@@ -1,10 +1,11 @@
 package ru.joke.profiler.output.handlers.kafka;
 
+import ru.joke.profiler.configuration.meta.ConfigurationParser;
 import ru.joke.profiler.output.handlers.OutputData;
 import ru.joke.profiler.output.handlers.OutputDataSink;
 import ru.joke.profiler.output.handlers.async.AsyncOutputDataSinkHandleSupport;
-import ru.joke.profiler.output.handlers.util.JsonObjectPropertiesInjector;
 import ru.joke.profiler.output.handlers.util.NoProfilingOutputDataSinkWrapper;
+import ru.joke.profiler.output.handlers.util.injectors.JsonObjectPropertiesInjector;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -37,9 +38,7 @@ public final class OutputDataKafkaSinkHandle extends AsyncOutputDataSinkHandleSu
             final Map<String, String> properties,
             final Map<String, Object> context
     ) {
-        final KafkaSinkConfigurationLoader configurationLoader = new KafkaSinkConfigurationLoader();
-        final KafkaSinkConfiguration configuration = configurationLoader.load(properties);
-
+        final KafkaSinkConfiguration configuration = ConfigurationParser.parse(KafkaSinkConfiguration.class, properties);
         final KafkaMessageChannel kafkaMessageChannel = createKafkaChannel(configuration);
 
         final OutputDataSink<OutputData> terminalSink = new OutputDataKafkaSink(kafkaMessageChannel);
@@ -55,14 +54,14 @@ public final class OutputDataKafkaSinkHandle extends AsyncOutputDataSinkHandleSu
     }
 
     private KafkaMessageChannel createKafkaChannel(final KafkaSinkConfiguration configuration) {
-        final KafkaSinkConfiguration.OutputMessageConfiguration messageConfiguration = configuration.outputMessageConfiguration();
-        final JsonObjectPropertiesInjector injector = new JsonObjectPropertiesInjector(messageConfiguration.propertiesMapping());
+        final KafkaSinkConfiguration.OutputRecordConfiguration recordConfiguration = configuration.outputRecordConfiguration();
+        final JsonObjectPropertiesInjector injector = new JsonObjectPropertiesInjector(recordConfiguration.propertiesMapping());
 
         final KafkaProducerSessionFactory producerSessionFactory = new KafkaProducerSessionFactory();
         final Function<OutputData, byte[]> bodyConversionFunc = o -> injector.inject(new StringBuilder(), o).toString().getBytes(StandardCharsets.UTF_8);
-        final KafkaHeaderPropertiesInjector headerPropertiesInjector = new KafkaHeaderPropertiesInjector(messageConfiguration.headersMapping());
+        final KafkaHeaderPropertiesInjector headerPropertiesInjector = new KafkaHeaderPropertiesInjector(recordConfiguration.headersMapping());
         final KafkaMessageFactory messageFactory = new KafkaMessageFactory(
-                messageConfiguration,
+                recordConfiguration,
                 headerPropertiesInjector,
                 bodyConversionFunc
         );

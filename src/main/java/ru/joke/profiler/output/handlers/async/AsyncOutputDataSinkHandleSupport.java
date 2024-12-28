@@ -1,5 +1,6 @@
 package ru.joke.profiler.output.handlers.async;
 
+import ru.joke.profiler.configuration.meta.ConfigurationParser;
 import ru.joke.profiler.output.handlers.OutputData;
 import ru.joke.profiler.output.handlers.OutputDataSink;
 import ru.joke.profiler.output.handlers.OutputDataSinkHandle;
@@ -9,17 +10,14 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static ru.joke.profiler.configuration.ConfigurationProperties.ASYNC_FLUSHING_ENABLED;
-import static ru.joke.profiler.configuration.ConfigurationProperties.parseBooleanProperty;
-
 public abstract class AsyncOutputDataSinkHandleSupport<T> implements OutputDataSinkHandle {
 
     @Override
     public final OutputDataSink<OutputData> create(final Map<String, String> properties) throws Exception {
-        final boolean asyncFlushingEnabled = parseBooleanProperty(properties, ASYNC_FLUSHING_ENABLED);
+        final AsyncSinkDataFlushingConfiguration asyncConfiguration = ConfigurationParser.parse(AsyncSinkDataFlushingConfiguration.class, properties);
         final Map<String, Object> creationContext = buildCreationContext(properties);
-        return asyncFlushingEnabled
-                ? createAsyncOutputSync(properties, creationContext)
+        return asyncConfiguration.asyncFlushingEnabled()
+                ? createAsyncOutputSync(properties, creationContext, asyncConfiguration)
                 : createSyncOutputSink(properties, creationContext);
     }
 
@@ -42,17 +40,16 @@ public abstract class AsyncOutputDataSinkHandleSupport<T> implements OutputDataS
             final Map<String, Object> context
     ) throws Exception;
 
-    protected OutputDataSink<OutputData> createAsyncOutputSync(
+    private OutputDataSink<OutputData> createAsyncOutputSync(
             final Map<String, String> properties,
-            final Map<String, Object> context
+            final Map<String, Object> context,
+            final AsyncSinkDataFlushingConfiguration asyncConfiguration
     ) throws Exception {
         final OutputDataSink<T> sink = createTerminalOutputSink(properties, context);
-        final AsyncSinkDataFlushingConfiguration configuration = composeConfiguration(properties);
-        return new AsyncOutputDataSink<>(sink, configuration, conversionFunction(properties, context));
-    }
-
-    private AsyncSinkDataFlushingConfiguration composeConfiguration(final Map<String, String> properties) {
-        final AsyncOutputSinkFlushingConfigurationLoader configurationLoader = new AsyncOutputSinkFlushingConfigurationLoader();
-        return configurationLoader.load(properties);
+        return new AsyncOutputDataSink<>(
+                sink,
+                asyncConfiguration,
+                conversionFunction(properties, context)
+        );
     }
 }

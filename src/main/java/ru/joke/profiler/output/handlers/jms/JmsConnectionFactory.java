@@ -11,7 +11,7 @@ final class JmsConnectionFactory implements ConnectionFactory<JmsContextWrapper>
 
     private final jakarta.jms.ConnectionFactory connectionFactory;
 
-    JmsConnectionFactory(final JmsSinkConfiguration.ConnectionConfiguration configuration) {
+    JmsConnectionFactory(final JmsSinkConfiguration.OutputDestinationConfiguration configuration) {
         this.connectionFactory = lookup(configuration.connectionFactoryJndiName());
     }
 

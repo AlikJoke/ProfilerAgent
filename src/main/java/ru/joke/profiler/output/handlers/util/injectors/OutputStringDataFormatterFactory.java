@@ -1,4 +1,6 @@
-package ru.joke.profiler.output.handlers.util;
+package ru.joke.profiler.output.handlers.util.injectors;
+
+import ru.joke.profiler.output.handlers.util.injectors.OutputStringDataFormatter;
 
 public final class OutputStringDataFormatterFactory {
 

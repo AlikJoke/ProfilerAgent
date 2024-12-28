@@ -23,11 +23,11 @@ public final class ExecutionTimeRegistrarInitializer {
 
     public void init() {
         final ExecutionTimeRegistrar baseRegistrar =
-                this.staticConfiguration.isExecutionTracingEnabled()
+                this.staticConfiguration.executionTracingEnabled()
                         ? new TracedExecutionTimeRegistrar(this.outputSink)
                         : new SimpleExecutionTimeRegistrar(this.outputSink);
         final ExecutionTimeRegistrar resultRegistrar =
-                this.staticConfiguration.isDynamicConfigurationEnabled()
+                this.staticConfiguration.dynamicConfigurationEnabled()
                         ? new DynamicConfigurableExecutionTimeRegistrar(baseRegistrar, this.staticConfiguration, this.dynamicProfilingConfigurationHolder)
                         : baseRegistrar;
         resultRegistrar.init();

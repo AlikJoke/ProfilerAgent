@@ -1,4 +1,4 @@
-package ru.joke.profiler.output.handlers.stream;
+package ru.joke.profiler.output.handlers.fs.stream;
 
 import ru.joke.profiler.output.handlers.OutputDataSink;
 import ru.joke.profiler.output.handlers.ProfilerOutputSinkException;
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public abstract class OutputDataAbsStreamSink implements OutputDataSink<String> {
+public abstract class OutputDataAbsStreamSink<C extends AbstractFsStreamSinkConfiguration> implements OutputDataSink<String> {
 
     private static final Logger logger = Logger.getLogger(OutputDataSink.class.getCanonicalName());
 
@@ -20,11 +20,10 @@ public abstract class OutputDataAbsStreamSink implements OutputDataSink<String> 
 
     protected OutputDataAbsStreamSink(
             final Writer writer,
-            final int bufferSize,
-            final boolean forceFlushOnWrites
+            final C configuration
     ) {
-        this.writer = new BufferedWriter(writer, bufferSize);
-        this.forceFlushOnWrites = forceFlushOnWrites;
+        this.writer = new BufferedWriter(writer, configuration.bufferSize());
+        this.forceFlushOnWrites = configuration.forceFlushOnWrites();
     }
 
     @Override

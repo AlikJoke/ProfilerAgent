@@ -190,7 +190,7 @@ public final class ClassProfilingTransformer extends ClassVisitor {
             final int elapsedTimeVarIndex = newLocal(Type.LONG_TYPE);
             mv.visitVarInsn(LSTORE, elapsedTimeVarIndex);
 
-            final long minExecutionThreshold = this.profilingConfiguration.getMinExecutionThreshold();
+            final long minExecutionThreshold = this.profilingConfiguration.minExecutionThresholdNs();
             if (minExecutionThreshold > 0) {
 
                 /*

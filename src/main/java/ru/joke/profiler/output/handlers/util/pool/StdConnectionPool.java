@@ -33,7 +33,7 @@ public final class StdConnectionPool<T extends PooledConnection> implements Conn
         this.pool = new ConcurrentLinkedBlockingQueue<>(configuration.maxPoolSize());
         this.registry = new ArrayList<>();
         this.idleConnectionsTerminator =
-                configuration.keepAliveIdleTime() == -1
+                configuration.keepAliveIdleMs() == -1
                         ? null
                         : Executors.newSingleThreadScheduledExecutor(r -> {
                             final Thread thread = new Thread(r);
@@ -61,8 +61,8 @@ public final class StdConnectionPool<T extends PooledConnection> implements Conn
         if (this.idleConnectionsTerminator != null) {
             this.idleConnectionsTerminator.scheduleWithFixedDelay(
                     this::terminateExpiredIdleConnections,
-                    this.configuration.keepAliveIdleTime(),
-                    this.configuration.keepAliveIdleTime(),
+                    this.configuration.keepAliveIdleMs(),
+                    this.configuration.keepAliveIdleMs(),
                     TimeUnit.MILLISECONDS
             );
         }
@@ -79,14 +79,14 @@ public final class StdConnectionPool<T extends PooledConnection> implements Conn
     public T get() {
         final T result;
         try {
-            result = this.pool.poll(this.configuration.maxConnectionWaitTime(), TimeUnit.MILLISECONDS);
+            result = this.pool.poll(this.configuration.maxConnectionWaitMs(), TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             logger.log(Level.WARNING, "Thread was interrupted", e);
             throw new ProfilerOutputSinkException(e);
         }
 
         if (result == null || !result.init()) {
-            final String infoMsg = String.format("Can't poll valid connection from the pool in timeout %d", this.configuration.maxConnectionWaitTime());
+            final String infoMsg = String.format("Can't poll valid connection from the pool in timeout %d", this.configuration.maxConnectionWaitMs());
             if (this.configuration.connectionUnavailabilityPolicy() == ConnectionPoolConfiguration.ConnectionUnavailabilityPolicy.ERROR) {
                 throw new ProfilerOutputSinkException(infoMsg);
             }
@@ -122,6 +122,6 @@ public final class StdConnectionPool<T extends PooledConnection> implements Conn
     }
 
     private boolean isConnectionExpired(final T connection, final long currentTimestamp) {
-        return connection.lastUsedTimestamp() + this.configuration.keepAliveIdleTime() <= currentTimestamp;
+        return connection.lastUsedTimestamp() + this.configuration.keepAliveIdleMs() <= currentTimestamp;
     }
 }

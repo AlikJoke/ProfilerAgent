@@ -5,7 +5,7 @@ import ru.joke.profiler.output.handlers.OutputData;
 import ru.joke.profiler.output.handlers.OutputDataSink;
 import ru.joke.profiler.output.handlers.async.AsyncOutputDataSinkHandleSupport;
 import ru.joke.profiler.output.handlers.util.NoProfilingOutputDataSinkWrapper;
-import ru.joke.profiler.output.handlers.util.OutputPropertiesInjector;
+import ru.joke.profiler.output.handlers.util.injectors.OutputPropertiesInjector;
 import ru.joke.profiler.output.handlers.util.pool.ConnectionFactory;
 import ru.joke.profiler.output.handlers.util.pool.ConnectionPool;
 import ru.joke.profiler.output.handlers.util.pool.ConnectionPoolFactory;

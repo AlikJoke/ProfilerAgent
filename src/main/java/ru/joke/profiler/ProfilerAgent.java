@@ -15,7 +15,6 @@ import java.util.function.Predicate;
 
 public final class ProfilerAgent {
 
-    @SuppressWarnings("unused")
     public static void premain(final String args, final Instrumentation instrumentation) throws Exception {
         agentmain(args, instrumentation);
     }
@@ -51,7 +50,7 @@ public final class ProfilerAgent {
 
     private static OutputDataSink<OutputData> createOutputSink(final StaticProfilingConfiguration configuration) throws Exception {
         final OutputDataSinkFactory sinkFactory = new OutputDataSinkFactory();
-        final OutputDataSink<OutputData> sink = sinkFactory.create(configuration.getSinkType(), configuration.getSinkProperties());
+        final OutputDataSink<OutputData> sink = sinkFactory.create(configuration.sinkType(), configuration.sinkProperties());
         tryInitSink(sink);
 
         return sink;
@@ -70,7 +69,7 @@ public final class ProfilerAgent {
             final ProfilingConfigurationLoader configurationLoader,
             final StaticProfilingConfiguration staticConfiguration
     ) {
-        if (!staticConfiguration.isDynamicConfigurationEnabled()) {
+        if (!staticConfiguration.dynamicConfigurationEnabled()) {
             return;
         }
 
@@ -79,7 +78,7 @@ public final class ProfilerAgent {
                 new DynamicProfilingConfigurationRefreshService(
                         dynamicConfigHolder,
                         configurationLoader,
-                        staticConfiguration.getDynamicConfigurationRefreshInterval()
+                        staticConfiguration.dynamicConfigurationRefreshIntervalMs()
                 );
         dynamicConfigRefreshService.start();
 

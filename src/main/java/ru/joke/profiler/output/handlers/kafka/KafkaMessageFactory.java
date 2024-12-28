@@ -10,12 +10,12 @@ import java.util.function.Function;
 
 final class KafkaMessageFactory {
 
-    private final KafkaSinkConfiguration.OutputMessageConfiguration configuration;
+    private final KafkaSinkConfiguration.OutputRecordConfiguration configuration;
     private final Function<OutputData, byte[]> bodyConversionFunc;
     private final KafkaHeaderPropertiesInjector headerPropertiesInjector;
 
     KafkaMessageFactory(
-            final KafkaSinkConfiguration.OutputMessageConfiguration configuration,
+            final KafkaSinkConfiguration.OutputRecordConfiguration configuration,
             final KafkaHeaderPropertiesInjector headerPropertiesInjector,
             final Function<OutputData, byte[]> bodyConversionFunc
     ) {

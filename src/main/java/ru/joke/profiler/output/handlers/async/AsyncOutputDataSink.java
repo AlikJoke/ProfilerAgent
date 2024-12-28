@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -35,17 +36,10 @@ final class AsyncOutputDataSink<S, T> implements OutputDataSink<S> {
         this.delegateSink = delegateSink;
         this.configuration = configuration;
         this.queue = new ConcurrentLinkedBlockingQueue<>(configuration.overflowLimit());
-        final AtomicInteger threadCounter = new AtomicInteger();
         this.flushExecutor = Executors.newScheduledThreadPool(
                 configuration.flushingThreadPoolSize(),
-                r -> {
-                    final Thread thread = new Thread(r);
-                    thread.setDaemon(true);
-                    thread.setName(FLUSHING_THREAD_NAME_PREFIX + threadCounter.incrementAndGet());
-                    thread.setUncaughtExceptionHandler((t, e) -> logger.log(Level.SEVERE, "Unable to flush data", e));
-
-                    return thread;
-                });
+                createAsyncFlushingThreadFactory()
+        );
         this.conversionFunc = conversionFunc;
     }
 
@@ -54,8 +48,8 @@ final class AsyncOutputDataSink<S, T> implements OutputDataSink<S> {
         this.delegateSink.init();
         this.flushExecutor.scheduleAtFixedRate(
                 this::flush,
-                this.configuration.flushInterval(),
-                this.configuration.flushInterval(),
+                this.configuration.flushIntervalMs(),
+                this.configuration.flushIntervalMs(),
                 TimeUnit.MILLISECONDS
         );
     }
@@ -63,16 +57,18 @@ final class AsyncOutputDataSink<S, T> implements OutputDataSink<S> {
     @Override
     public void write(final S outputData) {
         final Supplier<T> dataSupplier = this.conversionFunc.apply(outputData);
-        final OverflowPolicy overflowPolicy = this.configuration.overflowPolicy();
+        final AsyncSinkDataFlushingConfiguration.OverflowPolicy overflowPolicy = this.configuration.overflowPolicy();
         while (!this.queue.offer(dataSupplier)) {
-            if (overflowPolicy == OverflowPolicy.SYNC) {
-                this.delegateSink.write(dataSupplier.get());
-                return;
-            } else if (overflowPolicy == OverflowPolicy.DISCARD) {
-                logger.severe("Async queue is full, data will be discarded");
-                return;
-            } else if (overflowPolicy == OverflowPolicy.ERROR) {
-                throw new ProfilerOutputSinkException(String.format("Unable to offer data to async queue: %s", outputData));
+            switch (overflowPolicy) {
+                case SYNC:
+                    logger.severe("Async queue is full, data will be written sync");
+                    this.delegateSink.write(dataSupplier.get());
+                    return;
+                case DISCARD:
+                    logger.severe("Async queue is full, data will be discarded");
+                    return;
+                case ERROR:
+                    throw new ProfilerOutputSinkException(String.format("Unable to offer data to async queue: %s", outputData));
             }
         }
     }
@@ -103,5 +99,17 @@ final class AsyncOutputDataSink<S, T> implements OutputDataSink<S> {
         if (!dataItems.isEmpty()) {
             this.delegateSink.write(dataItems);
         }
+    }
+
+    private ThreadFactory createAsyncFlushingThreadFactory() {
+        final AtomicInteger counter = new AtomicInteger();
+        return r -> {
+            final Thread thread = new Thread(r);
+            thread.setDaemon(true);
+            thread.setName(FLUSHING_THREAD_NAME_PREFIX + counter.getAndIncrement());
+            thread.setUncaughtExceptionHandler((t, e) -> logger.log(Level.SEVERE, "Unable to flush data", e));
+
+            return thread;
+        };
     }
 }

@@ -1,9 +1,10 @@
 package ru.joke.profiler.output.handlers.http2;
 
+import ru.joke.profiler.configuration.meta.ConfigurationParser;
 import ru.joke.profiler.output.handlers.OutputData;
 import ru.joke.profiler.output.handlers.OutputDataSink;
 import ru.joke.profiler.output.handlers.async.AsyncOutputDataSinkHandleSupport;
-import ru.joke.profiler.output.handlers.util.JsonObjectPropertiesInjector;
+import ru.joke.profiler.output.handlers.util.injectors.JsonObjectPropertiesInjector;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -35,9 +36,7 @@ public final class OutputDataHttp2SinkHandle extends AsyncOutputDataSinkHandleSu
             final Map<String, String> properties,
             final Map<String, Object> context
     ) {
-
-        final Http2SinkConfigurationLoader configurationLoader = new Http2SinkConfigurationLoader();
-        final Http2SinkConfiguration configuration = configurationLoader.load(properties);
+        final Http2SinkConfiguration configuration = ConfigurationParser.parse(Http2SinkConfiguration.class, properties);
 
         final Http2MessageChannel channel = buildMessageChannel(configuration);
         return new OutputDataHttp2Sink(channel);
@@ -54,9 +53,12 @@ public final class OutputDataHttp2SinkHandle extends AsyncOutputDataSinkHandleSu
     private Http2MessageChannel buildMessageChannel(final Http2SinkConfiguration configuration) {
 
         final Http2SinkConfiguration.OutputMessageConfiguration outputMessageConfiguration = configuration.outputMessageConfiguration();
-        final Http2RequestProducerFactory requestProducerFactory = new Http2RequestProducerFactory(outputMessageConfiguration);
+        final Http2SinkConfiguration.OutputEndpointConfiguration outputEndpointConfiguration = configuration.outputEndpointConfiguration();
+        final Http2RequestProducerFactory requestProducerFactory = new Http2RequestProducerFactory(outputEndpointConfiguration, outputMessageConfiguration);
+
         final Http2MessageFactory messageFactory = buildMessageFactory(outputMessageConfiguration);
-        final Http2ClientFactory clientFactory = new Http2ClientFactory(configuration.http2ClientConfiguration());
+        final Http2ClientCredentialsProviderFactory credentialsProviderFactory = new Http2ClientCredentialsProviderFactory(outputEndpointConfiguration);
+        final Http2ClientFactory clientFactory = new Http2ClientFactory(configuration.http2ClientConfiguration(), credentialsProviderFactory);
 
         return new Http2MessageChannel(
                 configuration.processingConfiguration(),

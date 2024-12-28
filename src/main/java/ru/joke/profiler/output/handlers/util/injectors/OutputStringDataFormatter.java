@@ -1,6 +1,6 @@
-package ru.joke.profiler.output.handlers.util;
+package ru.joke.profiler.output.handlers.util.injectors;
 
-import ru.joke.profiler.configuration.ProfilingTimeUnit;
+import ru.joke.profiler.configuration.util.ProfilingTimeUnit;
 import ru.joke.profiler.output.handlers.OutputData;
 
 import java.time.LocalDateTime;

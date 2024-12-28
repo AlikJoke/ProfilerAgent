@@ -1,6 +1,6 @@
 package ru.joke.profiler.configuration;
 
-import ru.joke.profiler.output.handlers.stream.console.OutputDataConsoleSinkHandle;
+import ru.joke.profiler.configuration.meta.ConfigurationParser;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,13 +11,17 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Properties;
 import java.util.function.Function;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public final class ProfilingConfigurationLoader {
 
     private static final Logger logger = Logger.getLogger(ProfilingConfigurationLoader.class.getCanonicalName());
+
+    private static final String CONFIGURATION_FILE_PATH_ARG = "conf_file";
 
     private final String configurationFilePath;
 
@@ -29,7 +33,7 @@ public final class ProfilingConfigurationLoader {
                     Arrays.stream(agentArgs.split(";"))
                             .map(arg -> arg.split("="))
                             .filter(arg -> arg.length > 1 && !arg[1].isEmpty())
-                            .filter(arg -> ConfigurationProperties.CONFIGURATION_FILE_PATH_ARG.equalsIgnoreCase(arg[0]))
+                            .filter(arg -> CONFIGURATION_FILE_PATH_ARG.equalsIgnoreCase(arg[0]))
                             .map(arg -> arg[1])
                             .findAny()
                             .orElse(null);
@@ -47,26 +51,18 @@ public final class ProfilingConfigurationLoader {
             return null;
         }
 
-        return loadByConfigFile(DynamicProfilingConfiguration::create);
+        return loadByConfigFile(DynamicProfilingConfiguration.class);
     }
 
     public StaticProfilingConfiguration loadStatic() {
         if (this.configurationFilePath == null) {
-            return new StaticProfilingConfiguration(
-                    null,
-                    0,
-                    false,
-                    0,
-                    false,
-                    OutputDataConsoleSinkHandle.SINK_TYPE,
-                    Collections.emptyMap()
-            );
+            return ConfigurationParser.parse(StaticProfilingConfiguration.class, Collections.emptyMap());
         }
 
-        return loadByConfigFile(StaticProfilingConfiguration::create);
+        return loadByConfigFile(StaticProfilingConfiguration.class);
     }
 
-    private <T> T loadByConfigFile(final Function<Properties, T> configurationFunc) {
+    private <T> T loadByConfigFile(final Class<T> configurationType) {
 
         final Path configurationFilePath = Paths.get(this.configurationFilePath);
         final File configurationFile = configurationFilePath.toFile();
@@ -78,7 +74,13 @@ public final class ProfilingConfigurationLoader {
             final Properties props = new Properties();
             props.load(fis);
 
-            return configurationFunc.apply(props);
+
+            final Map<String, String> mapProperties =
+                    props.stringPropertyNames()
+                            .stream()
+                            .collect(Collectors.toMap(Function.identity(), props::getProperty));
+
+            return ConfigurationParser.parse(configurationType, mapProperties);
         } catch (IOException e) {
             throw new InvalidConfigurationException(String.format("Unable to create configuration from file %s", this.configurationFilePath), e);
         }

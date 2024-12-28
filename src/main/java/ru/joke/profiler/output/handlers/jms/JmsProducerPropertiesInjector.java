@@ -1,7 +1,7 @@
 package ru.joke.profiler.output.handlers.jms;
 
 import jakarta.jms.JMSProducer;
-import ru.joke.profiler.output.handlers.util.OutputPropertiesInjector;
+import ru.joke.profiler.output.handlers.util.injectors.OutputPropertiesInjector;
 
 import java.time.LocalDateTime;
 import java.util.Map;

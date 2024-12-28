@@ -1,4 +1,4 @@
-package ru.joke.profiler.configuration;
+package ru.joke.profiler.configuration.util;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;

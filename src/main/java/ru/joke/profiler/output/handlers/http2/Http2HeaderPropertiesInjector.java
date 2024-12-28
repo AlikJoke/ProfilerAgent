@@ -2,7 +2,7 @@ package ru.joke.profiler.output.handlers.http2;
 
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.message.BasicHeader;
-import ru.joke.profiler.output.handlers.util.OutputPropertiesInjector;
+import ru.joke.profiler.output.handlers.util.injectors.OutputPropertiesInjector;
 
 import java.time.LocalDateTime;
 import java.util.Map;

@@ -10,4 +10,6 @@ public @interface ProfilerConfigurationPropertiesWrapper {
     String prefix() default "";
 
     Class<? extends ConfigurationParser> parser() default DefaultConfigurationParser.class;
+
+    String conditionalOn() default "";
 }

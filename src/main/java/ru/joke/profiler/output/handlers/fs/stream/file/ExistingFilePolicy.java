@@ -1,22 +1,24 @@
-package ru.joke.profiler.output.handlers.stream.file;
+package ru.joke.profiler.output.handlers.fs.stream.file;
 
+import ru.joke.profiler.configuration.meta.ProfilerDefaultEnumProperty;
 import ru.joke.profiler.output.handlers.ProfilerOutputSinkException;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
-public enum ExistingFilePolicy {
+enum ExistingFilePolicy {
 
+    @ProfilerDefaultEnumProperty
     REWRITE {
         @Override
-        public Writer createWriter(String path) throws IOException {
+        Writer createWriter(String path) throws IOException {
             return new OutputStreamWriter(new FileOutputStream(path, false), StandardCharsets.UTF_8);
         }
     },
 
     ROTATE {
         @Override
-        public Writer createWriter(String path) throws IOException {
+        Writer createWriter(String path) throws IOException {
             final File oldFile = new File(path);
             final File renamedFile = findNextAvailable(path);
             if (oldFile.exists()) {
@@ -41,20 +43,10 @@ public enum ExistingFilePolicy {
 
     APPEND {
         @Override
-        public Writer createWriter(String path) throws IOException {
+        Writer createWriter(String path) throws IOException {
             return new OutputStreamWriter(new FileOutputStream(path, true), StandardCharsets.UTF_8);
         }
     };
 
-    public abstract Writer createWriter(final String path) throws IOException;
-
-    public static ExistingFilePolicy parse(final String alias) {
-        for (final ExistingFilePolicy policy : values()) {
-            if (policy.name().equalsIgnoreCase(alias)) {
-                return policy;
-            }
-        }
-
-        return ExistingFilePolicy.REWRITE;
-    }
+    abstract Writer createWriter(final String path) throws IOException;
 }

@@ -7,12 +7,10 @@ import jakarta.jms.JMSRuntimeException;
 import ru.joke.profiler.output.handlers.OutputData;
 import ru.joke.profiler.output.handlers.OutputDataSink;
 import ru.joke.profiler.output.handlers.ProfilerOutputSinkException;
-import ru.joke.profiler.output.handlers.util.OutputPropertiesInjector;
+import ru.joke.profiler.output.handlers.util.injectors.OutputPropertiesInjector;
 import ru.joke.profiler.output.handlers.util.pool.ConnectionPool;
-import ru.joke.profiler.output.handlers.util.pool.ConnectionPoolConfiguration;
 import ru.joke.profiler.output.handlers.util.pool.ConnectionPoolFactory;
 import ru.joke.profiler.output.handlers.util.recovery.ConnectionRecoveryConfiguration;
-import ru.joke.profiler.output.handlers.util.recovery.ProcessingInRecoveryStatePolicy;
 import ru.joke.profiler.output.handlers.util.recovery.RecoveryProcessor;
 
 import javax.naming.InitialContext;
@@ -52,12 +50,11 @@ final class JmsMessageChannel implements AutoCloseable {
             final OutputPropertiesInjector<StringBuilder> outputMessageBodyBuilder,
             final OutputPropertiesInjector<JMSProducer> producerPropertiesInjector
     ) {
-        final ConnectionPoolConfiguration poolConfiguration = configuration.connectionConfiguration().connectionPoolConfiguration();
-        this.connectionPool = connectionPoolFactory.create(poolConfiguration);
+        this.connectionPool = connectionPoolFactory.create(configuration.connectionPoolConfiguration());
         this.configuration = configuration;
         this.outputMessageBodyBuilder = outputMessageBodyBuilder;
         this.producerPropertiesInjector = producerPropertiesInjector;
-        this.outputEndpoint = lookup(configuration.outputMessageConfiguration().targetEndpointJndiName());
+        this.outputEndpoint = lookup(configuration.outputDestinationConfiguration().destinationJndiName());
         this.recoveryExecutor = Executors.newSingleThreadExecutor(r -> {
             final Thread thread = new Thread(r);
             thread.setDaemon(true);
@@ -190,7 +187,7 @@ final class JmsMessageChannel implements AutoCloseable {
         }
 
         final ConnectionRecoveryConfiguration recoveryConfiguration = this.configuration.recoveryConfiguration();
-        final ProcessingInRecoveryStatePolicy policy = recoveryConfiguration.processingInRecoveryStatePolicy();
+        final ConnectionRecoveryConfiguration.ProcessingInRecoveryStatePolicy policy = recoveryConfiguration.processingInRecoveryStatePolicy();
         switch (policy) {
             case WAIT:
                 if (switchedToRecoveryState) {

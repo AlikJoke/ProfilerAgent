@@ -27,7 +27,7 @@ public final class DynamicConfigurableExecutionTimeRegistrar extends ExecutionTi
     public void registerMethodEnter(final String method) {
 
         final DynamicExecutionContext executionContext = findOrCreateExecutionContext();
-        if (executionContext.configuration != null && ++executionContext.depth > executionContext.configuration.getProfiledTraceMaxDepth()) {
+        if (executionContext.configuration != null && ++executionContext.depth > executionContext.configuration.profiledTraceMaxDepth()) {
             return;
         }
 
@@ -38,8 +38,8 @@ public final class DynamicConfigurableExecutionTimeRegistrar extends ExecutionTi
             }
 
             if ((executionContext.configuration == null
-                    || executionContext.configuration.getProfilingRootsFilter() == null
-                    || executionContext.configuration.getProfilingRootsFilter().test(method)
+                    || executionContext.configuration.profilingRootsFilter() == null
+                    || executionContext.configuration.profilingRootsFilter().test(method)
                     || this.delegate.isRegistrationOccurredOnTrace())) {
                 this.delegate.registerMethodEnter(method);
             }
@@ -54,7 +54,7 @@ public final class DynamicConfigurableExecutionTimeRegistrar extends ExecutionTi
     public void registerMethodExit() {
         final DynamicExecutionContext executionContext = findOrCreateExecutionContext();
         try {
-            if (executionContext.configuration != null && executionContext.depth-- > executionContext.configuration.getProfiledTraceMaxDepth()) {
+            if (executionContext.configuration != null && executionContext.depth-- > executionContext.configuration.profiledTraceMaxDepth()) {
                 return;
             }
 
@@ -81,7 +81,7 @@ public final class DynamicConfigurableExecutionTimeRegistrar extends ExecutionTi
     ) {
         final DynamicExecutionContext executionContext = findOrCreateExecutionContext();
         try {
-            if (executionContext.configuration != null && executionContext.depth-- > executionContext.configuration.getProfiledTraceMaxDepth()
+            if (executionContext.configuration != null && executionContext.depth-- > executionContext.configuration.profiledTraceMaxDepth()
                     || isTracingRegistrationEnabled() && !this.delegate.isRegistrationOccurredOnTrace()) {
                 return;
             }
@@ -92,7 +92,7 @@ public final class DynamicConfigurableExecutionTimeRegistrar extends ExecutionTi
             }
 
             if (!isProfiled(executionContext.configuration, method)
-                    || executionContext.configuration.getMinExecutionThreshold() > methodElapsedTime) {
+                    || executionContext.configuration.minExecutionThresholdNs() > methodElapsedTime) {
                 this.delegate.registerMethodExit();
                 return;
             }
@@ -116,14 +116,14 @@ public final class DynamicConfigurableExecutionTimeRegistrar extends ExecutionTi
     }
 
     private boolean isTracingRegistrationEnabled() {
-        return this.staticProfilingConfiguration.isExecutionTracingEnabled();
+        return this.staticProfilingConfiguration.executionTracingEnabled();
     }
 
     private boolean isProfiled(final DynamicProfilingConfiguration dynamicConfig, final String method) {
         final Thread currentThread = Thread.currentThread();
-        return !dynamicConfig.isProfilingDisabled()
+        return !dynamicConfig.profilingDisabled()
                 && dynamicConfig.isResourceMustBeProfiled(method)
-                && (dynamicConfig.getThreadsFilter() == null || dynamicConfig.getThreadsFilter().test(currentThread.getName()));
+                && (dynamicConfig.threadsFilter() == null || dynamicConfig.threadsFilter().test(currentThread.getName()));
     }
 
     private DynamicExecutionContext findOrCreateExecutionContext() {

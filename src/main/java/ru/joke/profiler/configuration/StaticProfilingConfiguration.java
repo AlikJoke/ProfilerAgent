@@ -1,58 +1,79 @@
 package ru.joke.profiler.configuration;
 
+import ru.joke.profiler.configuration.meta.ProfilerConfigurationPropertiesWrapper;
+import ru.joke.profiler.configuration.meta.ProfilerConfigurationProperty;
+import ru.joke.profiler.configuration.util.MapConfigurationPropertiesParser;
+import ru.joke.profiler.configuration.util.MillisTimePropertyParser;
+import ru.joke.profiler.configuration.util.NanoTimePropertyParser;
+import ru.joke.profiler.output.handlers.fs.stream.console.OutputDataConsoleSinkHandle;
+
 import java.util.Collections;
 import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
-import static ru.joke.profiler.configuration.ConfigurationProperties.*;
 
 public final class StaticProfilingConfiguration extends ProfilingConfiguration {
 
-    private static final long DEFAULT_DYNAMIC_CONFIG_REFRESHING_INTERVAL = 60_000;
+    private static final String STATIC_PREFIX = "static.";
+    private static final String SINK_PROPERTIES_PREFIX = "sink.";
+    private static final String SINK_TYPE = SINK_PROPERTIES_PREFIX + "sink.type";
+    private static final String INCLUDED_RESOURCES = "included_resources";
+    private static final String INCLUDED_RESOURCES_MASK = "included_resources_mask";
+    private static final String DYNAMIC_CONFIGURATION_ENABLED = "dynamic_conf_enabled";
+    private static final String DYNAMIC_CONFIGURATION_REFRESH_INTERVAL = "dynamic_conf_refresh_interval";
+    private static final String EXECUTION_TRACING_ENABLED = "execution_tracing_enabled";
 
     private final boolean dynamicConfigurationEnabled;
-    private final long dynamicConfigurationRefreshInterval;
+    private final long dynamicConfigurationRefreshIntervalMs;
     private final boolean executionTracingEnabled;
     private final String sinkType;
     private final Map<String, String> sinkProperties;
 
+    @ProfilerConfigurationPropertiesWrapper(prefix = STATIC_PREFIX)
     StaticProfilingConfiguration(
-            final Predicate<String> resourcesFilter,
-            final long minExecutionThreshold,
-            final boolean dynamicConfigurationEnabled,
-            final long dynamicConfigurationRefreshIntervalMs,
-            final boolean executionTracingEnabled,
-            final String sinkType,
-            final Map<String, String> sinkProperties
+            @ProfilerConfigurationProperty(name = INCLUDED_RESOURCES) final String includedResources,
+            @ProfilerConfigurationProperty(name = INCLUDED_RESOURCES_MASK) final String includedResourcesMask,
+            @ProfilerConfigurationProperty(name = EXCLUDED_RESOURCES) final String excludedResources,
+            @ProfilerConfigurationProperty(name = INCLUDED_RESOURCES_MASK) final String excludedResourcesMask,
+            @ProfilerConfigurationProperty(name = MIN_EXECUTION_THRESHOLD, defaultValue = "0", parser = NanoTimePropertyParser.class) final long minExecutionThresholdNs,
+            @ProfilerConfigurationProperty(name = DYNAMIC_CONFIGURATION_ENABLED) final boolean dynamicConfigurationEnabled,
+            @ProfilerConfigurationProperty(name = DYNAMIC_CONFIGURATION_REFRESH_INTERVAL, defaultValue = "1m", parser = MillisTimePropertyParser.class) final long dynamicConfigurationRefreshIntervalMs,
+            @ProfilerConfigurationProperty(name = EXECUTION_TRACING_ENABLED) final boolean executionTracingEnabled,
+            @ProfilerConfigurationProperty(name = SINK_TYPE, defaultValue = OutputDataConsoleSinkHandle.SINK_TYPE) final String sinkType,
+            @ProfilerConfigurationPropertiesWrapper(prefix = SINK_PROPERTIES_PREFIX, parser = MapConfigurationPropertiesParser.class) final Map<String, String> sinkProperties
     ) {
-        super(resourcesFilter, minExecutionThreshold);
+        super(
+                composeResourcesFilter(
+                        includedResources,
+                        includedResourcesMask,
+                        excludedResources,
+                        excludedResourcesMask,
+                        '/'
+                ),
+                minExecutionThresholdNs
+        );
         this.dynamicConfigurationEnabled = dynamicConfigurationEnabled;
-        this.dynamicConfigurationRefreshInterval = dynamicConfigurationRefreshIntervalMs;
+        this.dynamicConfigurationRefreshIntervalMs = dynamicConfigurationRefreshIntervalMs;
         this.executionTracingEnabled = executionTracingEnabled;
         this.sinkType = sinkType;
         this.sinkProperties = Collections.unmodifiableMap(sinkProperties);
     }
 
-    public boolean isDynamicConfigurationEnabled() {
+    public boolean dynamicConfigurationEnabled() {
         return dynamicConfigurationEnabled;
     }
 
-    public long getDynamicConfigurationRefreshInterval() {
-        return dynamicConfigurationRefreshInterval;
+    public long dynamicConfigurationRefreshIntervalMs() {
+        return dynamicConfigurationRefreshIntervalMs;
     }
 
-    public boolean isExecutionTracingEnabled() {
+    public boolean executionTracingEnabled() {
         return executionTracingEnabled;
     }
 
-    public Map<String, String> getSinkProperties() {
+    public Map<String, String> sinkProperties() {
         return sinkProperties;
     }
 
-    public String getSinkType() {
+    public String sinkType() {
         return sinkType;
     }
 
@@ -60,73 +81,11 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
     public String toString() {
         return "StaticProfilingConfiguration{"
                 + "dynamicConfigurationEnabled=" + dynamicConfigurationEnabled
-                + ", dynamicConfigurationRefreshInterval=" + dynamicConfigurationRefreshInterval
+                + ", dynamicConfigurationRefreshIntervalMs=" + dynamicConfigurationRefreshIntervalMs
                 + ", executionTracingEnabled=" + executionTracingEnabled
-                + ", minExecutionThreshold=" + minExecutionThreshold
+                + ", minExecutionThreshold=" + minExecutionThresholdNs
                 + ", sinkType=" + sinkType
                 + ", sinkProperties=" + sinkProperties
                 + '}';
-    }
-
-    static StaticProfilingConfiguration create(final Properties props) {
-        final String includedResourcesStr = props.getProperty(STATIC_INCLUDED_RESOURCES, "");
-        final Set<String> includedResources = parseResourcesArg(includedResourcesStr, '/');
-
-        final String excludedResourcesStr = props.getProperty(STATIC_EXCLUDED_RESOURCES, "");
-        final Set<String> excludedResources = parseResourcesArg(excludedResourcesStr, '/');
-
-        final String includedResourcesMask = props.getProperty(STATIC_INCLUDED_RESOURCES_MASK);
-        final String excludedResourcesMask = props.getProperty(STATIC_EXCLUDED_RESOURCES_MASK);
-
-        final String minExecutionThresholdStr = props.getProperty(STATIC_MIN_EXECUTION_THRESHOLD);
-        final String minExecThresholdTimeUnitStr = props.getProperty(STATIC_MIN_EXECUTION_THRESHOLD_TU);
-
-        final Predicate<String> resourcesFilter = composeJoinedResourcesFilter(includedResources, includedResourcesMask, excludedResources, excludedResourcesMask);
-        final long executionThresholdNs = parseExecutionThreshold(minExecutionThresholdStr, minExecThresholdTimeUnitStr);
-
-        final boolean dynamicConfigurationEnabled = parseBooleanProperty(props, STATIC_DYNAMIC_CONFIGURATION_ENABLED);
-
-        final long dynamicConfigurationRefreshInterval = parseLongProperty(props, STATIC_DYNAMIC_CONFIGURATION_REFRESH_INTERVAL, DEFAULT_DYNAMIC_CONFIG_REFRESHING_INTERVAL);
-
-        final String dynamicConfigurationRefreshIntervalTimeUnitStr = props.getProperty(STATIC_DYNAMIC_CONFIGURATION_REFRESH_INTERVAL_TU);
-        final ProfilingTimeUnit dynamicConfigurationRefreshIntervalTimeUnit = ProfilingTimeUnit.parse(dynamicConfigurationRefreshIntervalTimeUnitStr, ProfilingTimeUnit.MILLISECONDS);
-        final long dynamicConfigurationRefreshIntervalMs = dynamicConfigurationRefreshIntervalTimeUnit.toJavaTimeUnit().toMillis(dynamicConfigurationRefreshInterval);
-
-        final boolean executionTracingEnabled = parseBooleanProperty(props, STATIC_EXECUTION_TRACING_ENABLED);
-        final Map<String, String> sinkProperties =
-                props.entrySet()
-                        .stream()
-                        .filter(e -> e.getKey().toString().startsWith(SINK_PROPERTIES_PREFIX))
-                        .filter(e -> e.getValue() != null && !String.valueOf(e.getValue()).isEmpty())
-                        .collect(Collectors.toMap(e -> e.getKey().toString(), e -> String.valueOf(e.getValue())));
-
-        final String sinkType = props.getProperty(STATIC_SINK_TYPE);
-
-        return new StaticProfilingConfiguration(
-                resourcesFilter,
-                executionThresholdNs,
-                dynamicConfigurationEnabled,
-                dynamicConfigurationRefreshIntervalMs,
-                executionTracingEnabled,
-                sinkType,
-                sinkProperties
-        );
-    }
-
-    private static Predicate<String> composeJoinedResourcesFilter(
-            final Set<String> includedResources,
-            final String includedResourcesMask,
-            final Set<String> excludedResources,
-            final String excludedResourcesMask
-    ) {
-
-        final Predicate<String> resourcesFilterByExcluded = composeResourcesFilter(excludedResources, excludedResourcesMask, true);
-        final Predicate<String> resourcesFilterByIncluded = composeResourcesFilter(includedResources, includedResourcesMask, false);
-
-        return resourcesFilterByExcluded == null
-                ? resourcesFilterByIncluded
-                : resourcesFilterByIncluded == null
-                    ? resourcesFilterByExcluded
-                    : resourcesFilterByIncluded.and(resourcesFilterByExcluded);
     }
 }

@@ -14,6 +14,7 @@ import static ru.joke.profiler.configuration.meta.ReflectionUtil.findAnnotatedCo
 public interface ConfigurationParser<T> {
 
     T parse(
+            Class<T> type,
             AnnotatedElement annotatedElement,
             ProfilerConfigurationPropertiesWrapper configuration,
             Map<String, String> properties
@@ -23,14 +24,16 @@ public interface ConfigurationParser<T> {
             Class<T> configurationType,
             Map<String, String> properties
     ) {
-        CacheableParsersFactory.init();
+        final boolean init = CacheableParsersFactory.init();
         try {
             final Optional<Constructor<T>> constructor = findAnnotatedConstructor(configurationType, ProfilerConfigurationPropertiesWrapper.class);
             return constructor
                     .map(c -> parse(configurationType, c, properties))
                     .orElseThrow(() -> new InvalidConfigurationException(String.format("No any annotated by %s constructor found on class %s", ProfilerConfigurationPropertiesWrapper.class.getCanonicalName(), configurationType.getCanonicalName())));
         } finally {
-            CacheableParsersFactory.clear();
+            if (init) {
+                CacheableParsersFactory.clear();
+            }
         }
     }
 
@@ -54,7 +57,8 @@ public interface ConfigurationParser<T> {
                                     .stream()
                                     .filter(e -> e.getKey().startsWith(propertiesPrefix))
                                     .collect(Collectors.toMap(e -> e.getKey().substring(propertiesPrefix.length()), Map.Entry::getValue, (v1, v2) -> v1));
-        return parser.parse(annotatedElement, wrapper, configurationProperties);
+
+        return parser.parse(tokenType, annotatedElement, wrapper, configurationProperties);
     }
 
     abstract class CacheableParsersFactory {
@@ -71,8 +75,13 @@ public interface ConfigurationParser<T> {
             return parser;
         }
 
-        private static void init() {
+        private static boolean init() {
+            if (parsersThreadCache != null) {
+                return false;
+            }
+
             parsersThreadCache = ThreadLocal.withInitial(HashMap::new);
+            return true;
         }
 
         private static void clear() {

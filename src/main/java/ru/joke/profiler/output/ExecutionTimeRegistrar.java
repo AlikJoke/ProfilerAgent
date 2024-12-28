@@ -9,13 +9,11 @@ public abstract class ExecutionTimeRegistrar {
 
     private static ExecutionTimeRegistrar registrarInstance;
 
-    @SuppressWarnings("unused")
     @MethodInstanceAccessorHandle
     public static ExecutionTimeRegistrar getInstance() {
         return registrarInstance;
     }
 
-    @SuppressWarnings("unused")
     @MethodEnterHandle
     public void registerMethodEnter(final String method) {
 

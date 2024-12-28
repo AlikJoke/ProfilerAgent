@@ -1,4 +1,4 @@
-package ru.joke.profiler.output.handlers.util;
+package ru.joke.profiler.output.handlers.util.injectors;
 
 import java.time.LocalDateTime;
 import java.util.Map;

@@ -1,5 +1,7 @@
 package ru.joke.profiler.configuration.meta;
 
+import ru.joke.profiler.configuration.InvalidConfigurationException;
+
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Parameter;
@@ -13,23 +15,33 @@ public final class DefaultConfigurationParser<T> implements ConfigurationParser<
 
     @Override
     public T parse(
+            final Class<T> type,
             final AnnotatedElement annotatedElement,
             final ProfilerConfigurationPropertiesWrapper configuration,
             final Map<String, String> properties
     ) {
-        if (!(annotatedElement instanceof Constructor)) {
-            throw new UnsupportedOperationException("Supported only constructor as annotated element in this implementation");
-        }
-
-        @SuppressWarnings("unchecked")
-        final Constructor<T> constructor = (Constructor<T>) annotatedElement;
-        final Object[] args = new Object[constructor.getParameterCount()];
-        for (int i = 0; i < constructor.getParameterCount(); i++) {
-            final Parameter parameter = constructor.getParameters()[i];
+        final Constructor<T> targetConstructor = findConstructor(type, annotatedElement);
+        final Object[] args = new Object[targetConstructor.getParameterCount()];
+        for (int i = 0; i < targetConstructor.getParameterCount(); i++) {
+            final Parameter parameter = targetConstructor.getParameters()[i];
             args[i] = createPropertyInstance(parameter, properties);
         }
 
-        return createInstance(constructor, args);
+        return createInstance(targetConstructor, args);
+    }
+
+    private Constructor<T> findConstructor(
+            final Class<T> type,
+            final AnnotatedElement annotatedElement
+    ) {
+        if (!(annotatedElement instanceof Constructor)) {
+            return findAnnotatedConstructor(type, ProfilerConfigurationPropertiesWrapper.class)
+                    .orElseThrow(() -> new InvalidConfigurationException("Supported only constructor as annotated element in this implementation"));
+        } else {
+            @SuppressWarnings("unchecked")
+            final Constructor<T> annotatedConstructor = (Constructor<T>) annotatedElement;
+            return annotatedConstructor;
+        }
     }
 
     private Object createPropertyInstance(

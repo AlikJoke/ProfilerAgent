@@ -16,10 +16,13 @@ final class Http2RequestProducerFactory {
     private final ContentType contentType;
     private final HttpHost targetHost;
 
-    Http2RequestProducerFactory(final Http2SinkConfiguration.OutputMessageConfiguration configuration) {
-        this.outputEndpoint = configuration.outputEndpoint();
-        this.contentType = ContentType.create(configuration.contentType(), StandardCharsets.UTF_8);
-        this.targetHost = new HttpHost(configuration.outputScheme(), configuration.outputHost(), configuration.outputPort());
+    Http2RequestProducerFactory(
+            final Http2SinkConfiguration.OutputEndpointConfiguration endpointConfiguration,
+            final Http2SinkConfiguration.OutputMessageConfiguration messageConfiguration
+    ) {
+        this.outputEndpoint = endpointConfiguration.outputEndpoint();
+        this.contentType = ContentType.create(messageConfiguration.contentType(), StandardCharsets.UTF_8);
+        this.targetHost = new HttpHost(endpointConfiguration.outputScheme(), endpointConfiguration.outputHost(), endpointConfiguration.outputPort());
     }
 
     AsyncRequestProducer create(final Http2Message message) {

@@ -1,47 +1,75 @@
 package ru.joke.profiler.configuration;
 
-import java.util.Properties;
-import java.util.Set;
+import ru.joke.profiler.configuration.meta.ProfilerConfigurationPropertiesWrapper;
+import ru.joke.profiler.configuration.meta.ProfilerConfigurationProperty;
+import ru.joke.profiler.configuration.util.NanoTimePropertyParser;
+
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
-import static ru.joke.profiler.configuration.ConfigurationProperties.*;
-
 public final class DynamicProfilingConfiguration extends ProfilingConfiguration {
+
+    private static final String DYNAMIC_PREFIX = "dynamic.";
+    private static final String EXCLUDED_THREADS_MASK = "excluded_threads_mask";
+    private static final String PROFILING_DISABLED = "profiling_disabled";
+    private static final String PROFILING_ROOTS = "profiling_roots";
+    private static final String PROFILING_ROOTS_MASK = "profiling_roots_mask";
+    private static final String PROFILED_STACKTRACE_MAX_DEPTH = "profiled_stacktrace_max_depth";
 
     private final boolean profilingDisabled;
     private final Predicate<String> threadsFilter;
     private final Predicate<String> profilingRootsFilter;
     private final int profiledTraceMaxDepth;
 
+    @ProfilerConfigurationPropertiesWrapper(prefix = DYNAMIC_PREFIX)
     private DynamicProfilingConfiguration(
-            final long minExecutionThresholdNs,
-            final Predicate<String> resourcesFilter,
-            final Predicate<String> threadsFilter,
-            final Predicate<String> profilingRootsFilter,
-            final boolean profilingDisabled,
-            final int profiledTraceMaxDepth
+            @ProfilerConfigurationProperty(name = MIN_EXECUTION_THRESHOLD, defaultValue = "0", parser = NanoTimePropertyParser.class) final long minExecutionThresholdNs,
+            @ProfilerConfigurationProperty(name = EXCLUDED_RESOURCES) final String excludedResources,
+            @ProfilerConfigurationProperty(name = EXCLUDED_RESOURCES_MASK) final String excludedResourcesMask,
+            @ProfilerConfigurationProperty(name = EXCLUDED_THREADS_MASK) final String excludedThreadsMask,
+            @ProfilerConfigurationProperty(name = PROFILING_ROOTS) final String profilingRoots,
+            @ProfilerConfigurationProperty(name = PROFILING_ROOTS_MASK) final String profilingRootsMask,
+            @ProfilerConfigurationProperty(name = PROFILING_DISABLED) final boolean profilingDisabled,
+            @ProfilerConfigurationProperty(name = PROFILED_STACKTRACE_MAX_DEPTH, defaultValue = "-1") final int profiledTraceMaxDepth
     ) {
-        super(resourcesFilter, minExecutionThresholdNs);
-        this.threadsFilter = threadsFilter;
+        super(
+                composeResourcesFilter(
+                        null,
+                        null,
+                        excludedResources,
+                        excludedResourcesMask,
+                        '/'
+                ),
+                minExecutionThresholdNs
+        );
+        this.threadsFilter =
+                excludedThreadsMask.isEmpty()
+                        ? null
+                        : Pattern.compile(excludedThreadsMask).asPredicate().negate();
         this.profilingDisabled = profilingDisabled;
-        this.profilingRootsFilter = profilingRootsFilter;
-        this.profiledTraceMaxDepth = profiledTraceMaxDepth;
+        this.profilingRootsFilter = composeResourcesFilter(
+                profilingRoots,
+                profilingRootsMask,
+                null,
+                null,
+                '.'
+        );
+        this.profiledTraceMaxDepth = profiledTraceMaxDepth == -1 ? Integer.MAX_VALUE : -1;
     }
 
-    public boolean isProfilingDisabled() {
+    public boolean profilingDisabled() {
         return profilingDisabled;
     }
 
-    public Predicate<String> getThreadsFilter() {
+    public Predicate<String> threadsFilter() {
         return threadsFilter;
     }
 
-    public Predicate<String> getProfilingRootsFilter() {
+    public Predicate<String> profilingRootsFilter() {
         return profilingRootsFilter;
     }
 
-    public int getProfiledTraceMaxDepth() {
+    public int profiledTraceMaxDepth() {
         return profiledTraceMaxDepth;
     }
 
@@ -53,41 +81,7 @@ public final class DynamicProfilingConfiguration extends ProfilingConfiguration 
                 + ", profilingRootsFilter=" + profilingRootsFilter
                 + ", profiledTraceMaxDepth=" + profiledTraceMaxDepth
                 + ", resourcesFilter=" + resourcesFilter
-                + ", minExecutionThreshold=" + minExecutionThreshold
+                + ", minExecutionThresholdNs=" + minExecutionThresholdNs
                 + '}';
-    }
-
-    static DynamicProfilingConfiguration create(final Properties properties) {
-        final String minExecutionThresholdStr = properties.getProperty(DYNAMIC_MIN_EXECUTION_THRESHOLD);
-        final String minExecutionThresholdTimeUnitStr = properties.getProperty(DYNAMIC_MIN_EXECUTION_THRESHOLD_TU);
-        final long minExecutionThresholdNs = parseExecutionThreshold(minExecutionThresholdStr, minExecutionThresholdTimeUnitStr);
-
-        final String excludedResourcesArg = properties.getProperty(DYNAMIC_EXCLUDED_RESOURCES, "");
-        final Set<String> excludedResources = parseResourcesArg(excludedResourcesArg, '.');
-
-        final String excludedResourcesMask = properties.getProperty(DYNAMIC_EXCLUDED_RESOURCES_MASK);
-        final String excludedThreadsMask = properties.getProperty(DYNAMIC_EXCLUDED_THREADS_MASK);
-        final Predicate<String> threadsFilter =
-                excludedThreadsMask == null || excludedThreadsMask.isEmpty()
-                        ? null
-                        : Pattern.compile(excludedThreadsMask).asPredicate().negate();
-        final Predicate<String> resourcesFilter = composeResourcesFilter(excludedResources, excludedResourcesMask, true);
-
-        final String profilingRootsStr = properties.getProperty(DYNAMIC_PROFILING_ROOTS, "");
-        final Set<String> profilingRoots = parseResourcesArg(profilingRootsStr, '.');
-
-        final String profilingRootsMask = properties.getProperty(DYNAMIC_PROFILING_ROOTS_MASK);
-        final Predicate<String> profilingRootsFilter = composeResourcesFilter(profilingRoots, profilingRootsMask, false);
-
-        final int traceMaxDepth = parseIntProperty(properties, DYNAMIC_PROFILED_STACKTRACE_MAX_DEPTH, Integer.MAX_VALUE);
-        final boolean profilingDisabled = parseBooleanProperty(properties, DYNAMIC_PROFILING_DISABLED);
-        return new DynamicProfilingConfiguration(
-                minExecutionThresholdNs,
-                resourcesFilter,
-                threadsFilter,
-                profilingRootsFilter,
-                profilingDisabled,
-                traceMaxDepth
-        );
     }
 }
