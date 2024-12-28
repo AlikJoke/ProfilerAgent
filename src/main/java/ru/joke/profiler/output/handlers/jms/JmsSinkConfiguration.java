@@ -14,7 +14,8 @@ final class JmsSinkConfiguration {
     JmsSinkConfiguration(
             final ConnectionConfiguration connectionConfiguration,
             final OutputMessageConfiguration outputMessageConfiguration,
-            final ConnectionRecoveryConfiguration recoveryConfiguration) {
+            final ConnectionRecoveryConfiguration recoveryConfiguration
+    ) {
         this.connectionConfiguration = connectionConfiguration;
         this.outputMessageConfiguration = outputMessageConfiguration;
         this.recoveryConfiguration = recoveryConfiguration;
@@ -48,7 +49,8 @@ final class JmsSinkConfiguration {
 
         public ConnectionConfiguration(
                 final String connectionFactoryJndiName,
-                final ConnectionPoolConfiguration connectionPoolConfiguration) {
+                final ConnectionPoolConfiguration connectionPoolConfiguration
+        ) {
             this.connectionFactoryJndiName = connectionFactoryJndiName;
             this.connectionPoolConfiguration = connectionPoolConfiguration;
         }
@@ -91,7 +93,8 @@ final class JmsSinkConfiguration {
                 final long deliveryDelayMs,
                 final boolean persistent,
                 final Map<String, String> bodyPropertiesMapping,
-                final Map<String, String> messagePropertiesMapping) {
+                final Map<String, String> messagePropertiesMapping
+        ) {
             this.targetEndpointJndiName = targetEndpointJndiName;
             this.messageType = messageType;
             this.includeMessageId = includeMessageId;

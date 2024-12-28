@@ -21,7 +21,8 @@ public final class RecoveryProcessor {
             final Runnable cleaningCallback,
             final Runnable recoveryCallback,
             final long maxRecoveryAttemptTimeMillis,
-            final long maxRecoveryTimeoutMillis) {
+            final long maxRecoveryTimeoutMillis
+    ) {
         this.recoveryCallback = Objects.requireNonNull(recoveryCallback, "recoveryCallback");
         this.cleaningCallback = Objects.requireNonNull(cleaningCallback, "cleaningCallback");
         this.maxRecoveryAttemptTimeMillis = maxRecoveryAttemptTimeMillis;

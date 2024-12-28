@@ -17,7 +17,8 @@ public final class ClassProfilingTransformer extends ClassVisitor {
             final ClassWriter classWriter,
             final String className,
             final StaticProfilingConfiguration profilingConfiguration,
-            final ExecutionTimeRegistrarMetadataSelector registrarMetadataSelector) {
+            final ExecutionTimeRegistrarMetadataSelector registrarMetadataSelector
+    ) {
         super(Opcodes.ASM9, classWriter);
         this.className = className;
         this.profilingConfiguration = profilingConfiguration;
@@ -30,7 +31,8 @@ public final class ClassProfilingTransformer extends ClassVisitor {
             final String methodName,
             final String methodDesc,
             final String signature,
-            final String[] exceptions) {
+            final String[] exceptions
+    ) {
         if ((methodAccess & ACC_NATIVE) != 0 || (methodAccess & ACC_ABSTRACT) != 0) {
             return null;
         }
@@ -64,7 +66,8 @@ public final class ClassProfilingTransformer extends ClassVisitor {
                 final MethodVisitor methodVisitor,
                 final String methodName,
                 final StaticProfilingConfiguration profilingConfiguration,
-                final ExecutionTimeRegistrarMetadataSelector registrarMetadataSelector) {
+                final ExecutionTimeRegistrarMetadataSelector registrarMetadataSelector
+        ) {
             super(api, access, descriptor, methodVisitor);
             this.methodName = methodName;
             this.profilingConfiguration = profilingConfiguration;
@@ -98,7 +101,13 @@ public final class ClassProfilingTransformer extends ClassVisitor {
         }
 
         @Override
-        public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
+        public void visitMethodInsn(
+                final int opcode,
+                final String owner,
+                final String name,
+                final String descriptor,
+                final boolean isInterface
+        ) {
             super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
             if (name.equals(CONSTRUCTOR) && this.isConstructor && opcode == INVOKESPECIAL && this.tryStartLabel == null) {
                 injectTryBlockBeginning();
@@ -262,7 +271,11 @@ public final class ClassProfilingTransformer extends ClassVisitor {
             invokeMethodVisitRegistration(enterRegistrationMethod, this.registrarMetadataSelector.selectEnterRegistrationMethodSignature(), true);
         }
 
-        private void invokeMethodVisitRegistration(final String methodName, final String signature, final boolean loadInstrumentedMethodNameAsParameter) {
+        private void invokeMethodVisitRegistration(
+                final String methodName,
+                final String signature,
+                final boolean loadInstrumentedMethodNameAsParameter
+        ) {
             final String registrarClass = this.registrarMetadataSelector.selectRegistrarClass();
             mv.visitMethodInsn(
                     INVOKESTATIC,

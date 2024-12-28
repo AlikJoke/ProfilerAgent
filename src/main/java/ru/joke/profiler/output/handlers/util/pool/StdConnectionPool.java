@@ -26,7 +26,8 @@ public final class StdConnectionPool<T extends PooledConnection> implements Conn
 
     StdConnectionPool(
             final ConnectionFactory<T> connectionFactory,
-            final ConnectionPoolConfiguration configuration) {
+            final ConnectionPoolConfiguration configuration
+    ) {
         this.connectionFactory = connectionFactory;
         this.configuration = configuration;
         this.pool = new ConcurrentLinkedBlockingQueue<>(configuration.maxPoolSize());

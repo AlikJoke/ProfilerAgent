@@ -17,7 +17,8 @@ final class KafkaMessageFactory {
     KafkaMessageFactory(
             final KafkaSinkConfiguration.OutputMessageConfiguration configuration,
             final KafkaHeaderPropertiesInjector headerPropertiesInjector,
-            final Function<OutputData, byte[]> bodyConversionFunc) {
+            final Function<OutputData, byte[]> bodyConversionFunc
+    ) {
         this.configuration = configuration;
         this.bodyConversionFunc = bodyConversionFunc;
         this.headerPropertiesInjector = headerPropertiesInjector;

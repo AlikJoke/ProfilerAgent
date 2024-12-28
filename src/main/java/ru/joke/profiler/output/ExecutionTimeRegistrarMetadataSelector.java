@@ -118,7 +118,8 @@ public final class ExecutionTimeRegistrarMetadataSelector {
     private <T extends Annotation> Method findAnnotatedMethod(
             final Class<?> registrarClass,
             final Class<T> annotation,
-            final Predicate<T> annotationFilter) {
+            final Predicate<T> annotationFilter
+    ) {
         final Method[] methods = registrarClass.getMethods();
         return Arrays.stream(methods)
                         .filter(m -> m.isAnnotationPresent(annotation) && annotationFilter.test(m.getAnnotation(annotation)))

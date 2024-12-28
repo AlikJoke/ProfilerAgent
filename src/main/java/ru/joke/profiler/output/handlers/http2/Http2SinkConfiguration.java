@@ -25,7 +25,8 @@ final class Http2SinkConfiguration {
     Http2SinkConfiguration(
             final OutputMessageConfiguration outputMessageConfiguration,
             final ProcessingConfiguration processingConfiguration,
-            final Http2ClientConfiguration http2ClientConfiguration) {
+            final Http2ClientConfiguration http2ClientConfiguration
+    ) {
         this.outputMessageConfiguration = outputMessageConfiguration;
         this.processingConfiguration = processingConfiguration;
         this.http2ClientConfiguration = http2ClientConfiguration;
@@ -69,7 +70,8 @@ final class Http2SinkConfiguration {
                 final String outputEndpoint,
                 final String contentType,
                 final Map<String, String> propertiesMapping,
-                final Map<String, String> headersMapping) {
+                final Map<String, String> headersMapping
+        ) {
             this.outputScheme = outputScheme;
             this.outputHost = outputHost;
             this.outputPort = outputPort;
@@ -132,7 +134,8 @@ final class Http2SinkConfiguration {
                 final boolean disableAsyncSending,
                 final OnErrorPolicy onErrorPolicy,
                 final int maxRetriesOnError,
-                final long syncSendingWaitMs) {
+                final long syncSendingWaitMs
+        ) {
             this.disableAsyncSending = disableAsyncSending;
             this.onErrorPolicy = onErrorPolicy;
             this.maxRetriesOnError = maxRetriesOnError;
@@ -202,7 +205,8 @@ final class Http2SinkConfiguration {
                 final TLSConfiguration tlsConfiguration,
                 final RequestConfiguration requestConfiguration,
                 final IOConfiguration ioConfiguration,
-                final boolean enableGracefulShutdown) {
+                final boolean enableGracefulShutdown
+        ) {
             this.authenticationConfiguration = authenticationConfiguration;
             this.connectionConfiguration = connectionConfiguration;
             this.tlsConfiguration = tlsConfiguration;
@@ -276,7 +280,8 @@ final class Http2SinkConfiguration {
                     final int maxFrameSize,
                     final boolean compressionDisabled,
                     final int maxConcurrentStreams,
-                    final int initialWindowSize) {
+                    final int initialWindowSize
+            ) {
                 this.maxRetries = maxRetries;
                 this.retriesIntervalMs = retriesIntervalMs;
                 this.authenticationEnabled = authenticationEnabled;
@@ -377,7 +382,8 @@ final class Http2SinkConfiguration {
                     final long validateAfterInactivityIntervalMs,
                     final long socketTimeoutMs,
                     final long connectTimeoutMs,
-                    final long connectionTimeToLiveMs) {
+                    final long connectionTimeToLiveMs
+            ) {
                 this.idleConnectionTimeoutMs = idleConnectionTimeoutMs;
                 this.validateAfterInactivityIntervalMs = validateAfterInactivityIntervalMs;
                 this.socketTimeoutMs = socketTimeoutMs;
@@ -444,7 +450,8 @@ final class Http2SinkConfiguration {
                     final int socksProxyPort,
                     final String socksProxyUsername,
                     final char[] socksProxyPassword,
-                    final long ioTimeoutMs) {
+                    final long ioTimeoutMs
+            ) {
                 this.threadCount = threadCount;
                 this.sendBufferSize = sendBufferSize;
                 this.lingerTimeoutMs = lingerTimeoutMs;
@@ -533,7 +540,8 @@ final class Http2SinkConfiguration {
             AuthenticationConfiguration(
                     final AuthProvider authProvider,
                     final Scope scope,
-                    final Credentials credentials) {
+                    final Credentials credentials
+            ) {
                 this.authProvider = authProvider;
                 this.scope = scope;
                 this.credentials = credentials;
@@ -590,7 +598,12 @@ final class Http2SinkConfiguration {
                 private final String host;
                 private final int port;
 
-                Scope(final String realm, final String scheme, final String host, final int port) {
+                Scope(
+                        final String realm,
+                        final String scheme,
+                        final String host,
+                        final int port
+                ) {
                     this.realm = realm;
                     this.scheme = scheme;
                     this.host = host;
@@ -698,7 +711,11 @@ final class Http2SinkConfiguration {
                 private final String location;
                 private final char[] password;
 
-                KStore(final String type, final String location, final char[] password) {
+                KStore(
+                        final String type,
+                        final String location,
+                        final char[] password
+                ) {
                     this.type = type;
                     this.location = location;
                     this.password = password;
@@ -723,7 +740,8 @@ final class Http2SinkConfiguration {
                     final String protocol,
                     final KStore trustStore,
                     final KStore keyStore,
-                    final char[] keyPassword) {
+                    final char[] keyPassword
+            ) {
                 super(protocol, trustStore);
                 this.keyStore = keyStore;
                 this.keyPassword = keyPassword;

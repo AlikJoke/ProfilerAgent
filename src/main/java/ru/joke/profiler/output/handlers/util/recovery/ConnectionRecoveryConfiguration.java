@@ -9,7 +9,8 @@ public final class ConnectionRecoveryConfiguration {
     public ConnectionRecoveryConfiguration(
             final long recoveryTimeoutMs,
             final long maxRetryRecoveryIntervalMs,
-            final ProcessingInRecoveryStatePolicy processingInRecoveryStatePolicy) {
+            final ProcessingInRecoveryStatePolicy processingInRecoveryStatePolicy
+    ) {
         this.recoveryTimeoutMs = recoveryTimeoutMs;
         this.maxRetryRecoveryIntervalMs = maxRetryRecoveryIntervalMs;
         this.processingInRecoveryStatePolicy = processingInRecoveryStatePolicy;

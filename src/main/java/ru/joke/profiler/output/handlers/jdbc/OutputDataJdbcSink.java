@@ -14,7 +14,8 @@ final class OutputDataJdbcSink implements OutputDataSink<OutputData> {
 
     OutputDataJdbcSink(
             final OutputDataJdbcStorage storage,
-            final OutputDataTablePreparer outputDataTablePreparer) {
+            final OutputDataTablePreparer outputDataTablePreparer
+    ) {
         this.storage = storage;
         this.outputDataTablePreparer = outputDataTablePreparer;
     }

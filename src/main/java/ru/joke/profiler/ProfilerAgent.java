@@ -26,7 +26,7 @@ public final class ProfilerAgent {
 
         initializeRegistrar(staticConfiguration);
         final ExecutionTimeRegistrarMetadataSelector registrarMetadataSelector = new ExecutionTimeRegistrarMetadataSelector(ExecutionTimeRegistrar.class);
-        final Predicate<String> transformationFilter = new TransformationFilter(staticConfiguration, instrumentation);
+        final Predicate<String> transformationFilter = new TransformationFilter(staticConfiguration);
 
         handleDynamicConfiguration(configurationLoader, staticConfiguration);
 
@@ -68,7 +68,8 @@ public final class ProfilerAgent {
 
     private static void handleDynamicConfiguration(
             final ProfilingConfigurationLoader configurationLoader,
-            final StaticProfilingConfiguration staticConfiguration) {
+            final StaticProfilingConfiguration staticConfiguration
+    ) {
         if (!staticConfiguration.isDynamicConfigurationEnabled()) {
             return;
         }

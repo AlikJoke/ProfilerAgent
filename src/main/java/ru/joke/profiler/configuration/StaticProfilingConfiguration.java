@@ -26,7 +26,8 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
             final long dynamicConfigurationRefreshIntervalMs,
             final boolean executionTracingEnabled,
             final String sinkType,
-            final Map<String, String> sinkProperties) {
+            final Map<String, String> sinkProperties
+    ) {
         super(resourcesFilter, minExecutionThreshold);
         this.dynamicConfigurationEnabled = dynamicConfigurationEnabled;
         this.dynamicConfigurationRefreshInterval = dynamicConfigurationRefreshIntervalMs;
@@ -116,7 +117,8 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
             final Set<String> includedResources,
             final String includedResourcesMask,
             final Set<String> excludedResources,
-            final String excludedResourcesMask) {
+            final String excludedResourcesMask
+    ) {
 
         final Predicate<String> resourcesFilterByExcluded = composeResourcesFilter(excludedResources, excludedResourcesMask, true);
         final Predicate<String> resourcesFilterByIncluded = composeResourcesFilter(includedResources, includedResourcesMask, false);

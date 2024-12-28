@@ -27,7 +27,8 @@ public final class OutputData {
     public void fill(
             final String method,
             final long methodElapsedTime,
-            final long methodEnterTimestamp) {
+            final long methodEnterTimestamp
+    ) {
         fill(method, methodElapsedTime, methodEnterTimestamp, null, 0);
     }
 
@@ -36,7 +37,8 @@ public final class OutputData {
             final long methodElapsedTime,
             final long methodEnterTimestamp,
             final String traceId,
-            final int depth) {
+            final int depth
+    ) {
         fill(method, methodElapsedTime, methodEnterTimestamp, traceId, depth, Thread.currentThread().getName(), LocalDateTime.now());
     }
 
@@ -47,7 +49,8 @@ public final class OutputData {
             final String traceId,
             final int depth,
             final String threadName,
-            final LocalDateTime timestamp) {
+            final LocalDateTime timestamp
+    ) {
         this.method = method;
         this.traceId = traceId;
         this.depth = depth;

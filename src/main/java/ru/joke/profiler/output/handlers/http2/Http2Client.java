@@ -17,7 +17,8 @@ final class Http2Client implements AutoCloseable {
 
     Http2Client(
             final CloseableHttpAsyncClient delegateClient,
-            final Http2SinkConfiguration.Http2ClientConfiguration http2ClientConfiguration) {
+            final Http2SinkConfiguration.Http2ClientConfiguration http2ClientConfiguration
+    ) {
         this.delegateClient = delegateClient;
         this.http2ClientConfiguration = http2ClientConfiguration;
     }
@@ -29,7 +30,8 @@ final class Http2Client implements AutoCloseable {
     <T> Future<T> execute(
             final AsyncRequestProducer requestProducer,
             final AsyncResponseConsumer<T> responseConsumer,
-            final FutureCallback<T> callback) {
+            final FutureCallback<T> callback
+    ) {
         return this.delegateClient.execute(requestProducer, responseConsumer, callback);
     }
 

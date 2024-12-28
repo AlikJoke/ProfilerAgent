@@ -19,8 +19,8 @@ public final class DynamicProfilingConfigurationRefreshService {
     public DynamicProfilingConfigurationRefreshService(
             final DynamicProfilingConfigurationHolder dynamicProfilingConfigurationHolder,
             final ProfilingConfigurationLoader configurationLoader,
-            final long dynamicConfigRefreshIntervalMs) {
-
+            final long dynamicConfigRefreshIntervalMs
+    ) {
         this.executorService = Executors.newSingleThreadScheduledExecutor(r -> {
             final Thread thread = new Thread(r);
             thread.setDaemon(true);
@@ -38,8 +38,6 @@ public final class DynamicProfilingConfigurationRefreshService {
     }
 
     public void start() {
-
-
         this.refreshAction.run();
         this.executorService.scheduleAtFixedRate(
                 this.refreshAction,

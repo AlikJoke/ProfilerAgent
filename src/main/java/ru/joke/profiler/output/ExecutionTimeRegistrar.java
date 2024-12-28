@@ -30,7 +30,8 @@ public abstract class ExecutionTimeRegistrar {
     public void registerMethodExit(
             final String method,
             final long methodEnterTimestamp,
-            final long methodElapsedTime) {
+            final long methodElapsedTime
+    ) {
         write(method, methodEnterTimestamp, methodElapsedTime);
     }
 

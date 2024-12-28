@@ -1,6 +1,10 @@
 package ru.joke.profiler.output.handlers.util.pool;
 
-import ru.joke.profiler.configuration.InvalidConfigurationException;
+import ru.joke.profiler.configuration.meta.ProfilerConfigurationPropertiesWrapper;
+import ru.joke.profiler.configuration.meta.ProfilerConfigurationProperty;
+import ru.joke.profiler.configuration.meta.ProfilerDefaultEnumProperty;
+
+import static ru.joke.profiler.configuration.ConfigurationProperties.*;
 
 public final class ConnectionPoolConfiguration {
 
@@ -11,13 +15,15 @@ public final class ConnectionPoolConfiguration {
     private final long maxConnectionWaitTime;
     private final ConnectionUnavailabilityPolicy connectionUnavailabilityPolicy;
 
+    @ProfilerConfigurationPropertiesWrapper(prefix = SINK_CONNECTION_POOL_PROPERTIES_PREFIX)
     public ConnectionPoolConfiguration(
-            final boolean enablePooling,
-            final int maxPoolSize,
-            final int initialPoolSize,
-            final long keepAliveIdleTime,
-            final long maxConnectionWaitTime,
-            final ConnectionUnavailabilityPolicy connectionUnavailabilityPolicy) {
+            @ProfilerConfigurationProperty(name = STATIC_SINK_CONNECTION_POOL_ENABLED, defaultValue = "true") final boolean enablePooling,
+            @ProfilerConfigurationProperty(name = STATIC_SINK_CONNECTION_POOL_MAX_POOL, defaultValue = "32") final int maxPoolSize,
+            @ProfilerConfigurationProperty(name = STATIC_SINK_CONNECTION_POOL_INIT_POOL, defaultValue = "4") final int initialPoolSize,
+            @ProfilerConfigurationProperty(name = STATIC_SINK_CONNECTION_POOL_KEEP_ALIVE_IDLE, defaultValue = "120000") final long keepAliveIdleTime,
+            @ProfilerConfigurationProperty(name = STATIC_SINK_CONNECTION_POOL_MAX_WAIT, defaultValue = "3000") final long maxConnectionWaitTime,
+            @ProfilerConfigurationProperty(name = STATIC_SINK_CONNECTION_POOL_CONN_UNAVAILABILITY_POLICY) final ConnectionUnavailabilityPolicy connectionUnavailabilityPolicy
+    ) {
         this.enablePooling = enablePooling;
         this.maxPoolSize = maxPoolSize;
         this.initialPoolSize = initialPoolSize;
@@ -64,22 +70,10 @@ public final class ConnectionPoolConfiguration {
 
     public enum ConnectionUnavailabilityPolicy {
 
+        @SuppressWarnings("unused")
         SKIP,
 
-        ERROR;
-
-        public static ConnectionUnavailabilityPolicy parse(final String alias) {
-            for (final ConnectionUnavailabilityPolicy policy : values()) {
-                if (policy.name().equalsIgnoreCase(alias)) {
-                    return policy;
-                }
-            }
-
-            if (alias == null || alias.isEmpty()) {
-                return ERROR;
-            }
-
-            throw new InvalidConfigurationException("Unknown type of policy: " + alias);
-        }
+        @ProfilerDefaultEnumProperty
+        ERROR
     }
 }

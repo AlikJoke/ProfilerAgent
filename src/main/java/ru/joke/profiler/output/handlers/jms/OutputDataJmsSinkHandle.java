@@ -1,5 +1,6 @@
 package ru.joke.profiler.output.handlers.jms;
 
+import ru.joke.profiler.configuration.meta.ConfigurationParser;
 import ru.joke.profiler.output.handlers.OutputData;
 import ru.joke.profiler.output.handlers.OutputDataSink;
 import ru.joke.profiler.output.handlers.async.AsyncOutputDataSinkHandleSupport;
@@ -24,7 +25,8 @@ public final class OutputDataJmsSinkHandle extends AsyncOutputDataSinkHandleSupp
     @Override
     protected Function<OutputData, Supplier<OutputData>> conversionFunction(
             final Map<String, String> properties,
-            final Map<String, Object> context) {
+            final Map<String, Object> context
+    ) {
         return o -> {
             final OutputData data = new OutputData();
             data.fill(o);
@@ -35,9 +37,9 @@ public final class OutputDataJmsSinkHandle extends AsyncOutputDataSinkHandleSupp
     @Override
     protected OutputDataSink<OutputData> createTerminalOutputSink(
             final Map<String, String> properties,
-            final Map<String, Object> context) {
-        final JmsSinkConfigurationLoader configurationLoader = new JmsSinkConfigurationLoader();
-        final JmsSinkConfiguration configuration = configurationLoader.load(properties);
+            final Map<String, Object> context
+    ) {
+        final JmsSinkConfiguration configuration = ConfigurationParser.parse(JmsSinkConfiguration.class, properties);
 
         final JmsMessageChannel messageChannel = createJmsChannel(configuration);
 
@@ -48,7 +50,8 @@ public final class OutputDataJmsSinkHandle extends AsyncOutputDataSinkHandleSupp
     @Override
     protected OutputDataSink<OutputData> createSyncOutputSink(
             final Map<String, String> properties,
-            final Map<String, Object> context) {
+            final Map<String, Object> context
+    ) {
         return createTerminalOutputSink(properties, context);
     }
 

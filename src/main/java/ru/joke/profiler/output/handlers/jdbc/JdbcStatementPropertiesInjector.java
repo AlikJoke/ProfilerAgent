@@ -20,7 +20,8 @@ final class JdbcStatementPropertiesInjector extends OutputPropertiesInjector<Pre
             final PreparedStatement template,
             final String method,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return injectStringParam(template, propertyIndex, method);
     }
 
@@ -29,7 +30,8 @@ final class JdbcStatementPropertiesInjector extends OutputPropertiesInjector<Pre
             final PreparedStatement template,
             final long methodEnterTimestamp,
             final String property,
-            int propertyIndex) {
+            int propertyIndex
+    ) {
         return injectLongParam(template, propertyIndex, methodEnterTimestamp);
     }
 
@@ -38,7 +40,8 @@ final class JdbcStatementPropertiesInjector extends OutputPropertiesInjector<Pre
             final PreparedStatement template,
             final long methodElapsedTime,
             final String property,
-            int propertyIndex) {
+            int propertyIndex
+    ) {
         return injectLongParam(template, propertyIndex, methodElapsedTime);
     }
 
@@ -47,7 +50,8 @@ final class JdbcStatementPropertiesInjector extends OutputPropertiesInjector<Pre
             final PreparedStatement template,
             final String traceId,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return injectStringParam(template, propertyIndex, traceId);
     }
 
@@ -56,7 +60,8 @@ final class JdbcStatementPropertiesInjector extends OutputPropertiesInjector<Pre
             final PreparedStatement template,
             final int depth,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return injectIntParam(template, propertyIndex, depth);
     }
 
@@ -64,7 +69,9 @@ final class JdbcStatementPropertiesInjector extends OutputPropertiesInjector<Pre
     protected PreparedStatement injectIp(
             final PreparedStatement template,
             final String ip,
-            final String property, int propertyIndex) {
+            final String property,
+            final int propertyIndex
+    ) {
         return injectStringParam(template, propertyIndex, ip);
     }
 
@@ -73,7 +80,8 @@ final class JdbcStatementPropertiesInjector extends OutputPropertiesInjector<Pre
             final PreparedStatement template,
             final String host,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return injectStringParam(template, propertyIndex, host);
     }
 
@@ -82,7 +90,8 @@ final class JdbcStatementPropertiesInjector extends OutputPropertiesInjector<Pre
             final PreparedStatement template,
             final String source,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return injectStringParam(template, propertyIndex, source);
     }
 
@@ -91,7 +100,8 @@ final class JdbcStatementPropertiesInjector extends OutputPropertiesInjector<Pre
             final PreparedStatement template,
             final String value,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return injectStringParam(template, propertyIndex, value);
     }
 
@@ -100,7 +110,8 @@ final class JdbcStatementPropertiesInjector extends OutputPropertiesInjector<Pre
             final PreparedStatement template,
             final String threadName,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return injectStringParam(template, propertyIndex, threadName);
     }
 
@@ -109,7 +120,8 @@ final class JdbcStatementPropertiesInjector extends OutputPropertiesInjector<Pre
             final PreparedStatement template,
             final LocalDateTime timestamp,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         try {
             if (timestamp == null) {
                 template.setNull(propertyIndex, Types.TIMESTAMP);
@@ -126,7 +138,8 @@ final class JdbcStatementPropertiesInjector extends OutputPropertiesInjector<Pre
     private PreparedStatement injectStringParam(
             final PreparedStatement statement,
             final int index,
-            final String param) {
+            final String param
+    ) {
         try {
             if (param == null) {
                 statement.setNull(index, Types.VARCHAR);
@@ -143,7 +156,8 @@ final class JdbcStatementPropertiesInjector extends OutputPropertiesInjector<Pre
     private PreparedStatement injectLongParam(
             final PreparedStatement statement,
             final int index,
-            final long param) {
+            final long param
+    ) {
         try {
             statement.setLong(index, param);
             return statement;
@@ -155,7 +169,8 @@ final class JdbcStatementPropertiesInjector extends OutputPropertiesInjector<Pre
     private PreparedStatement injectIntParam(
             final PreparedStatement statement,
             final int index,
-            final int param) {
+            final int param
+    ) {
         try {
             statement.setInt(index, param);
             return statement;

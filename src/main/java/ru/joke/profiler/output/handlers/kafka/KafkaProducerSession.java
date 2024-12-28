@@ -18,7 +18,8 @@ final class KafkaProducerSession implements Closeable {
 
     KafkaProducerSession(
             final KafkaSinkConfiguration.ProducerConfiguration configuration,
-            final KafkaProducer<String, byte[]> producer) {
+            final KafkaProducer<String, byte[]> producer
+    ) {
         this.producer = producer;
         this.configuration = configuration;
     }

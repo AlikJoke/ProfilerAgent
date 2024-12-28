@@ -1,5 +1,6 @@
 package ru.joke.profiler.output.handlers.jdbc;
 
+import ru.joke.profiler.configuration.meta.ConfigurationParser;
 import ru.joke.profiler.output.handlers.OutputData;
 import ru.joke.profiler.output.handlers.OutputDataSink;
 import ru.joke.profiler.output.handlers.async.AsyncOutputDataSinkHandleSupport;
@@ -26,7 +27,8 @@ public final class OutputDataJdbcSinkHandle extends AsyncOutputDataSinkHandleSup
     @Override
     protected Function<OutputData, Supplier<OutputData>> conversionFunction(
             final Map<String, String> properties,
-            final Map<String, Object> context) {
+            final Map<String, Object> context
+    ) {
         return o -> {
             final OutputData data = new OutputData();
             data.fill(o);
@@ -37,9 +39,9 @@ public final class OutputDataJdbcSinkHandle extends AsyncOutputDataSinkHandleSup
     @Override
     protected OutputDataSink<OutputData> createTerminalOutputSink(
             final Map<String, String> properties,
-            final Map<String, Object> context) {
-        final JdbcSinkConfigurationLoader configurationLoader = new JdbcSinkConfigurationLoader();
-        final JdbcSinkConfiguration configuration = configurationLoader.load(properties);
+            final Map<String, Object> context
+    ) {
+        final JdbcSinkConfiguration configuration = ConfigurationParser.parse(JdbcSinkConfiguration.class, properties);
 
         final ConnectionFactory<JdbcConnectionWrapper> connectionFactory = new JdbcConnectionFactory(configuration.connectionFactoryConfiguration());
         final ConnectionPoolFactory<JdbcConnectionWrapper> poolFactory = new ConnectionPoolFactory<>(connectionFactory);
@@ -53,14 +55,16 @@ public final class OutputDataJdbcSinkHandle extends AsyncOutputDataSinkHandleSup
     @Override
     protected OutputDataSink<OutputData> createSyncOutputSink(
             final Map<String, String> properties,
-            final Map<String, Object> context) {
+            final Map<String, Object> context
+    ) {
         return createTerminalOutputSink(properties, context);
     }
 
     private OutputDataSink<OutputData> buildJdbcSink(
             final JdbcSinkConfiguration configuration,
             final ConnectionPool<JdbcConnectionWrapper> pool,
-            final ConnectionFactory<JdbcConnectionWrapper> connectionFactory) {
+            final ConnectionFactory<JdbcConnectionWrapper> connectionFactory
+    ) {
         final OutputPropertiesInjector<PreparedStatement> propertiesInjector = new JdbcStatementPropertiesInjector(configuration.outputTableConfiguration());
         final OutputDataJdbcStorage jdbcStorage = new OutputDataJdbcStorage(pool, configuration, propertiesInjector);
 

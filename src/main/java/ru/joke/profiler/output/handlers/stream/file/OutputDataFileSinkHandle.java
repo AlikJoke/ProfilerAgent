@@ -29,14 +29,16 @@ public final class OutputDataFileSinkHandle extends OutputDataStreamSinkHandle {
     @Override
     protected Function<OutputData, Supplier<String>> conversionFunction(
             final Map<String, String> properties,
-            final Map<String, Object> context) {
+            final Map<String, Object> context
+    ) {
         return getFormatter(context)::formatLater;
     }
 
     @Override
     protected OutputDataSink<OutputData> createSyncOutputSink(
             final Map<String, String> properties,
-            final Map<String, Object> context) throws IOException {
+            final Map<String, Object> context
+    ) throws IOException {
         final OutputDataSink<String> targetSink = createTerminalOutputSink(properties, context);
         return new OutputDataConversionSinkWrapper<>(targetSink, getFormatter(context)::format);
     }
@@ -44,7 +46,8 @@ public final class OutputDataFileSinkHandle extends OutputDataStreamSinkHandle {
     @Override
     protected OutputDataSink<String> createTerminalOutputSink(
             final Map<String, String> properties,
-            final Map<String, Object> context) throws IOException {
+            final Map<String, Object> context
+    ) throws IOException {
         final String filePath = findRequiredProperty(properties, STATIC_FILE_SINK_FILE);
         final int bufferSize = extractBufferSizeProperty(properties, STATIC_FILE_SINK_BUFFER_SIZE);
 

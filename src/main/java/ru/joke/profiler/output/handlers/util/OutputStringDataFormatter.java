@@ -64,7 +64,8 @@ public final class OutputStringDataFormatter extends OutputPropertiesInjector<St
             final String template,
             final String method,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return injectProperty(template, property, method);
     }
 
@@ -73,7 +74,8 @@ public final class OutputStringDataFormatter extends OutputPropertiesInjector<St
             final String template,
             final long methodEnterTimestamp,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return injectProperty(template, property, String.valueOf(methodEnterTimestamp));
     }
 
@@ -82,7 +84,8 @@ public final class OutputStringDataFormatter extends OutputPropertiesInjector<St
             final String template,
             final long methodElapsedTime,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return injectProperty(template, property, String.valueOf(methodElapsedTime));
     }
 
@@ -91,7 +94,8 @@ public final class OutputStringDataFormatter extends OutputPropertiesInjector<St
             final String template,
             final String traceId,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return injectProperty(template, property, traceId);
     }
 
@@ -100,7 +104,8 @@ public final class OutputStringDataFormatter extends OutputPropertiesInjector<St
             final String template,
             final int depth,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return injectProperty(template, property, String.valueOf(depth));
     }
 
@@ -109,7 +114,8 @@ public final class OutputStringDataFormatter extends OutputPropertiesInjector<St
             final String template,
             final String ip,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return injectProperty(template, property, ip);
     }
 
@@ -118,7 +124,8 @@ public final class OutputStringDataFormatter extends OutputPropertiesInjector<St
             final String template,
             final String host,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return injectProperty(template, property, String.valueOf(host));
     }
 
@@ -127,7 +134,8 @@ public final class OutputStringDataFormatter extends OutputPropertiesInjector<St
             final String template,
             final String source,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return injectProperty(template, property, source);
     }
 
@@ -136,7 +144,8 @@ public final class OutputStringDataFormatter extends OutputPropertiesInjector<St
             final String template,
             final String value,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return injectProperty(template, property, value);
     }
 
@@ -145,7 +154,8 @@ public final class OutputStringDataFormatter extends OutputPropertiesInjector<St
             final String template,
             final String threadName,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return injectProperty(template, property, threadName);
     }
 
@@ -154,7 +164,8 @@ public final class OutputStringDataFormatter extends OutputPropertiesInjector<St
             final String template,
             final LocalDateTime timestamp,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return injectProperty(template, property, this.currentTimestampFormatter.format(timestamp));
     }
 
@@ -165,7 +176,8 @@ public final class OutputStringDataFormatter extends OutputPropertiesInjector<St
             final long methodEnterTimestamp,
             final long elapsedTime,
             final String threadName,
-            final LocalDateTime timestamp) {
+            final LocalDateTime timestamp
+    ) {
         String result = injectProperty(this.outputDataPattern, THREAD_PROPERTY, threadName);
         result = injectProperty(result, METHOD_PROPERTY, method);
         result = injectProperty(result, METHOD_ENTER_TS_PROPERTY, String.valueOf(this.enterTimestampUnit.convert(methodEnterTimestamp, TimeUnit.NANOSECONDS)));
@@ -183,7 +195,11 @@ public final class OutputStringDataFormatter extends OutputPropertiesInjector<St
         return result;
     }
 
-    private String injectProperty(final String target, final String property, final String propertyValue) {
+    private String injectProperty(
+            final String target,
+            final String property,
+            final String propertyValue
+    ) {
         return target.replace(PROPERTY_START + property + PROPERTY_END, propertyValue);
     }
 

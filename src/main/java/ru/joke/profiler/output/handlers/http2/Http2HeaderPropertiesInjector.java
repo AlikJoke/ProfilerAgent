@@ -21,7 +21,8 @@ final class Http2HeaderPropertiesInjector extends OutputPropertiesInjector<Heade
             final Header[] template,
             final String method,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return addHeader(template, property, method, propertyIndex);
     }
 
@@ -30,7 +31,8 @@ final class Http2HeaderPropertiesInjector extends OutputPropertiesInjector<Heade
             final Header[] template,
             final long methodEnterTimestamp,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return addHeader(template, property, methodEnterTimestamp, propertyIndex);
     }
 
@@ -39,7 +41,8 @@ final class Http2HeaderPropertiesInjector extends OutputPropertiesInjector<Heade
             final Header[] template,
             final long methodElapsedTime,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return addHeader(template, property, methodElapsedTime, propertyIndex);
     }
 
@@ -48,7 +51,8 @@ final class Http2HeaderPropertiesInjector extends OutputPropertiesInjector<Heade
             final Header[] template,
             final String traceId,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return addHeader(template, property, traceId, propertyIndex);
     }
 
@@ -57,7 +61,8 @@ final class Http2HeaderPropertiesInjector extends OutputPropertiesInjector<Heade
             final Header[] template,
             final int depth,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return addHeader(template, property, depth, propertyIndex);
     }
 
@@ -66,7 +71,8 @@ final class Http2HeaderPropertiesInjector extends OutputPropertiesInjector<Heade
             final Header[] template,
             final String ip,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return addHeader(template, property, ip, propertyIndex);
     }
 
@@ -75,7 +81,8 @@ final class Http2HeaderPropertiesInjector extends OutputPropertiesInjector<Heade
             final Header[] template,
             final String host,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return addHeader(template, property, host, propertyIndex);
     }
 
@@ -84,7 +91,8 @@ final class Http2HeaderPropertiesInjector extends OutputPropertiesInjector<Heade
             final Header[] template,
             final String source,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return addHeader(template, property, source, propertyIndex);
     }
 
@@ -93,7 +101,8 @@ final class Http2HeaderPropertiesInjector extends OutputPropertiesInjector<Heade
             final Header[] template,
             final String systemPropertyValue,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return addHeader(template, property, systemPropertyValue, propertyIndex);
     }
 
@@ -102,7 +111,8 @@ final class Http2HeaderPropertiesInjector extends OutputPropertiesInjector<Heade
             final Header[] template,
             final String threadName,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return addHeader(template, property, threadName, propertyIndex);
     }
 
@@ -111,7 +121,8 @@ final class Http2HeaderPropertiesInjector extends OutputPropertiesInjector<Heade
             final Header[] template,
             final LocalDateTime timestamp,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return addHeader(template, property, timestamp.toString(), propertyIndex);
     }
     
@@ -119,7 +130,8 @@ final class Http2HeaderPropertiesInjector extends OutputPropertiesInjector<Heade
             final Header[] headers, 
             final String property, 
             final Object value,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         final String headerName = this.properties2headersMapping.getOrDefault(property, property);
         final Header header = new BasicHeader(headerName, value, true);
         headers[propertyIndex - 1] = header;

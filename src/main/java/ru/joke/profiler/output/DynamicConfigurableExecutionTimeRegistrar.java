@@ -16,7 +16,8 @@ public final class DynamicConfigurableExecutionTimeRegistrar extends ExecutionTi
     public DynamicConfigurableExecutionTimeRegistrar(
             final ExecutionTimeRegistrar delegate,
             final StaticProfilingConfiguration staticProfilingConfiguration,
-            final DynamicProfilingConfigurationHolder dynamicProfilingConfigurationHolder) {
+            final DynamicProfilingConfigurationHolder dynamicProfilingConfigurationHolder
+    ) {
         this.delegate = delegate;
         this.staticProfilingConfiguration = staticProfilingConfiguration;
         this.dynamicProfilingConfigurationHolder = dynamicProfilingConfigurationHolder;
@@ -76,8 +77,8 @@ public final class DynamicConfigurableExecutionTimeRegistrar extends ExecutionTi
     public void registerMethodExit(
             final String method,
             final long methodEnterTimestamp,
-            final long methodElapsedTime) {
-
+            final long methodElapsedTime
+    ) {
         final DynamicExecutionContext executionContext = findOrCreateExecutionContext();
         try {
             if (executionContext.configuration != null && executionContext.depth-- > executionContext.configuration.getProfiledTraceMaxDepth()
@@ -138,6 +139,7 @@ public final class DynamicConfigurableExecutionTimeRegistrar extends ExecutionTi
     }
 
     private static class DynamicExecutionContext {
+
         private final DynamicProfilingConfiguration configuration;
         private int depth;
 

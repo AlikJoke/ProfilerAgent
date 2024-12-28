@@ -29,14 +29,16 @@ public final class OutputDataConsoleSinkHandle extends OutputDataStreamSinkHandl
     @Override
     protected Function<OutputData, Supplier<String>> conversionFunction(
             final Map<String, String> properties,
-            final Map<String, Object> context) {
+            final Map<String, Object> context
+    ) {
         return getFormatter(context)::formatLater;
     }
 
     @Override
     protected OutputDataSink<OutputData> createSyncOutputSink(
             final Map<String, String> properties,
-            final Map<String, Object> context) throws UnsupportedEncodingException {
+            final Map<String, Object> context
+    ) throws UnsupportedEncodingException {
         final OutputDataSink<String> targetSink = createTerminalOutputSink(properties, context);
         return new OutputDataConversionSinkWrapper<>(targetSink, getFormatter(context)::format);
     }
@@ -44,7 +46,8 @@ public final class OutputDataConsoleSinkHandle extends OutputDataStreamSinkHandl
     @Override
     protected OutputDataSink<String> createTerminalOutputSink(
             final Map<String, String> properties,
-            final Map<String, Object> context) throws UnsupportedEncodingException {
+            final Map<String, Object> context
+    ) throws UnsupportedEncodingException {
         final boolean forceFlushOnWrites = parseBooleanProperty(properties, STATIC_CONSOLE_SINK_FORCE_FLUSH_ON_WRITES);
         final int bufferSize = extractBufferSizeProperty(properties, STATIC_CONSOLE_SINK_BUFFER_SIZE);
 

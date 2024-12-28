@@ -30,7 +30,8 @@ public final class JsonObjectPropertiesInjector extends OutputPropertiesInjector
             final StringBuilder template,
             final String method,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         appendFieldName(template, property);
         appendStringValue(template, method);
         return template;
@@ -41,7 +42,8 @@ public final class JsonObjectPropertiesInjector extends OutputPropertiesInjector
             final StringBuilder template,
             final long methodEnterTimestamp,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         appendFieldName(template, property);
         appendLongValue(template, methodEnterTimestamp);
         return template;
@@ -52,7 +54,8 @@ public final class JsonObjectPropertiesInjector extends OutputPropertiesInjector
             final StringBuilder template,
             final long methodElapsedTime,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         appendFieldName(template, property);
         appendLongValue(template, methodElapsedTime);
         return template;
@@ -63,7 +66,8 @@ public final class JsonObjectPropertiesInjector extends OutputPropertiesInjector
             final StringBuilder template,
             final String traceId,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         appendFieldName(template, property);
         appendStringValue(template, traceId);
         return template;
@@ -74,7 +78,8 @@ public final class JsonObjectPropertiesInjector extends OutputPropertiesInjector
             final StringBuilder template,
             final int depth,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         appendFieldName(template, property);
         appendIntValue(template, depth);
         return template;
@@ -85,7 +90,8 @@ public final class JsonObjectPropertiesInjector extends OutputPropertiesInjector
             final StringBuilder template,
             final String ip,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         appendFieldName(template, property);
         appendStringValue(template, ip);
         return template;
@@ -96,7 +102,8 @@ public final class JsonObjectPropertiesInjector extends OutputPropertiesInjector
             final StringBuilder template,
             final String host,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         appendFieldName(template, property);
         appendStringValue(template, host);
         return template;
@@ -107,7 +114,8 @@ public final class JsonObjectPropertiesInjector extends OutputPropertiesInjector
             final StringBuilder template,
             final String source,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         appendFieldName(template, property);
         appendStringValue(template, source);
         return template;
@@ -118,7 +126,8 @@ public final class JsonObjectPropertiesInjector extends OutputPropertiesInjector
             final StringBuilder template,
             final String value,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         appendFieldName(template, property);
         appendStringValue(template, value);
         return template;
@@ -129,7 +138,8 @@ public final class JsonObjectPropertiesInjector extends OutputPropertiesInjector
             final StringBuilder template,
             final String threadName,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         appendFieldName(template, property);
         appendStringValue(template, threadName);
         return template;
@@ -140,7 +150,8 @@ public final class JsonObjectPropertiesInjector extends OutputPropertiesInjector
             final StringBuilder template,
             final LocalDateTime timestamp,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         appendFieldName(template, property);
         appendStringValue(template, timestamp.toString());
         return template;
@@ -172,12 +183,10 @@ public final class JsonObjectPropertiesInjector extends OutputPropertiesInjector
     }
 
     private void appendLongValue(final StringBuilder template, final long value) {
-        template.append(value)
-                .append(",");
+        template.append(value).append(",");
     }
 
     private void appendIntValue(final StringBuilder template, final int value) {
-        template.append(value)
-                .append(",");
+        template.append(value).append(",");
     }
 }

@@ -30,7 +30,8 @@ final class AsyncOutputDataSink<S, T> implements OutputDataSink<S> {
     AsyncOutputDataSink(
             final OutputDataSink<T> delegateSink,
             final AsyncSinkDataFlushingConfiguration configuration,
-            final Function<S, Supplier<T>> conversionFunc) {
+            final Function<S, Supplier<T>> conversionFunc
+    ) {
         this.delegateSink = delegateSink;
         this.configuration = configuration;
         this.queue = new ConcurrentLinkedBlockingQueue<>(configuration.overflowLimit());

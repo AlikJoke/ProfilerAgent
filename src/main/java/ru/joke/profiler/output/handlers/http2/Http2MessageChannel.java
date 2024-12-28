@@ -31,7 +31,8 @@ final class Http2MessageChannel implements AutoCloseable {
             final Http2SinkConfiguration.ProcessingConfiguration configuration,
             final Http2ClientFactory http2ClientFactory,
             final Http2MessageFactory messageEntityFactory,
-            final Http2RequestProducerFactory requestProducerFactory) {
+            final Http2RequestProducerFactory requestProducerFactory
+    ) {
         this.configuration = configuration;
         this.httpClient = http2ClientFactory.create();
         this.messageEntityFactory = messageEntityFactory;
@@ -103,7 +104,8 @@ final class Http2MessageChannel implements AutoCloseable {
             final Http2Message message,
             final Future<?> future,
             final long timeout,
-            final int requestId) {
+            final int requestId
+    ) {
         try {
             future.get(timeout, TimeUnit.MILLISECONDS);
         } catch (TimeoutException | ExecutionException e) {
@@ -115,7 +117,11 @@ final class Http2MessageChannel implements AutoCloseable {
         }
     }
 
-    private boolean handleOnError(final Http2Message message, final int requestId, final Exception ex) {
+    private boolean handleOnError(
+            final Http2Message message,
+            final int requestId,
+            final Exception ex
+    ) {
         if (this.configuration.onErrorPolicy() != Http2SinkConfiguration.ProcessingConfiguration.OnErrorPolicy.RETRY) {
             return true;
         }

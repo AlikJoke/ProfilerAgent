@@ -28,7 +28,8 @@ public final class OutputDataLoggerSinkHandle extends AsyncOutputDataSinkHandleS
     @Override
     protected Function<OutputData, Supplier<String>> conversionFunction(
             final Map<String, String> properties,
-            final Map<String, Object> context) {
+            final Map<String, Object> context
+    ) {
         final OutputStringDataFormatter formatter = (OutputStringDataFormatter) context.get(FORMATTER_KEY);
         return formatter::formatLater;
     }
@@ -36,7 +37,8 @@ public final class OutputDataLoggerSinkHandle extends AsyncOutputDataSinkHandleS
     @Override
     protected OutputDataSink<String> createTerminalOutputSink(
             final Map<String, String> properties,
-            final Map<String, Object> context) {
+            final Map<String, Object> context
+    ) {
         final OutputDataSink<String> terminalSink = new OutputDataLoggerSink(
                 findRequiredProperty(properties, STATIC_LOGGER_SINK_CATEGORY),
                 findRequiredProperty(properties, STATIC_LOGGER_SINK_LEVEL)
@@ -48,7 +50,8 @@ public final class OutputDataLoggerSinkHandle extends AsyncOutputDataSinkHandleS
     @Override
     protected OutputDataSink<OutputData> createSyncOutputSink(
             final Map<String, String> properties,
-            final Map<String, Object> context) {
+            final Map<String, Object> context
+    ) {
         final OutputStringDataFormatter formatter = (OutputStringDataFormatter) context.get(FORMATTER_KEY);
         return new OutputDataConversionSinkWrapper<>(
                 createTerminalOutputSink(properties, context),

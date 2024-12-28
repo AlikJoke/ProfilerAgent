@@ -16,7 +16,8 @@ public final class MessageKeyPartitioner implements Partitioner {
             final byte[] keyBytes,
             final Object value,
             final byte[] valueBytes,
-            final Cluster cluster) {
+            final Cluster cluster
+    ) {
         final List<PartitionInfo> partitions = cluster.partitionsForTopic(topic);
         final int numPartitions = partitions.size();
         final int messageHash = key.hashCode();

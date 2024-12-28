@@ -4,6 +4,10 @@ import ru.joke.profiler.ProfilerException;
 
 public final class InvalidConfigurationException extends ProfilerException {
 
+    public InvalidConfigurationException(final Throwable cause) {
+        super(cause);
+    }
+
     public InvalidConfigurationException(final String message) {
         super(message);
     }

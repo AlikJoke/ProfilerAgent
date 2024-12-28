@@ -20,7 +20,8 @@ final class JmsProducerPropertiesInjector extends OutputPropertiesInjector<JMSPr
             final JMSProducer template,
             final String method,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return addStringProperty(template, property, method);
     }
 
@@ -29,7 +30,8 @@ final class JmsProducerPropertiesInjector extends OutputPropertiesInjector<JMSPr
             final JMSProducer template,
             final long methodEnterTimestamp,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return addLongProperty(template, property, methodEnterTimestamp);
     }
 
@@ -38,7 +40,8 @@ final class JmsProducerPropertiesInjector extends OutputPropertiesInjector<JMSPr
             final JMSProducer template,
             final long methodElapsedTime,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return addLongProperty(template, property, methodElapsedTime);
     }
 
@@ -47,7 +50,8 @@ final class JmsProducerPropertiesInjector extends OutputPropertiesInjector<JMSPr
             final JMSProducer template,
             final String traceId,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return addStringProperty(template, property, traceId);
     }
 
@@ -56,7 +60,8 @@ final class JmsProducerPropertiesInjector extends OutputPropertiesInjector<JMSPr
             final JMSProducer template,
             final int depth,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return template.setProperty(this.propertiesMapping.getOrDefault(property, property), depth);
     }
 
@@ -65,7 +70,8 @@ final class JmsProducerPropertiesInjector extends OutputPropertiesInjector<JMSPr
             final JMSProducer template,
             final String ip,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return addStringProperty(template, property, ip);
     }
 
@@ -74,7 +80,8 @@ final class JmsProducerPropertiesInjector extends OutputPropertiesInjector<JMSPr
             final JMSProducer template,
             final String host,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return addStringProperty(template, property, host);
     }
 
@@ -83,7 +90,8 @@ final class JmsProducerPropertiesInjector extends OutputPropertiesInjector<JMSPr
             final JMSProducer template,
             final String source,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return addStringProperty(template, property, source);
     }
 
@@ -92,7 +100,8 @@ final class JmsProducerPropertiesInjector extends OutputPropertiesInjector<JMSPr
             final JMSProducer template,
             final String systemPropertyValue,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return addStringProperty(template, property, systemPropertyValue);
     }
 
@@ -101,7 +110,8 @@ final class JmsProducerPropertiesInjector extends OutputPropertiesInjector<JMSPr
             final JMSProducer template,
             final String threadName,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return addStringProperty(template, property, threadName);
     }
 
@@ -110,14 +120,16 @@ final class JmsProducerPropertiesInjector extends OutputPropertiesInjector<JMSPr
             final JMSProducer template,
             final LocalDateTime timestamp,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return addStringProperty(template, property, timestamp.toString());
     }
 
     private JMSProducer addStringProperty(
             final JMSProducer producer,
             final String property,
-            final String value) {
+            final String value
+    ) {
         final String headerName = this.propertiesMapping.getOrDefault(property, property);
         return producer.setProperty(headerName, value);
     }
@@ -125,7 +137,8 @@ final class JmsProducerPropertiesInjector extends OutputPropertiesInjector<JMSPr
     private JMSProducer addLongProperty(
             final JMSProducer producer,
             final String property,
-            final long value) {
+            final long value
+    ) {
         final String headerName = this.propertiesMapping.getOrDefault(property, property);
         return producer.setProperty(headerName, value);
     }

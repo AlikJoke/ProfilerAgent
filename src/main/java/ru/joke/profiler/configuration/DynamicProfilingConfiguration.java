@@ -20,7 +20,8 @@ public final class DynamicProfilingConfiguration extends ProfilingConfiguration 
             final Predicate<String> threadsFilter,
             final Predicate<String> profilingRootsFilter,
             final boolean profilingDisabled,
-            final int profiledTraceMaxDepth) {
+            final int profiledTraceMaxDepth
+    ) {
         super(resourcesFilter, minExecutionThresholdNs);
         this.threadsFilter = threadsFilter;
         this.profilingDisabled = profilingDisabled;

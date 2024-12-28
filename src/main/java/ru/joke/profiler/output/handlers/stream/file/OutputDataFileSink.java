@@ -10,7 +10,8 @@ public final class OutputDataFileSink extends OutputDataAbsStreamSink {
             final int bufferSize,
             final ExistingFilePolicy existingFilePolicy,
             final String filePath,
-            final boolean forceFlushOnWrites) throws IOException {
+            final boolean forceFlushOnWrites
+    ) throws IOException {
         super(
                 existingFilePolicy.createWriter(filePath),
                 bufferSize,

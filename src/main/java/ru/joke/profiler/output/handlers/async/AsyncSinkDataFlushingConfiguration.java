@@ -15,7 +15,8 @@ final class AsyncSinkDataFlushingConfiguration {
             final int overflowLimit,
             final OverflowPolicy overflowPolicy,
             final boolean forceFlushOnExit,
-            final int flushMaxBatchSize) {
+            final int flushMaxBatchSize
+    ) {
         this.flushInterval = flushInterval;
         this.overflowLimit = overflowLimit;
         this.overflowPolicy = overflowPolicy;

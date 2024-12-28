@@ -15,7 +15,8 @@ final class Http2MessageFactory {
     Http2MessageFactory(
             final Http2SinkConfiguration.OutputMessageConfiguration configuration,
             final OutputPropertiesInjector<StringBuilder> bodyPropertiesInjector,
-            final OutputPropertiesInjector<Header[]> headersInjector) {
+            final OutputPropertiesInjector<Header[]> headersInjector
+    ) {
         this.configuration = configuration;
         this.bodyPropertiesInjector = bodyPropertiesInjector;
         this.headersInjector = headersInjector;

@@ -28,6 +28,15 @@ public abstract class ConfigurationProperties {
     static final String SINK_PROPERTIES_PREFIX = STATIC_PREFIX + "sink.";
     static final String STATIC_SINK_TYPE = createProperty(SINK_PROPERTIES_PREFIX, "type");
 
+    public static final String SINK_CONNECTION_POOL_PROPERTIES_PREFIX = "connection-pool.";
+
+    public static final String STATIC_SINK_CONNECTION_POOL_ENABLED = "use_connection_pool";
+    public static final String STATIC_SINK_CONNECTION_POOL_MAX_POOL = "max_pool_size";
+    public static final String STATIC_SINK_CONNECTION_POOL_INIT_POOL = "initial_pool_size";
+    public static final String STATIC_SINK_CONNECTION_POOL_KEEP_ALIVE_IDLE = "keep_alive_idle_time";
+    public static final String STATIC_SINK_CONNECTION_POOL_MAX_WAIT = "max_connection_wait_time";
+    public static final String STATIC_SINK_CONNECTION_POOL_CONN_UNAVAILABILITY_POLICY = "connection_unavailability_policy";
+
     private static final String OUTPUT_DATA_FORMAT = "output_data_format";
     private static final String OUTPUT_STREAM_BUFFER_SIZE = "output_stream_buffer_size";
     private static final String OUTPUT_STREAM_FORCE_FLUSH_ON_WRITES = "output_stream_force_flush_on_writes";
@@ -60,30 +69,23 @@ public abstract class ConfigurationProperties {
     public static final String STATIC_LOGGER_SINK_CATEGORY = createProperty(LOGGER_SINK_PROPERTIES_PREFIX, "category");
     public static final String STATIC_LOGGER_SINK_LEVEL = createProperty(LOGGER_SINK_PROPERTIES_PREFIX, "level");
 
-    public static final String JDBC_SINK_PROPERTIES_PREFIX = createProperty(SINK_PROPERTIES_PREFIX, createProperty(OutputDataJdbcSinkHandle.SINK_TYPE, "."));
+    public static final String JDBC_SINK_PROPERTIES_PREFIX = SINK_PROPERTIES_PREFIX + OutputDataJdbcSinkHandle.SINK_TYPE + ".";
 
-    public static final String JDBC_SINK_INSERTION_PROPERTIES_PREFIX = createProperty(JDBC_SINK_PROPERTIES_PREFIX, "insertion.");
+    public static final String JDBC_SINK_INSERTION_PROPERTIES_PREFIX = "insertion.";
 
-    public static final String STATIC_JDBC_SINK_ENABLE_BATCHING = createProperty(JDBC_SINK_INSERTION_PROPERTIES_PREFIX, "enable_batching");
-    public static final String STATIC_JDBC_SINK_BATCH_SIZE = createProperty(JDBC_SINK_INSERTION_PROPERTIES_PREFIX, "batch_size");
+    public static final String STATIC_JDBC_SINK_ENABLE_BATCHING = "enable_batching";
+    public static final String STATIC_JDBC_SINK_BATCH_SIZE = "batch_size";
 
-    public static final String JDBC_SINK_CONNECTION_FACTORY_PROPERTIES_PREFIX = createProperty(JDBC_SINK_PROPERTIES_PREFIX, "connection-factory.");
-    public static final String STATIC_JDBC_SINK_CONNECTION_FACTORY_URL = createProperty(JDBC_SINK_CONNECTION_FACTORY_PROPERTIES_PREFIX, "url");
+    public static final String JDBC_SINK_CONNECTION_FACTORY_PROPERTIES_PREFIX = "connection-factory.";
+    public static final String STATIC_JDBC_SINK_CONNECTION_FACTORY_URL = "url";
 
-    public static final String JDBC_SINK_CONNECTION_POOL_PROPERTIES_PREFIX = createProperty(JDBC_SINK_PROPERTIES_PREFIX, "connection-pool.");
-    public static final String STATIC_JDBC_SINK_CONNECTION_POOL_ENABLED = createProperty(JDBC_SINK_CONNECTION_POOL_PROPERTIES_PREFIX, "use_connection_pool");
-    public static final String STATIC_JDBC_SINK_CONNECTION_POOL_MAX_POOL = createProperty(JDBC_SINK_CONNECTION_POOL_PROPERTIES_PREFIX, "max_pool_size");
-    public static final String STATIC_JDBC_SINK_CONNECTION_POOL_INIT_POOL = createProperty(JDBC_SINK_CONNECTION_POOL_PROPERTIES_PREFIX, "initial_pool_size");
-    public static final String STATIC_JDBC_SINK_CONNECTION_POOL_KEEP_ALIVE_IDLE = createProperty(JDBC_SINK_CONNECTION_POOL_PROPERTIES_PREFIX, "keep_alive_idle_time");
-    public static final String STATIC_JDBC_SINK_CONNECTION_POOL_MAX_WAIT = createProperty(JDBC_SINK_CONNECTION_POOL_PROPERTIES_PREFIX, "max_connection_wait_time");
-    public static final String STATIC_JDBC_SINK_CONNECTION_POOL_CONN_UNAVAILABILITY_POLICY = createProperty(JDBC_SINK_CONNECTION_POOL_PROPERTIES_PREFIX, "connection_unavailability_policy");
+    public static final String JDBC_SINK_OUTPUT_TABLE_PROPERTIES_PREFIX = "output-table.";
 
-    public static final String JDBC_SINK_OUTPUT_TABLE_PROPERTIES_PREFIX = createProperty(JDBC_SINK_PROPERTIES_PREFIX, "output-table.");
-    public static final String STATIC_JDBC_SINK_OUTPUT_TABLE_NAME = createProperty(JDBC_SINK_OUTPUT_TABLE_PROPERTIES_PREFIX, "table_name");
-    public static final String STATIC_JDBC_SINK_EXISTING_TABLE_POLICY = createProperty(JDBC_SINK_OUTPUT_TABLE_PROPERTIES_PREFIX, "existing_table_policy");
-    public static final String STATIC_JDBC_SINK_AUTO_CREATE_OUTPUT_TABLE = createProperty(JDBC_SINK_OUTPUT_TABLE_PROPERTIES_PREFIX, "auto_create_table");
-    public static final String STATIC_JDBC_SINK_SKIP_SCHEMA_VALIDATION = createProperty(JDBC_SINK_OUTPUT_TABLE_PROPERTIES_PREFIX, "skip_schema_validation");
-    public static final String STATIC_JDBC_SINK_COLUMNS_METADATA = createProperty(JDBC_SINK_OUTPUT_TABLE_PROPERTIES_PREFIX, "columns_metadata");
+    public static final String STATIC_JDBC_SINK_OUTPUT_TABLE_NAME = "table_name";
+    public static final String STATIC_JDBC_SINK_EXISTING_TABLE_POLICY = "existing_table_policy";
+    public static final String STATIC_JDBC_SINK_AUTO_CREATE_OUTPUT_TABLE = "auto_create_table";
+    public static final String STATIC_JDBC_SINK_SKIP_SCHEMA_VALIDATION = "skip_schema_validation";
+    public static final String STATIC_JDBC_SINK_COLUMNS_METADATA = "columns_metadata";
 
     public static final String KAFKA_SINK_PROPERTIES_PREFIX = createProperty(SINK_PROPERTIES_PREFIX, createProperty(OutputDataKafkaSinkHandle.SINK_TYPE, "."));
 
@@ -225,7 +227,8 @@ public abstract class ConfigurationProperties {
     public static int parseIntProperty(
             final Map<?, ?> properties,
             final String property,
-            final int defaultValue) {
+            final int defaultValue
+    ) {
         final Object propertyValue = properties.get(property);
         final String propertyValueStr = propertyValue == null ? null : propertyValue.toString();
         return propertyValueStr == null || propertyValueStr.isEmpty()
@@ -236,7 +239,8 @@ public abstract class ConfigurationProperties {
     public static long parseLongProperty(
             final Map<?, ?> properties,
             final String property,
-            final long defaultValue) {
+            final long defaultValue
+    ) {
         final Object propertyValue = properties.get(property);
         final String propertyValueStr = propertyValue == null ? null : propertyValue.toString();
         return propertyValueStr == null || propertyValueStr.isEmpty()
@@ -267,7 +271,8 @@ public abstract class ConfigurationProperties {
     static Predicate<String> composeResourcesFilter(
             final Set<String> explicitResources,
             final String resourcesMask,
-            final boolean forExclusion) {
+            final boolean forExclusion
+    ) {
         final Predicate<String> resourcesByMaskFilter =
                 resourcesMask == null || resourcesMask.isEmpty()
                         ? null

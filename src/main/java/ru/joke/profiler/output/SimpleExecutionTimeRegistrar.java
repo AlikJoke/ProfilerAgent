@@ -17,7 +17,8 @@ public final class SimpleExecutionTimeRegistrar extends ExecutionTimeRegistrar {
     protected void write(
             final String method,
             final long methodEnterTimestamp,
-            final long methodElapsedTime) {
+            final long methodElapsedTime
+    ) {
         final OutputData output = this.outputData.get();
         output.fill(method, methodElapsedTime, methodEnterTimestamp);
 

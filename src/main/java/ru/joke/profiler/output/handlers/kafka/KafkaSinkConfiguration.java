@@ -14,7 +14,8 @@ final class KafkaSinkConfiguration {
     KafkaSinkConfiguration(
             final ProducerConfiguration producerConfiguration,
             final OutputMessageConfiguration outputMessageConfiguration,
-            final ConnectionRecoveryConfiguration recoveryConfiguration) {
+            final ConnectionRecoveryConfiguration recoveryConfiguration
+    ) {
         this.producerConfiguration = producerConfiguration;
         this.outputMessageConfiguration = outputMessageConfiguration;
         this.recoveryConfiguration = recoveryConfiguration;
@@ -52,7 +53,8 @@ final class KafkaSinkConfiguration {
                 final Map<String, String> producerProperties,
                 final boolean useCompression,
                 final long waitOnCloseTimeoutMs,
-                final boolean checkClusterOnStart) {
+                final boolean checkClusterOnStart
+        ) {
             this.producerProperties = producerProperties;
             this.useCompression = useCompression;
             this.waitOnCloseTimeoutMs = waitOnCloseTimeoutMs;
@@ -99,7 +101,8 @@ final class KafkaSinkConfiguration {
                 final String messageType,
                 final String messageTypeHeader,
                 final Map<String, String> propertiesMapping,
-                final Map<String, String> headersMapping) {
+                final Map<String, String> headersMapping
+        ) {
             this.outputQueue = outputQueue;
             this.messageType = messageType;
             this.messageTypeHeader = messageTypeHeader;

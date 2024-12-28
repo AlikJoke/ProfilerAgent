@@ -21,7 +21,8 @@ final class KafkaHeaderPropertiesInjector extends OutputPropertiesInjector<Heade
             final Headers template,
             final String method,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return addStringHeader(template, property, method);
     }
 
@@ -30,7 +31,8 @@ final class KafkaHeaderPropertiesInjector extends OutputPropertiesInjector<Heade
             final Headers template,
             final long methodEnterTimestamp,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return addLongHeader(template, property, methodEnterTimestamp);
     }
 
@@ -39,7 +41,8 @@ final class KafkaHeaderPropertiesInjector extends OutputPropertiesInjector<Heade
             final Headers template,
             final long methodElapsedTime,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return addLongHeader(template, property, methodElapsedTime);
     }
 
@@ -48,7 +51,8 @@ final class KafkaHeaderPropertiesInjector extends OutputPropertiesInjector<Heade
             final Headers template,
             final String traceId,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return addStringHeader(template, property, traceId);
     }
 
@@ -66,7 +70,8 @@ final class KafkaHeaderPropertiesInjector extends OutputPropertiesInjector<Heade
             final Headers template,
             final String ip,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return addStringHeader(template, property, ip);
     }
 
@@ -75,7 +80,8 @@ final class KafkaHeaderPropertiesInjector extends OutputPropertiesInjector<Heade
             final Headers template,
             final String host,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return addStringHeader(template, property, host);
     }
 
@@ -84,7 +90,8 @@ final class KafkaHeaderPropertiesInjector extends OutputPropertiesInjector<Heade
             final Headers template,
             final String source,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return addStringHeader(template, property, source);
     }
 
@@ -93,7 +100,8 @@ final class KafkaHeaderPropertiesInjector extends OutputPropertiesInjector<Heade
             final Headers template,
             final String systemPropertyValue,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return addStringHeader(template, property, systemPropertyValue);
     }
 
@@ -102,7 +110,8 @@ final class KafkaHeaderPropertiesInjector extends OutputPropertiesInjector<Heade
             final Headers template,
             final String threadName,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return addStringHeader(template, property, threadName);
     }
 
@@ -111,28 +120,32 @@ final class KafkaHeaderPropertiesInjector extends OutputPropertiesInjector<Heade
             final Headers template,
             final LocalDateTime timestamp,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return addStringHeader(template, property, timestamp.toString());
     }
     
     private Headers addStringHeader(
             final Headers headers, 
             final String property, 
-            final String value) {
+            final String value
+    ) {
         return headers.add(this.properties2headersMapping.getOrDefault(property, property), value.getBytes(StandardCharsets.UTF_8));
     }
 
     private Headers addLongHeader(
             final Headers headers,
             final String property,
-            final long value) {
+            final long value
+    ) {
         return headers.add(this.properties2headersMapping.getOrDefault(property, property), longToByteArray(value));
     }
 
     private Headers addIntHeader(
             final Headers headers,
             final String property,
-            final int value) {
+            final int value
+    ) {
         return headers.add(this.properties2headersMapping.getOrDefault(property, property), intToByteArray(value));
     }
 

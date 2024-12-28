@@ -45,7 +45,8 @@ public final class TracedExecutionTimeRegistrar extends ExecutionTimeRegistrar {
     public void registerMethodExit(
             final String method,
             final long methodEnterTimestamp,
-            final long methodElapsedTime) {
+            final long methodElapsedTime
+    ) {
         try {
             super.registerMethodExit(method, methodEnterTimestamp, methodElapsedTime);
         } finally {
@@ -57,7 +58,8 @@ public final class TracedExecutionTimeRegistrar extends ExecutionTimeRegistrar {
     protected void write(
             final String method,
             final long methodEnterTimestamp,
-            final long methodElapsedTime) {
+            final long methodElapsedTime
+    ) {
         final OutputData methodData = outputData.get();
 
         final OutputData output = this.outputData.get();

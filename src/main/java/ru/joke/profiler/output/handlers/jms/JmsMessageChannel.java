@@ -50,7 +50,8 @@ final class JmsMessageChannel implements AutoCloseable {
             final JmsSinkConfiguration configuration,
             final ConnectionPoolFactory<JmsContextWrapper> connectionPoolFactory,
             final OutputPropertiesInjector<StringBuilder> outputMessageBodyBuilder,
-            final OutputPropertiesInjector<JMSProducer> producerPropertiesInjector) {
+            final OutputPropertiesInjector<JMSProducer> producerPropertiesInjector
+    ) {
         final ConnectionPoolConfiguration poolConfiguration = configuration.connectionConfiguration().connectionPoolConfiguration();
         this.connectionPool = connectionPoolFactory.create(poolConfiguration);
         this.configuration = configuration;
@@ -131,8 +132,11 @@ final class JmsMessageChannel implements AutoCloseable {
         return result;
     }
 
-    private void sendMessage(final byte[][] outputBodies, final List<OutputData> outputData, final JmsContextWrapper session) {
-
+    private void sendMessage(
+            final byte[][] outputBodies,
+            final List<OutputData> outputData,
+            final JmsContextWrapper session
+    ) {
         final JmsSinkConfiguration.OutputMessageConfiguration outputMessageConfiguration = this.configuration.outputMessageConfiguration();
         final JMSProducer producer =
                 session.createProducer()
@@ -179,7 +183,8 @@ final class JmsMessageChannel implements AutoCloseable {
     private synchronized boolean tryToRecoverProducerSessionIfNeed(
             final Exception ex,
             final JmsContextWrapper session,
-            final boolean switchedToRecoveryState) {
+            final boolean switchedToRecoveryState
+    ) {
         if (this.isClosed) {
             return false;
         }

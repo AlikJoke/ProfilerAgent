@@ -41,7 +41,8 @@ final class KafkaMessageChannel implements AutoCloseable {
             final KafkaSinkConfiguration configuration,
             final KafkaProducerSessionFactory producerSessionFactory,
             final KafkaMessageFactory messageFactory,
-            final KafkaClusterValidator clusterValidator) {
+            final KafkaClusterValidator clusterValidator
+    ) {
         this.producerSessionFactory = producerSessionFactory;
         this.clusterValidator = clusterValidator;
         this.configuration = configuration;

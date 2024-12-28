@@ -21,7 +21,8 @@ public abstract class OutputDataAbsStreamSink implements OutputDataSink<String> 
     protected OutputDataAbsStreamSink(
             final Writer writer,
             final int bufferSize,
-            final boolean forceFlushOnWrites) {
+            final boolean forceFlushOnWrites
+    ) {
         this.writer = new BufferedWriter(writer, bufferSize);
         this.forceFlushOnWrites = forceFlushOnWrites;
     }

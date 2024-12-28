@@ -26,7 +26,8 @@ final class OutputDataJdbcStorage implements AutoCloseable {
     OutputDataJdbcStorage(
             final ConnectionPool<JdbcConnectionWrapper> pool,
             final JdbcSinkConfiguration configuration,
-            final OutputPropertiesInjector<PreparedStatement> parametersInjector) {
+            final OutputPropertiesInjector<PreparedStatement> parametersInjector
+    ) {
         this.pool = pool;
         this.insertQuery = buildInsertQuery(configuration.outputTableConfiguration());
         this.parametersInjector = parametersInjector;

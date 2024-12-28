@@ -21,7 +21,8 @@ public final class ProfilingTransformer implements ClassFileTransformer {
     public ProfilingTransformer(
             final Predicate<String> transformationFilter,
             final StaticProfilingConfiguration configuration,
-            final ExecutionTimeRegistrarMetadataSelector registrarMetadataSelector) {
+            final ExecutionTimeRegistrarMetadataSelector registrarMetadataSelector
+    ) {
         this.transformationFilter = transformationFilter;
         this.configuration = configuration;
         this.registrarMetadataSelector = registrarMetadataSelector;
@@ -33,8 +34,8 @@ public final class ProfilingTransformer implements ClassFileTransformer {
             final String className,
             final Class<?> classBeingRedefined,
             final ProtectionDomain protectionDomain,
-            final byte[] classFileBuffer) {
-
+            final byte[] classFileBuffer
+    ) {
         final Boolean isProfilingDisabled = profilingDisabled.get();
         if (isProfilingDisabled != null && isProfilingDisabled
                 || !this.transformationFilter.test(className)) {

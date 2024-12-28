@@ -140,7 +140,8 @@ public abstract class OutputPropertiesInjector<T> {
             final T template,
             final OutputData data,
             final String property,
-            final int index) {
+            final int index
+    ) {
 
         switch (property) {
             case METHOD_PROPERTY:

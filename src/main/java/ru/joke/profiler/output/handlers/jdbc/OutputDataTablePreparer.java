@@ -21,7 +21,8 @@ final class OutputDataTablePreparer {
     OutputDataTablePreparer(
             final JdbcSinkConfiguration.OutputTableConfiguration configuration,
             final ConnectionFactory<JdbcConnectionWrapper> connectionFactory,
-            final OutputDataTableSchemaValidator tableSchemaValidator) {
+            final OutputDataTableSchemaValidator tableSchemaValidator
+    ) {
         this.configuration = configuration;
         this.connectionFactory = connectionFactory;
         this.tableSchemaValidator = tableSchemaValidator;

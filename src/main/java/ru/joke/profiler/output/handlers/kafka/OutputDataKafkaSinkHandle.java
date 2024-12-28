@@ -23,7 +23,8 @@ public final class OutputDataKafkaSinkHandle extends AsyncOutputDataSinkHandleSu
     @Override
     protected Function<OutputData, Supplier<OutputData>> conversionFunction(
             final Map<String, String> properties,
-            final Map<String, Object> context) {
+            final Map<String, Object> context
+    ) {
         return o -> {
             final OutputData data = new OutputData();
             data.fill(o);
@@ -34,7 +35,8 @@ public final class OutputDataKafkaSinkHandle extends AsyncOutputDataSinkHandleSu
     @Override
     protected OutputDataSink<OutputData> createTerminalOutputSink(
             final Map<String, String> properties,
-            final Map<String, Object> context) {
+            final Map<String, Object> context
+    ) {
         final KafkaSinkConfigurationLoader configurationLoader = new KafkaSinkConfigurationLoader();
         final KafkaSinkConfiguration configuration = configurationLoader.load(properties);
 
@@ -47,7 +49,8 @@ public final class OutputDataKafkaSinkHandle extends AsyncOutputDataSinkHandleSu
     @Override
     protected OutputDataSink<OutputData> createSyncOutputSink(
             final Map<String, String> properties,
-            final Map<String, Object> context) {
+            final Map<String, Object> context
+    ) {
         return createTerminalOutputSink(properties, context);
     }
 

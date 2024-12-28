@@ -14,7 +14,8 @@ public final class ExecutionTimeRegistrarInitializer {
     public ExecutionTimeRegistrarInitializer(
             final StaticProfilingConfiguration staticConfiguration,
             final DynamicProfilingConfigurationHolder dynamicProfilingConfigurationHolder,
-            final OutputDataSink<OutputData> outputSink) {
+            final OutputDataSink<OutputData> outputSink
+    ) {
         this.staticConfiguration = staticConfiguration;
         this.outputSink = outputSink;
         this.dynamicProfilingConfigurationHolder = dynamicProfilingConfigurationHolder;

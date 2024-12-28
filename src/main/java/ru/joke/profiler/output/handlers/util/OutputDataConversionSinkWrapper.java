@@ -14,7 +14,8 @@ public final class OutputDataConversionSinkWrapper<T> implements OutputDataSink<
 
     public OutputDataConversionSinkWrapper(
             final OutputDataSink<T> delegate,
-            final Function<OutputData, T> conversionFunc) {
+            final Function<OutputData, T> conversionFunc
+    ) {
         this.conversionFunc = conversionFunc;
         this.delegate = delegate;
     }
