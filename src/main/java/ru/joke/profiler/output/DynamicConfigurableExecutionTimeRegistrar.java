@@ -37,10 +37,10 @@ public final class DynamicConfigurableExecutionTimeRegistrar extends ExecutionTi
                 return;
             }
 
-            if ((executionContext.configuration == null
+            if (executionContext.configuration == null
+                    || this.delegate.isRegistrationOccurredOnTrace()
                     || executionContext.configuration.profilingRootsFilter() == null
-                    || executionContext.configuration.profilingRootsFilter().test(method)
-                    || this.delegate.isRegistrationOccurredOnTrace())) {
+                    || executionContext.configuration.profilingRootsFilter().test(method)) {
                 this.delegate.registerMethodEnter(method);
             }
         } finally {

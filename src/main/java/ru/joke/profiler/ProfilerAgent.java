@@ -7,6 +7,7 @@ import ru.joke.profiler.output.ExecutionTimeRegistrarMetadataSelector;
 import ru.joke.profiler.output.handlers.OutputData;
 import ru.joke.profiler.output.handlers.OutputDataSink;
 import ru.joke.profiler.output.handlers.OutputDataSinkFactory;
+import ru.joke.profiler.transformation.NativeClassMethodsCollector;
 import ru.joke.profiler.transformation.ProfilingTransformer;
 import ru.joke.profiler.transformation.TransformationFilter;
 
@@ -29,7 +30,14 @@ public final class ProfilerAgent {
 
         handleDynamicConfiguration(configurationLoader, staticConfiguration);
 
-        instrumentation.addTransformer(new ProfilingTransformer(transformationFilter, staticConfiguration, registrarMetadataSelector));
+        final NativeClassMethodsCollector nativeClassMethodsCollector = new NativeClassMethodsCollector(transformationFilter);
+        final ProfilingTransformer transformer = new ProfilingTransformer(
+                transformationFilter,
+                staticConfiguration,
+                registrarMetadataSelector,
+                nativeClassMethodsCollector
+        );
+        instrumentation.addTransformer(transformer);
     }
 
     private static void initializeRegistrar(final StaticProfilingConfiguration staticConfiguration) throws Exception {

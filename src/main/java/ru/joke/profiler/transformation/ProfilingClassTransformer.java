@@ -7,22 +7,29 @@ import ru.joke.profiler.output.ExecutionTimeRegistrarMetadataSelector;
 
 import static org.objectweb.asm.Opcodes.*;
 
-public final class ClassProfilingTransformer extends ClassVisitor {
+public final class ProfilingClassTransformer extends ClassVisitor {
+
+    private static final String SYSTEM_CLASS_NAME = System.class.getCanonicalName().replace('.', '/');
+    private static final String NANO_TIME_METHOD_NAME = "nanoTime";
+    private static final String NANO_TIME_METHOD_SIGNATURE = "()J";
 
     private final String className;
     private final StaticProfilingConfiguration profilingConfiguration;
     private final ExecutionTimeRegistrarMetadataSelector registrarMetadataSelector;
+    private final NativeClassMethodsCollector nativeClassMethodsCollector;
 
-    ClassProfilingTransformer(
+    ProfilingClassTransformer(
             final ClassWriter classWriter,
             final String className,
             final StaticProfilingConfiguration profilingConfiguration,
-            final ExecutionTimeRegistrarMetadataSelector registrarMetadataSelector
+            final ExecutionTimeRegistrarMetadataSelector registrarMetadataSelector,
+            final NativeClassMethodsCollector nativeClassMethodsCollector
     ) {
         super(Opcodes.ASM9, classWriter);
         this.className = className;
         this.profilingConfiguration = profilingConfiguration;
         this.registrarMetadataSelector = registrarMetadataSelector;
+        this.nativeClassMethodsCollector = nativeClassMethodsCollector;
     }
 
     @Override
@@ -37,21 +44,19 @@ public final class ClassProfilingTransformer extends ClassVisitor {
             return null;
         }
 
-        final MethodVisitor methodVisitor = this.cv.visitMethod(methodAccess, methodName, methodDesc, signature, exceptions);
         final String fullMethodName = this.className + "." + methodName;
-        return new MethodExecutionTimeRegistrationTransformer(Opcodes.ASM9, methodAccess, methodDesc, methodVisitor, fullMethodName, profilingConfiguration, registrarMetadataSelector);
+        if (!this.profilingConfiguration.isResourceMustBeProfiled(fullMethodName)) {
+            return null;
+        }
+
+        final MethodVisitor methodVisitor = this.cv.visitMethod(methodAccess, methodName, methodDesc, signature, exceptions);
+        return new MethodExecutionTimeRegistrationTransformer(Opcodes.ASM9, methodAccess, methodDesc, methodVisitor, fullMethodName);
     }
 
-    private static class MethodExecutionTimeRegistrationTransformer extends LocalVariablesSorter {
-
-        private static final String SYSTEM_CLASS_NAME = System.class.getCanonicalName().replace('.', '/');
-        private static final String NANO_TIME_METHOD_NAME = "nanoTime";
-        private static final String NANO_TIME_METHOD_SIGNATURE = "()J";
+    private class MethodExecutionTimeRegistrationTransformer extends LocalVariablesSorter {
 
         private static final String CONSTRUCTOR = "<init>";
 
-        private final StaticProfilingConfiguration profilingConfiguration;
-        private final ExecutionTimeRegistrarMetadataSelector registrarMetadataSelector;
         private final String methodName;
         private final boolean isConstructor;
 
@@ -64,14 +69,10 @@ public final class ClassProfilingTransformer extends ClassVisitor {
                 final int access,
                 final String descriptor,
                 final MethodVisitor methodVisitor,
-                final String methodName,
-                final StaticProfilingConfiguration profilingConfiguration,
-                final ExecutionTimeRegistrarMetadataSelector registrarMetadataSelector
+                final String methodName
         ) {
             super(api, access, descriptor, methodVisitor);
             this.methodName = methodName;
-            this.profilingConfiguration = profilingConfiguration;
-            this.registrarMetadataSelector = registrarMetadataSelector;
             this.isConstructor = methodName.endsWith(CONSTRUCTOR);
         }
 
@@ -88,13 +89,18 @@ public final class ClassProfilingTransformer extends ClassVisitor {
             /*
              * ~ ExecutionTimeRegistrar.getInstance().registerMethodEnter();
              */
-            invokeMethodEnterRegistration();
+            invokeMethodEnterRegistration(this.methodName);
 
             /*
              * Try block in constructors starts only after the parent class constructor is called.
              */
             if (!this.isConstructor) {
-                injectTryBlockBeginning();
+                injectTryBlockBeginning(
+                        this.methodName,
+                        this.timestampEnterVarIndex,
+                        this.tryHandlerLabel = new Label(),
+                        this.tryStartLabel = new Label()
+                );
             }
 
             super.visitCode();
@@ -108,9 +114,20 @@ public final class ClassProfilingTransformer extends ClassVisitor {
                 final String descriptor,
                 final boolean isInterface
         ) {
-            super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
+            final boolean isNativeMethod = nativeClassMethodsCollector.isNativeMethod(owner, name, descriptor);
+            if (isNativeMethod) {
+                injectNativeMethodExecutionRegistration(opcode, owner, name, descriptor, isInterface);
+            } else {
+                super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
+            }
+
             if (name.equals(CONSTRUCTOR) && this.isConstructor && opcode == INVOKESPECIAL && this.tryStartLabel == null) {
-                injectTryBlockBeginning();
+                injectTryBlockBeginning(
+                        this.methodName,
+                        this.timestampEnterVarIndex,
+                        this.tryHandlerLabel = new Label(),
+                        this.tryStartLabel = new Label()
+                );
             }
         }
 
@@ -137,11 +154,50 @@ public final class ClassProfilingTransformer extends ClassVisitor {
             super.visitMaxs(maxStack, maxLocals);
         }
 
+        private void injectNativeMethodExecutionRegistration(
+                final int opcode,
+                final String owner,
+                final String name,
+                final String descriptor,
+                final boolean isInterface
+        ) {
+            /*
+             * ~ long startTime = System.nanoTime();
+             */
+            final int nativeMethodStartVarIndex = newLocal(Type.LONG_TYPE);
+            invokeNanoTime();
+            mv.visitVarInsn(LSTORE, nativeMethodStartVarIndex);
+
+            final String nativeMethodName = owner.replace('/', '.') + '.' + name;
+            /*
+             * ~ ExecutionTimeRegistrar.getInstance().registerMethodEnter();
+             */
+            invokeMethodEnterRegistration(nativeMethodName);
+
+            final Label tryHandlerLabel = new Label();
+            final Label tryStartLabel = new Label();
+            injectTryBlockBeginning(
+                    nativeMethodName,
+                    nativeMethodStartVarIndex,
+                    tryHandlerLabel,
+                    tryStartLabel
+            );
+
+            super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
+
+            final Label tryEndLabel = new Label();
+            mv.visitLabel(tryEndLabel);
+
+            insertElapsedTimeRegistrationCall(nativeMethodName, nativeMethodStartVarIndex);
+
+            mv.visitTryCatchBlock(tryStartLabel, tryEndLabel, tryHandlerLabel, null);
+        }
+
         private void onSuccessMethodExecution(final int returnOpcode) {
             final Label tryEndLabel = new Label();
             mv.visitLabel(tryEndLabel);
 
-            insertElapsedTimeRegistrationCall();
+            insertElapsedTimeRegistrationCall(this.methodName, this.timestampEnterVarIndex);
 
             super.visitInsn(returnOpcode);
 
@@ -153,26 +209,35 @@ public final class ClassProfilingTransformer extends ClassVisitor {
             mv.visitLabel(this.tryStartLabel);
         }
 
-        private void injectTryBlockBeginning() {
+        private void injectTryBlockBeginning(
+                final String instrumentedMethodName,
+                final int timestampEnterVarIndex,
+                final Label tryHandlerLabel,
+                final Label tryStartLabel
+        ) {
             final Label codeStart = new Label();
             mv.visitJumpInsn(GOTO, codeStart);
 
-            injectTryHandler();
+            injectTryHandler(instrumentedMethodName, timestampEnterVarIndex, tryHandlerLabel);
 
             mv.visitLabel(codeStart);
-
-            this.tryStartLabel = new Label();
-            mv.visitLabel(this.tryStartLabel);
+            mv.visitLabel(tryStartLabel);
         }
 
-        private void injectTryHandler() {
-            this.tryHandlerLabel = new Label();
-            mv.visitLabel(this.tryHandlerLabel);
-            insertElapsedTimeRegistrationCall();
+        private void injectTryHandler(
+                final String instrumentedMethodName,
+                final int timestampEnterVarIndex,
+                final Label tryHandlerLabel
+        ) {
+            mv.visitLabel(tryHandlerLabel);
+            insertElapsedTimeRegistrationCall(instrumentedMethodName, timestampEnterVarIndex);
             mv.visitInsn(ATHROW);
         }
 
-        private void insertElapsedTimeRegistrationCall() {
+        private void insertElapsedTimeRegistrationCall(
+                final String instrumentedMethodName,
+                final int timestampEnterVarIndex
+        ) {
             /*
              * ~ long endTime = System.nanoTime();
              */
@@ -184,13 +249,13 @@ public final class ClassProfilingTransformer extends ClassVisitor {
              * ~ long elapsedTime = endTime - startTime;
              */
             mv.visitVarInsn(LLOAD, timestampExitVarIndex);
-            mv.visitVarInsn(LLOAD, this.timestampEnterVarIndex);
+            mv.visitVarInsn(LLOAD, timestampEnterVarIndex);
             mv.visitInsn(LSUB);
 
             final int elapsedTimeVarIndex = newLocal(Type.LONG_TYPE);
             mv.visitVarInsn(LSTORE, elapsedTimeVarIndex);
 
-            final long minExecutionThreshold = this.profilingConfiguration.minExecutionThresholdNs();
+            final long minExecutionThreshold = profilingConfiguration.minExecutionThresholdNs();
             if (minExecutionThreshold > 0) {
 
                 /*
@@ -208,20 +273,20 @@ public final class ClassProfilingTransformer extends ClassVisitor {
                 final Label jumpLabel = new Label();
                 mv.visitJumpInsn(IFLT, jumpLabel);
 
-                invokeMethodExitRegistration(elapsedTimeVarIndex);
+                invokeMethodExitRegistration(instrumentedMethodName, elapsedTimeVarIndex, timestampEnterVarIndex);
                 final Label afterRegistrationCall = new Label();
                 mv.visitJumpInsn(GOTO, afterRegistrationCall);
 
                 mv.visitLabel(jumpLabel);
 
-                invokeMethodExitRegistration();
+                invokeMethodExitRegistration(instrumentedMethodName);
 
                 mv.visitLabel(afterRegistrationCall);
             } else {
                 /*
                  * ExecutionTimeRegistrar.getInstance().(registerDynamic(this.method, startTime, elapsedTime) | registerStatic(this.method, startTime, elapsedTime));
                  */
-                invokeMethodExitRegistration(elapsedTimeVarIndex);
+                invokeMethodExitRegistration(instrumentedMethodName, elapsedTimeVarIndex, timestampEnterVarIndex);
             }
         }
 
@@ -235,21 +300,25 @@ public final class ClassProfilingTransformer extends ClassVisitor {
             );
         }
 
-        private void invokeMethodExitRegistration(final int elapsedTimeVarIndex) {
-            final String registerMethodName = this.registrarMetadataSelector.selectExitTimeRegistrationMethod();
-            final String registerMethodSignature = this.registrarMetadataSelector.selectTimeRegistrationMethodSignature();
-            final String registrarClass = this.registrarMetadataSelector.selectRegistrarClass();
+        private void invokeMethodExitRegistration(
+                final String instrumentedMethodName,
+                final int elapsedTimeVarIndex,
+                final int timestampEnterVarIndex
+        ) {
+            final String registerMethodName = registrarMetadataSelector.selectExitTimeRegistrationMethod();
+            final String registerMethodSignature = registrarMetadataSelector.selectTimeRegistrationMethodSignature();
+            final String registrarClass = registrarMetadataSelector.selectRegistrarClass();
             mv.visitMethodInsn(
                     INVOKESTATIC,
                     registrarClass,
-                    this.registrarMetadataSelector.selectRegistrarSingletonAccessorMethod(),
-                    this.registrarMetadataSelector.selectRegistrarSingletonAccessorSignature(),
+                    registrarMetadataSelector.selectRegistrarSingletonAccessorMethod(),
+                    registrarMetadataSelector.selectRegistrarSingletonAccessorSignature(),
                     false
             );
 
-            mv.visitLdcInsn(this.methodName);
+            mv.visitLdcInsn(instrumentedMethodName);
 
-            mv.visitVarInsn(LLOAD, this.timestampEnterVarIndex);
+            mv.visitVarInsn(LLOAD, timestampEnterVarIndex);
             mv.visitVarInsn(LLOAD, elapsedTimeVarIndex);
 
             mv.visitMethodInsn(
@@ -261,38 +330,39 @@ public final class ClassProfilingTransformer extends ClassVisitor {
             );
         }
 
-        private void invokeMethodExitRegistration() {
-            final String exitRegistrationMethod = this.registrarMetadataSelector.selectExitRegistrationMethod();
-            invokeMethodVisitRegistration(exitRegistrationMethod, this.registrarMetadataSelector.selectExitRegistrationMethodSignature(), false);
+        private void invokeMethodExitRegistration(final String instrumentedMethodName) {
+            final String exitRegistrationMethod = registrarMetadataSelector.selectExitRegistrationMethod();
+            invokeMethodVisitRegistration(exitRegistrationMethod, registrarMetadataSelector.selectExitRegistrationMethodSignature(), false, instrumentedMethodName);
         }
 
-        private void invokeMethodEnterRegistration() {
-            final String enterRegistrationMethod = this.registrarMetadataSelector.selectEnterRegistrationMethod();
-            invokeMethodVisitRegistration(enterRegistrationMethod, this.registrarMetadataSelector.selectEnterRegistrationMethodSignature(), true);
+        private void invokeMethodEnterRegistration(final String instrumentedMethodName) {
+            final String enterRegistrationMethod = registrarMetadataSelector.selectEnterRegistrationMethod();
+            invokeMethodVisitRegistration(enterRegistrationMethod, registrarMetadataSelector.selectEnterRegistrationMethodSignature(), true, instrumentedMethodName);
         }
 
         private void invokeMethodVisitRegistration(
-                final String methodName,
+                final String visitMethodName,
                 final String signature,
-                final boolean loadInstrumentedMethodNameAsParameter
+                final boolean loadInstrumentedMethodNameAsParameter,
+                final String instrumentedMethodName
         ) {
-            final String registrarClass = this.registrarMetadataSelector.selectRegistrarClass();
+            final String registrarClass = registrarMetadataSelector.selectRegistrarClass();
             mv.visitMethodInsn(
                     INVOKESTATIC,
                     registrarClass,
-                    this.registrarMetadataSelector.selectRegistrarSingletonAccessorMethod(),
-                    this.registrarMetadataSelector.selectRegistrarSingletonAccessorSignature(),
+                    registrarMetadataSelector.selectRegistrarSingletonAccessorMethod(),
+                    registrarMetadataSelector.selectRegistrarSingletonAccessorSignature(),
                     false
             );
 
             if (loadInstrumentedMethodNameAsParameter) {
-                mv.visitLdcInsn(this.methodName);
+                mv.visitLdcInsn(instrumentedMethodName);
             }
 
             mv.visitMethodInsn(
                     INVOKEVIRTUAL,
                     registrarClass,
-                    methodName,
+                    visitMethodName,
                     signature,
                     false
             );

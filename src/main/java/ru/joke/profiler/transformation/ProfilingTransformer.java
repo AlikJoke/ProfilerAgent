@@ -17,15 +17,18 @@ public final class ProfilingTransformer implements ClassFileTransformer {
     private final Predicate<String> transformationFilter;
     private final StaticProfilingConfiguration configuration;
     private final ExecutionTimeRegistrarMetadataSelector registrarMetadataSelector;
+    private final NativeClassMethodsCollector nativeClassMethodsCollector;
 
     public ProfilingTransformer(
             final Predicate<String> transformationFilter,
             final StaticProfilingConfiguration configuration,
-            final ExecutionTimeRegistrarMetadataSelector registrarMetadataSelector
+            final ExecutionTimeRegistrarMetadataSelector registrarMetadataSelector,
+            final NativeClassMethodsCollector nativeClassMethodsCollector
     ) {
         this.transformationFilter = transformationFilter;
         this.configuration = configuration;
         this.registrarMetadataSelector = registrarMetadataSelector;
+        this.nativeClassMethodsCollector = nativeClassMethodsCollector;
     }
 
     @Override
@@ -44,7 +47,14 @@ public final class ProfilingTransformer implements ClassFileTransformer {
 
         final ClassReader cr = new ClassReader(classFileBuffer);
         final ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
-        final ClassVisitor cv = new ClassProfilingTransformer(cw, className, this.configuration, this.registrarMetadataSelector);
+        final ClassVisitor cv = new ProfilingClassTransformer(
+                cw,
+                className,
+                this.configuration,
+                this.registrarMetadataSelector,
+                this.nativeClassMethodsCollector
+        );
+
         cr.accept(cv, ClassReader.EXPAND_FRAMES);
 
         return cw.toByteArray();
