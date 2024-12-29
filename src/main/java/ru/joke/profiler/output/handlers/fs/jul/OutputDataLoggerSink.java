@@ -11,8 +11,8 @@ final class OutputDataLoggerSink implements OutputDataSink<String> {
     private final Level level;
 
     OutputDataLoggerSink(final LoggerSinkConfiguration configuration) {
-        this.level = Level.parse(configuration.category());
-        this.logger = Logger.getLogger(configuration.level());
+        this.level = Level.parse(configuration.level());
+        this.logger = Logger.getLogger(configuration.category());
     }
 
     @Override

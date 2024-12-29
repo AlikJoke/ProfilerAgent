@@ -14,7 +14,7 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
 
     private static final String STATIC_PREFIX = "static.";
     private static final String SINK_PROPERTIES_PREFIX = "sink.";
-    private static final String SINK_TYPE = SINK_PROPERTIES_PREFIX + "sink.type";
+    private static final String SINK_TYPE = "type";
     private static final String INCLUDED_RESOURCES = "included_resources";
     private static final String INCLUDED_RESOURCES_MASK = "included_resources_mask";
     private static final String DYNAMIC_CONFIGURATION_ENABLED = "dynamic_conf_enabled";
@@ -32,12 +32,11 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
             @ProfilerConfigurationProperty(name = INCLUDED_RESOURCES) final String includedResources,
             @ProfilerConfigurationProperty(name = INCLUDED_RESOURCES_MASK) final String includedResourcesMask,
             @ProfilerConfigurationProperty(name = EXCLUDED_RESOURCES) final String excludedResources,
-            @ProfilerConfigurationProperty(name = INCLUDED_RESOURCES_MASK) final String excludedResourcesMask,
+            @ProfilerConfigurationProperty(name = EXCLUDED_RESOURCES_MASK) final String excludedResourcesMask,
             @ProfilerConfigurationProperty(name = MIN_EXECUTION_THRESHOLD, defaultValue = "0", parser = NanoTimePropertyParser.class) final long minExecutionThresholdNs,
             @ProfilerConfigurationProperty(name = DYNAMIC_CONFIGURATION_ENABLED) final boolean dynamicConfigurationEnabled,
             @ProfilerConfigurationProperty(name = DYNAMIC_CONFIGURATION_REFRESH_INTERVAL, defaultValue = "1m", parser = MillisTimePropertyParser.class) final long dynamicConfigurationRefreshIntervalMs,
             @ProfilerConfigurationProperty(name = EXECUTION_TRACING_ENABLED) final boolean executionTracingEnabled,
-            @ProfilerConfigurationProperty(name = SINK_TYPE, defaultValue = OutputDataConsoleSinkHandle.SINK_TYPE) final String sinkType,
             @ProfilerConfigurationPropertiesWrapper(prefix = SINK_PROPERTIES_PREFIX, parser = MapConfigurationPropertiesParser.class) final Map<String, String> sinkProperties
     ) {
         super(
@@ -53,7 +52,7 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
         this.dynamicConfigurationEnabled = dynamicConfigurationEnabled;
         this.dynamicConfigurationRefreshIntervalMs = dynamicConfigurationRefreshIntervalMs;
         this.executionTracingEnabled = executionTracingEnabled;
-        this.sinkType = sinkType;
+        this.sinkType = sinkProperties.getOrDefault(SINK_TYPE, OutputDataConsoleSinkHandle.SINK_TYPE);
         this.sinkProperties = Collections.unmodifiableMap(sinkProperties);
     }
 

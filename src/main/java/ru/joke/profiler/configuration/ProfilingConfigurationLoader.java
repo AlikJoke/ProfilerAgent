@@ -74,10 +74,10 @@ public final class ProfilingConfigurationLoader {
             final Properties props = new Properties();
             props.load(fis);
 
-
             final Map<String, String> mapProperties =
                     props.stringPropertyNames()
                             .stream()
+                            .filter(p -> props.getProperty(p) != null && !props.getProperty(p).isEmpty())
                             .collect(Collectors.toMap(Function.identity(), props::getProperty));
 
             return ConfigurationParser.parse(configurationType, mapProperties);

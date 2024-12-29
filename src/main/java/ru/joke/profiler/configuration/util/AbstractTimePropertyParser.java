@@ -9,7 +9,8 @@ import java.util.regex.Pattern;
 
 abstract class AbstractTimePropertyParser implements ConfigurationPropertyParser<Long> {
 
-    private static final Pattern pattern = Pattern.compile("^([0-9]+)(ns|mcs|ms|s|m|h)*$");
+    private static final String NO_VALUE = "-1";
+    private static final Pattern pattern = Pattern.compile("^(\\d+)(ms|ns|mcs|m|s)?$");
 
     private final ProfilingTimeUnit defaultTimeUnit;
 
@@ -26,15 +27,19 @@ abstract class AbstractTimePropertyParser implements ConfigurationPropertyParser
             throw new InvalidConfigurationException(String.format("Property (%s) is required", property.name()));
         }
 
+        if (propertyValue.equals(NO_VALUE)) {
+            return Long.valueOf(NO_VALUE);
+        }
+
         final Matcher matcher = pattern.matcher(propertyValue);
-        if (!matcher.matches()) {
+        if (!matcher.find()) {
             throw new InvalidConfigurationException(String.format("Invalid format of property %s: %s", property.name(), propertyValue));
         }
 
-        final String timeValueStr = matcher.group(0);
+        final String timeValueStr = matcher.group(1);
         final long timeValue = Long.parseLong(timeValueStr);
 
-        final String timeUnitStr = matcher.groupCount() > 1 ? matcher.group(1) : null;
+        final String timeUnitStr = matcher.groupCount() > 1 ? matcher.group(2) : null;
         final ProfilingTimeUnit timeUnit = ProfilingTimeUnit.parse(timeUnitStr, this.defaultTimeUnit);
 
         return this.defaultTimeUnit.toJavaTimeUnit().convert(timeValue, timeUnit.toJavaTimeUnit());

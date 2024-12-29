@@ -70,18 +70,18 @@ final class KafkaSinkConfiguration {
         @ProfilerConfigurationPropertiesWrapper(prefix = PRODUCER_PROPERTIES_PREFIX)
         ProducerConfiguration(
                 @ProfilerConfigurationPropertiesWrapper(parser = MapConfigurationPropertiesParser.class) final Map<String, String> producerProperties,
-                @ProfilerConfigurationProperty(name = DISABLE_COMPRESSION) final boolean useCompression,
+                @ProfilerConfigurationProperty(name = DISABLE_COMPRESSION) final boolean disableCompression,
                 @ProfilerConfigurationProperty(name = WAIT_ON_CLOSE, defaultValue = "30s", parser = MillisTimePropertyParser.class) final long waitOnCloseTimeoutMs,
-                @ProfilerConfigurationProperty(name = DISABLE_CLUSTER_VALIDATION_ON_START) final boolean checkClusterOnStart
+                @ProfilerConfigurationProperty(name = DISABLE_CLUSTER_VALIDATION_ON_START) final boolean disableClusterValidationOnStart
         ) {
             if (producerProperties.get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG) == null) {
                 throw new InvalidConfigurationException(String.format("'%s' property is required to connect to Kafka", ProducerConfig.BOOTSTRAP_SERVERS_CONFIG));
             }
 
             this.producerProperties = producerProperties;
-            this.useCompression = useCompression;
+            this.useCompression = !disableCompression;
             this.waitOnCloseTimeoutMs = waitOnCloseTimeoutMs;
-            this.checkClusterOnStart = checkClusterOnStart;
+            this.checkClusterOnStart = !disableClusterValidationOnStart;
         }
 
         Map<String, String> producerProperties() {

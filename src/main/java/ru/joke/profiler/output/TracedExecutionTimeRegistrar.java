@@ -60,15 +60,13 @@ public final class TracedExecutionTimeRegistrar extends ExecutionTimeRegistrar {
             final long methodEnterTimestamp,
             final long methodElapsedTime
     ) {
-        final OutputData methodData = outputData.get();
-
         final OutputData output = this.outputData.get();
         output.fill(
                 method,
                 methodElapsedTime,
                 methodEnterTimestamp,
-                methodData.traceId(),
-                methodData.depth()
+                output.traceId(),
+                output.depth()
         );
 
         this.outputSink.write(output);

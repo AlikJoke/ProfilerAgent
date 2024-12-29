@@ -171,6 +171,24 @@
                             <executions>
                                 <execution>
                                     <configuration>
+                                        <relocations>
+                                            <relocation>
+                                                <pattern>org.</pattern>
+                                                <shadedPattern>ru.joke_shaded.org.</shadedPattern>
+                                            </relocation>
+                                            <relocation>
+                                                <pattern>net.</pattern>
+                                                <shadedPattern>ru.joke_shaded.net.</shadedPattern>
+                                            </relocation>
+                                            <relocation>
+                                                <pattern>common.</pattern>
+                                                <shadedPattern>ru.joke_shaded.common.</shadedPattern>
+                                            </relocation>
+                                            <relocation>
+                                                <pattern>kafka.kafka</pattern>
+                                                <shadedPattern>ru.joke_shaded.kafka.kafka</shadedPattern>
+                                            </relocation>
+                                        </relocations>
                                         <minimizeJar>false</minimizeJar>
                                     </configuration>
                                 </execution>
@@ -301,18 +319,6 @@
                                     <relocation>
                                         <pattern>org.</pattern>
                                         <shadedPattern>ru.joke_shaded.org.</shadedPattern>
-                                    </relocation>
-                                    <relocation>
-                                        <pattern>net.</pattern>
-                                        <shadedPattern>ru.joke_shaded.net.</shadedPattern>
-                                    </relocation>
-                                    <relocation>
-                                        <pattern>common.</pattern>
-                                        <shadedPattern>ru.joke_shaded.common.</shadedPattern>
-                                    </relocation>
-                                    <relocation>
-                                        <pattern>kafka.</pattern>
-                                        <shadedPattern>ru.joke_shaded.kafka.</shadedPattern>
                                     </relocation>
                                 </relocations>
                                 <minimizeJar>true</minimizeJar>

@@ -137,7 +137,7 @@ final class Http2MessageChannel implements AutoCloseable {
         }
 
         if (ex == null) {
-            logger.severe("Error on message sending (server return unallowed response code)");
+            logger.severe("Error on message sending (server return disallowed response code)");
         } else {
             logger.log(Level.SEVERE, "Error on message sending", ex);
         }

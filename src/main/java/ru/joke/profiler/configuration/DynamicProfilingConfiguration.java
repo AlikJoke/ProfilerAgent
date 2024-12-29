@@ -43,7 +43,7 @@ public final class DynamicProfilingConfiguration extends ProfilingConfiguration 
                 minExecutionThresholdNs
         );
         this.threadsFilter =
-                excludedThreadsMask.isEmpty()
+                excludedThreadsMask == null || excludedThreadsMask.isEmpty()
                         ? null
                         : Pattern.compile(excludedThreadsMask).asPredicate().negate();
         this.profilingDisabled = profilingDisabled;
@@ -54,7 +54,7 @@ public final class DynamicProfilingConfiguration extends ProfilingConfiguration 
                 null,
                 '.'
         );
-        this.profiledTraceMaxDepth = profiledTraceMaxDepth == -1 ? Integer.MAX_VALUE : -1;
+        this.profiledTraceMaxDepth = profiledTraceMaxDepth == -1 ? Integer.MAX_VALUE : profiledTraceMaxDepth;
     }
 
     public boolean profilingDisabled() {

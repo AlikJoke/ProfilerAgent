@@ -809,6 +809,7 @@ final class Http2SinkConfiguration {
             private final KStore keyStore;
             private final char[] keyPassword;
 
+            @ProfilerConfigurationPropertiesWrapper
             MutualTLSConfiguration(
                     @ProfilerConfigurationProperty(name = PROTOCOL, defaultValue = DEFAULT_PROTOCOL) final String protocol,
                     @ProfilerConfigurationPropertiesWrapper(prefix = TRUSTSTORE_PREFIX) final KStore trustStore,
