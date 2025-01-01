@@ -5,15 +5,19 @@ import ru.joke.profiler.configuration.meta.ProfilerConfigurationProperty;
 import ru.joke.profiler.configuration.util.MapConfigurationPropertiesParser;
 import ru.joke.profiler.configuration.util.MillisTimePropertyParser;
 import ru.joke.profiler.configuration.util.NanoTimePropertyParser;
+import ru.joke.profiler.configuration.util.TokenizeCommaDelimitedStringPropertyParser;
 import ru.joke.profiler.output.handlers.fs.stream.console.OutputDataConsoleSinkHandle;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 public final class StaticProfilingConfiguration extends ProfilingConfiguration {
 
     private static final String STATIC_PREFIX = "static.";
     private static final String SINK_PROPERTIES_PREFIX = "sink.";
+    private static final String INCLUDED_SPIES = "included_spies";
+    private static final String SPY_PREFIX = "spy.";
     private static final String SINK_TYPE = "type";
     private static final String INCLUDED_RESOURCES = "included_resources";
     private static final String INCLUDED_RESOURCES_MASK = "included_resources_mask";
@@ -24,8 +28,10 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
     private final boolean dynamicConfigurationEnabled;
     private final long dynamicConfigurationRefreshIntervalMs;
     private final boolean executionTracingEnabled;
+    private final List<String> spies;
     private final String sinkType;
     private final Map<String, String> sinkProperties;
+    private final Map<String, String> spiesProperties;
 
     @ProfilerConfigurationPropertiesWrapper(prefix = STATIC_PREFIX)
     StaticProfilingConfiguration(
@@ -37,7 +43,9 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
             @ProfilerConfigurationProperty(name = DYNAMIC_CONFIGURATION_ENABLED) final boolean dynamicConfigurationEnabled,
             @ProfilerConfigurationProperty(name = DYNAMIC_CONFIGURATION_REFRESH_INTERVAL, defaultValue = "1m", parser = MillisTimePropertyParser.class) final long dynamicConfigurationRefreshIntervalMs,
             @ProfilerConfigurationProperty(name = EXECUTION_TRACING_ENABLED) final boolean executionTracingEnabled,
-            @ProfilerConfigurationPropertiesWrapper(prefix = SINK_PROPERTIES_PREFIX, parser = MapConfigurationPropertiesParser.class) final Map<String, String> sinkProperties
+            @ProfilerConfigurationPropertiesWrapper(prefix = SINK_PROPERTIES_PREFIX, parser = MapConfigurationPropertiesParser.class) final Map<String, String> sinkProperties,
+            @ProfilerConfigurationProperty(name = INCLUDED_SPIES, parser = TokenizeCommaDelimitedStringPropertyParser.class) final List<String> spies,
+            @ProfilerConfigurationPropertiesWrapper(prefix = SPY_PREFIX, parser = MapConfigurationPropertiesParser.class) final Map<String, String> spiesProperties
     ) {
         super(
                 composeResourcesFilter(
@@ -54,6 +62,8 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
         this.executionTracingEnabled = executionTracingEnabled;
         this.sinkType = sinkProperties.getOrDefault(SINK_TYPE, OutputDataConsoleSinkHandle.SINK_TYPE);
         this.sinkProperties = Collections.unmodifiableMap(sinkProperties);
+        this.spies = Collections.unmodifiableList(spies);
+        this.spiesProperties = Collections.unmodifiableMap(spiesProperties);
     }
 
     public boolean dynamicConfigurationEnabled() {
@@ -72,8 +82,16 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
         return sinkProperties;
     }
 
+    public List<String> spies() {
+        return spies;
+    }
+
     public String sinkType() {
         return sinkType;
+    }
+
+    public Map<String, String> spiesProperties() {
+        return spiesProperties;
     }
 
     @Override
@@ -85,6 +103,8 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
                 + ", minExecutionThreshold=" + minExecutionThresholdNs
                 + ", sinkType=" + sinkType
                 + ", sinkProperties=" + sinkProperties
+                + ", spies=" + spies
+                + ", spiesProperties=" + spiesProperties
                 + '}';
     }
 }

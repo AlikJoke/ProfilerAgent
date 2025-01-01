@@ -129,7 +129,7 @@ public final class DynamicConfigurableExecutionTimeRegistrar extends ExecutionTi
     private DynamicExecutionContext findOrCreateExecutionContext() {
         final DynamicExecutionContext context = this.threadExecutionContext.get();
         if (context == null) {
-            final DynamicProfilingConfiguration dynamicConfig = this.dynamicProfilingConfigurationHolder.getDynamicConfiguration();
+            final DynamicProfilingConfiguration dynamicConfig = this.dynamicProfilingConfigurationHolder.get();
             final DynamicExecutionContext result = new DynamicExecutionContext(dynamicConfig);
             this.threadExecutionContext.set(result);
             return result;

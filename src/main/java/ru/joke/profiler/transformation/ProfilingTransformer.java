@@ -5,6 +5,7 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import ru.joke.profiler.configuration.StaticProfilingConfiguration;
 import ru.joke.profiler.output.ExecutionTimeRegistrarMetadataSelector;
+import ru.joke.profiler.transformation.spy.SpyInjector;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
@@ -18,17 +19,20 @@ public final class ProfilingTransformer implements ClassFileTransformer {
     private final StaticProfilingConfiguration configuration;
     private final ExecutionTimeRegistrarMetadataSelector registrarMetadataSelector;
     private final NativeClassMethodsCollector nativeClassMethodsCollector;
+    private final SpyInjector spyInjector;
 
     public ProfilingTransformer(
             final Predicate<String> transformationFilter,
             final StaticProfilingConfiguration configuration,
             final ExecutionTimeRegistrarMetadataSelector registrarMetadataSelector,
-            final NativeClassMethodsCollector nativeClassMethodsCollector
+            final NativeClassMethodsCollector nativeClassMethodsCollector,
+            final SpyInjector spyInjector
     ) {
         this.transformationFilter = transformationFilter;
         this.configuration = configuration;
         this.registrarMetadataSelector = registrarMetadataSelector;
         this.nativeClassMethodsCollector = nativeClassMethodsCollector;
+        this.spyInjector = spyInjector;
     }
 
     @Override
@@ -52,7 +56,8 @@ public final class ProfilingTransformer implements ClassFileTransformer {
                 className,
                 this.configuration,
                 this.registrarMetadataSelector,
-                this.nativeClassMethodsCollector
+                this.nativeClassMethodsCollector,
+                this.spyInjector
         );
 
         cr.accept(cv, ClassReader.EXPAND_FRAMES);

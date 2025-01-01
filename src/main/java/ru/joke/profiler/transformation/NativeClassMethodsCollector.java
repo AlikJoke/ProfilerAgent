@@ -5,6 +5,7 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import ru.joke.profiler.ProfilerAgent;
+import ru.joke.profiler.util.BytecodeUtil;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -66,7 +67,7 @@ public final class NativeClassMethodsCollector extends ClassVisitor {
     private Set<MethodInfo> collectNativeMethodsInClass(final String ownerClass) {
 
         try {
-            final ClassReader classReader = new ClassReader(ownerClass.replace("/", "."));
+            final ClassReader classReader = new ClassReader(BytecodeUtil.toCanonicalFormat(ownerClass));
             classReader.accept(this, SKIP_CODE | SKIP_FRAMES | SKIP_DEBUG);
 
             return this.classMethods.get();

@@ -33,7 +33,7 @@ public final class DynamicProfilingConfigurationRefreshService {
         this.dynamicConfigRefreshIntervalMs = dynamicConfigRefreshIntervalMs;
         this.refreshAction = () -> {
             final DynamicProfilingConfiguration dynamicConfig = configurationLoader.loadDynamic();
-            dynamicProfilingConfigurationHolder.setDynamicConfiguration(dynamicConfig);
+            dynamicProfilingConfigurationHolder.set(dynamicConfig);
         };
     }
 

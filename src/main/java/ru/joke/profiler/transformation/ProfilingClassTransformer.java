@@ -4,32 +4,37 @@ import org.objectweb.asm.*;
 import org.objectweb.asm.commons.LocalVariablesSorter;
 import ru.joke.profiler.configuration.StaticProfilingConfiguration;
 import ru.joke.profiler.output.ExecutionTimeRegistrarMetadataSelector;
+import ru.joke.profiler.transformation.spy.SpyInjector;
 
 import static org.objectweb.asm.Opcodes.*;
+import static ru.joke.profiler.util.BytecodeUtil.*;
 
 public final class ProfilingClassTransformer extends ClassVisitor {
 
-    private static final String SYSTEM_CLASS_NAME = System.class.getCanonicalName().replace('.', '/');
+    private static final String SYSTEM_CLASS_NAME = toBytecodeFormat(System.class);
     private static final String NANO_TIME_METHOD_NAME = "nanoTime";
-    private static final String NANO_TIME_METHOD_SIGNATURE = "()J";
+    private static final String NANO_TIME_METHOD_SIGNATURE = buildMethodDescriptor(System.class, NANO_TIME_METHOD_NAME);
 
     private final String className;
     private final StaticProfilingConfiguration profilingConfiguration;
     private final ExecutionTimeRegistrarMetadataSelector registrarMetadataSelector;
     private final NativeClassMethodsCollector nativeClassMethodsCollector;
+    private final SpyInjector spyInjector;
 
     ProfilingClassTransformer(
             final ClassWriter classWriter,
             final String className,
             final StaticProfilingConfiguration profilingConfiguration,
             final ExecutionTimeRegistrarMetadataSelector registrarMetadataSelector,
-            final NativeClassMethodsCollector nativeClassMethodsCollector
+            final NativeClassMethodsCollector nativeClassMethodsCollector,
+            final SpyInjector spyInjector
     ) {
         super(Opcodes.ASM9, classWriter);
         this.className = className;
         this.profilingConfiguration = profilingConfiguration;
         this.registrarMetadataSelector = registrarMetadataSelector;
         this.nativeClassMethodsCollector = nativeClassMethodsCollector;
+        this.spyInjector = spyInjector;
     }
 
     @Override
@@ -49,20 +54,32 @@ public final class ProfilingClassTransformer extends ClassVisitor {
             return null;
         }
 
-        final MethodVisitor methodVisitor = this.cv.visitMethod(methodAccess, methodName, methodDesc, signature, exceptions);
-        return new MethodExecutionTimeRegistrationTransformer(Opcodes.ASM9, methodAccess, methodDesc, methodVisitor, fullMethodName);
+        final MethodVisitor methodVisitor = this.cv.visitMethod(
+                methodAccess,
+                methodName,
+                methodDesc,
+                signature,
+                exceptions
+        );
+        return new MethodExecutionTimeRegistrationTransformer(
+                Opcodes.ASM9,
+                methodAccess,
+                methodDesc,
+                methodVisitor,
+                fullMethodName
+        );
     }
 
     private class MethodExecutionTimeRegistrationTransformer extends LocalVariablesSorter {
-
-        private static final String CONSTRUCTOR = "<init>";
 
         private final String methodName;
         private final boolean isConstructor;
 
         private int timestampEnterVarIndex;
 
-        private Label tryStartLabel, tryHandlerLabel, lastThrowLabel;
+        private Label tryStartLabel;
+        private Label tryHandlerLabel;
+        private Label lastThrowLabel;
 
         MethodExecutionTimeRegistrationTransformer(
                 final int api,
@@ -73,7 +90,7 @@ public final class ProfilingClassTransformer extends ClassVisitor {
         ) {
             super(api, access, descriptor, methodVisitor);
             this.methodName = methodName;
-            this.isConstructor = methodName.endsWith(CONSTRUCTOR);
+            this.isConstructor = methodName.endsWith(CONSTRUCTOR_NAME);
         }
 
         @Override
@@ -116,12 +133,27 @@ public final class ProfilingClassTransformer extends ClassVisitor {
         ) {
             final boolean isNativeMethod = nativeClassMethodsCollector.isNativeMethod(owner, name, descriptor);
             if (isNativeMethod) {
-                injectNativeMethodExecutionRegistration(opcode, owner, name, descriptor, isInterface);
-            } else {
-                super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
+                injectNativeMethodExecutionRegistration(
+                        opcode,
+                        owner,
+                        name,
+                        descriptor,
+                        isInterface
+                );
+            } else if (!spyInjector.injectSpy(this.mv, owner, name, descriptor)) {
+                super.visitMethodInsn(
+                        opcode,
+                        owner,
+                        name,
+                        descriptor,
+                        isInterface
+                );
             }
 
-            if (name.equals(CONSTRUCTOR) && this.isConstructor && opcode == INVOKESPECIAL && this.tryStartLabel == null) {
+            if (name.equals(CONSTRUCTOR_NAME)
+                    && this.isConstructor
+                    && opcode == INVOKESPECIAL
+                    && this.tryStartLabel == null) {
                 injectTryBlockBeginning(
                         this.methodName,
                         this.timestampEnterVarIndex,
@@ -168,7 +200,7 @@ public final class ProfilingClassTransformer extends ClassVisitor {
             invokeNanoTime();
             mv.visitVarInsn(LSTORE, nativeMethodStartVarIndex);
 
-            final String nativeMethodName = owner.replace('/', '.') + '.' + name;
+            final String nativeMethodName = toCanonicalFormat(owner) + '.' + name;
             /*
              * ~ ExecutionTimeRegistrar.getInstance().registerMethodEnter();
              */
@@ -262,7 +294,6 @@ public final class ProfilingClassTransformer extends ClassVisitor {
                  * ~ if (elapsedTime >= minExecutionThreshold) {
                  *       ExecutionTimeRegistrar.getInstance().(registerDynamic(this.method, startTime, elapsedTime) | registerStatic(this.method, startTime, elapsedTime));
                  *   } else {
-                 *       // branch exists only if execution tracing enabled
                  *       ExecutionTimeRegistrar.getInstance().registerMethodExit();
                  *   }
                  */
@@ -286,7 +317,11 @@ public final class ProfilingClassTransformer extends ClassVisitor {
                 /*
                  * ExecutionTimeRegistrar.getInstance().(registerDynamic(this.method, startTime, elapsedTime) | registerStatic(this.method, startTime, elapsedTime));
                  */
-                invokeMethodExitRegistration(instrumentedMethodName, elapsedTimeVarIndex, timestampEnterVarIndex);
+                invokeMethodExitRegistration(
+                        instrumentedMethodName,
+                        elapsedTimeVarIndex,
+                        timestampEnterVarIndex
+                );
             }
         }
 

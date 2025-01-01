@@ -1,6 +1,11 @@
 package ru.joke.profiler.configuration;
 
-public final class DynamicProfilingConfigurationHolder {
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
+import java.util.function.Supplier;
+
+public final class DynamicProfilingConfigurationHolder implements Supplier<DynamicProfilingConfiguration> {
 
     private static DynamicProfilingConfigurationHolder instance;
 
@@ -8,18 +13,32 @@ public final class DynamicProfilingConfigurationHolder {
         return instance;
     }
 
-    DynamicProfilingConfigurationHolder() {
-        super();
-    }
-
+    private final Map<String, BiConsumer<String, DynamicProfilingConfiguration>> subscriptions;
     private volatile DynamicProfilingConfiguration dynamicConfiguration;
 
-    public void setDynamicConfiguration(final DynamicProfilingConfiguration dynamicConfiguration) {
-        this.dynamicConfiguration = dynamicConfiguration;
+    DynamicProfilingConfigurationHolder() {
+        this.subscriptions = new ConcurrentHashMap<>();
     }
 
-    public DynamicProfilingConfiguration getDynamicConfiguration() {
+    public void set(final DynamicProfilingConfiguration dynamicConfiguration) {
+        this.dynamicConfiguration = dynamicConfiguration;
+        this.subscriptions.forEach((id, s) -> s.accept(id, dynamicConfiguration));
+    }
+
+    @Override
+    public DynamicProfilingConfiguration get() {
         return dynamicConfiguration;
+    }
+
+    public void subscribeOnChanges(
+            final String subscriptionId,
+            final BiConsumer<String, DynamicProfilingConfiguration> subscription
+    ) {
+        this.subscriptions.put(subscriptionId, subscription);
+    }
+
+    public boolean unsubscribe(final String subscriptionId) {
+        return this.subscriptions.remove(subscriptionId) != null;
     }
 
     void init() {

@@ -5,13 +5,13 @@ import ru.joke.profiler.configuration.StaticProfilingConfiguration;
 import ru.joke.profiler.output.handlers.OutputData;
 import ru.joke.profiler.output.handlers.OutputDataSink;
 
-public final class ExecutionTimeRegistrarInitializer {
+public final class ExecutionTimeRegistrarFactory {
 
     private final StaticProfilingConfiguration staticConfiguration;
     private final DynamicProfilingConfigurationHolder dynamicProfilingConfigurationHolder;
     private final OutputDataSink<OutputData> outputSink;
 
-    public ExecutionTimeRegistrarInitializer(
+    public ExecutionTimeRegistrarFactory(
             final StaticProfilingConfiguration staticConfiguration,
             final DynamicProfilingConfigurationHolder dynamicProfilingConfigurationHolder,
             final OutputDataSink<OutputData> outputSink
@@ -21,7 +21,7 @@ public final class ExecutionTimeRegistrarInitializer {
         this.dynamicProfilingConfigurationHolder = dynamicProfilingConfigurationHolder;
     }
 
-    public void init() {
+    public ExecutionTimeRegistrar create() {
         final ExecutionTimeRegistrar baseRegistrar =
                 this.staticConfiguration.executionTracingEnabled()
                         ? new TracedExecutionTimeRegistrar(this.outputSink)
@@ -31,5 +31,7 @@ public final class ExecutionTimeRegistrarInitializer {
                         ? new DynamicConfigurableExecutionTimeRegistrar(baseRegistrar, this.staticConfiguration, this.dynamicProfilingConfigurationHolder)
                         : baseRegistrar;
         resultRegistrar.init();
+
+        return resultRegistrar;
     }
 }
