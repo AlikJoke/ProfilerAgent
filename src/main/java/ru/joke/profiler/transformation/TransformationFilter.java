@@ -4,6 +4,8 @@ import ru.joke.profiler.configuration.StaticProfilingConfiguration;
 
 import java.util.function.Predicate;
 
+import static ru.joke.profiler.util.BytecodeUtil.isArrayType;
+
 public final class TransformationFilter implements Predicate<String> {
 
     private final StaticProfilingConfiguration configuration;
@@ -14,9 +16,11 @@ public final class TransformationFilter implements Predicate<String> {
 
     @Override
     public boolean test(final String className) {
-        return !isClassFromSystemPackage(className)
+        return className != null
+                && !isClassFromSystemPackage(className)
                 && !isClassFromAgentLibraryPackage(className)
                 && !isClassFromShadedDependencies(className)
+                && !isArrayType(className)
                 && this.configuration.isResourceMustBeProfiled(className);
     }
 

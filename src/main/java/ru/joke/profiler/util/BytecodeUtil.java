@@ -9,6 +9,16 @@ import java.util.stream.Collectors;
 public abstract class BytecodeUtil {
 
     public static final String CONSTRUCTOR_NAME = "<init>";
+    public static final String ARRAY = "[";
+    public static final String OBJECT_TYPE = toBytecodeFormat(Object.class);
+
+    public static boolean isArrayType(final String type) {
+        return type.startsWith(ARRAY);
+    }
+
+    public static String getTargetArrayType(final String arrayType) {
+        return arrayType.substring(1);
+    }
 
     public static String toCanonicalFormat(final String bytecodeFormat) {
         return bytecodeFormat.replace('/', '.');

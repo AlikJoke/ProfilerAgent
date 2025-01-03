@@ -45,15 +45,6 @@ public final class ProfilingClassTransformer extends ClassVisitor {
             final String signature,
             final String[] exceptions
     ) {
-        if ((methodAccess & ACC_NATIVE) != 0 || (methodAccess & ACC_ABSTRACT) != 0) {
-            return null;
-        }
-
-        final String fullMethodName = this.className + "." + methodName;
-        if (!this.profilingConfiguration.isResourceMustBeProfiled(fullMethodName)) {
-            return null;
-        }
-
         final MethodVisitor methodVisitor = this.cv.visitMethod(
                 methodAccess,
                 methodName,
@@ -61,6 +52,16 @@ public final class ProfilingClassTransformer extends ClassVisitor {
                 signature,
                 exceptions
         );
+
+        if ((methodAccess & ACC_NATIVE) != 0 || (methodAccess & ACC_ABSTRACT) != 0) {
+            return methodVisitor;
+        }
+
+        final String fullMethodName = this.className + "." + methodName;
+        if (!this.profilingConfiguration.isResourceMustBeProfiled(fullMethodName)) {
+            return methodVisitor;
+        }
+
         return new MethodExecutionTimeRegistrationTransformer(
                 Opcodes.ASM9,
                 methodAccess,
@@ -80,6 +81,8 @@ public final class ProfilingClassTransformer extends ClassVisitor {
         private Label tryStartLabel;
         private Label tryHandlerLabel;
         private Label lastThrowLabel;
+
+        private int lastInstruction;
 
         MethodExecutionTimeRegistrationTransformer(
                 final int api,
@@ -153,18 +156,22 @@ public final class ProfilingClassTransformer extends ClassVisitor {
             if (name.equals(CONSTRUCTOR_NAME)
                     && this.isConstructor
                     && opcode == INVOKESPECIAL
-                    && this.tryStartLabel == null) {
+                    && this.tryStartLabel == null
+                    && this.lastInstruction != DUP) {
                 injectTryBlockBeginning(
                         this.methodName,
                         this.timestampEnterVarIndex,
                         this.tryHandlerLabel = new Label(),
                         this.tryStartLabel = new Label()
                 );
+            } else {
+                this.lastInstruction = opcode;
             }
         }
 
         @Override
         public void visitInsn(int opcode) {
+            this.lastInstruction = opcode;
             if (opcode >= IRETURN && opcode <= RETURN) {
                 onSuccessMethodExecution(opcode);
                 return;
@@ -215,7 +222,13 @@ public final class ProfilingClassTransformer extends ClassVisitor {
                     tryStartLabel
             );
 
-            super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
+            super.visitMethodInsn(
+                    opcode,
+                    owner,
+                    name,
+                    descriptor,
+                    isInterface
+            );
 
             final Label tryEndLabel = new Label();
             mv.visitLabel(tryEndLabel);

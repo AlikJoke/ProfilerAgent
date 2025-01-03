@@ -373,14 +373,25 @@ class StatementSpy<T extends Statement> implements Statement {
             final String methodName,
             final String sql
     ) {
+        return composeMethodInfo(methodName, sql, null);
+    }
+
+    protected String composeMethodInfo(
+            final String methodName,
+            final String sql,
+            final String parameters
+    ) {
+        final int maxPrintedQueryCharacters = this.configuration.maxPrintedQueryCharacters();
         final String result =
                 this.methodInfoBuilder
                         .append(this.statementType)
                         .append('.')
                         .append(methodName)
                         .append('(')
-                        .append(sql)
-                        .append(')')
+                        .append('"')
+                        .append(sql.length() > maxPrintedQueryCharacters ? sql.substring(0, maxPrintedQueryCharacters) + "..." : sql)
+                        .append(parameters == null ? "\"" : "\" ::: " + parameters)
+                        .append(")")
                         .toString();
         this.methodInfoBuilder.delete(0, this.methodInfoBuilder.length());
 
@@ -391,7 +402,15 @@ class StatementSpy<T extends Statement> implements Statement {
             final String methodName,
             final List<String> sql
     ) {
-        if (sql == null) {
+        return composeBatchMethodInfo(methodName, sql, null);
+    }
+
+    protected String composeBatchMethodInfo(
+            final String methodName,
+            final List<String> sql,
+            final String parameters
+    ) {
+        if (sql == null || sql.isEmpty()) {
             return composeMethodInfo(methodName, "<no queries>");
         }
 
@@ -399,16 +418,31 @@ class StatementSpy<T extends Statement> implements Statement {
                 .append(this.statementType)
                 .append('.')
                 .append(methodName)
-                .append('(');
+                .append('(')
+                .append('\"');
 
         final int lastIndex = sql.size() - 1;
-        for (int i = 0; i < sql.size(); i++) {
+        for (int i = 0; i < sql.size() && i < this.configuration.maxBatchQueriesToPrint(); i++) {
             final String query = sql.get(i);
-            this.methodInfoBuilder.append(query);
+
+            if (query.length() > this.configuration.maxPrintedQueryCharacters()) {
+                this.methodInfoBuilder.append(query, 0, this.configuration.maxPrintedQueryCharacters()).append("...");
+            } else {
+                this.methodInfoBuilder.append(query);
+            }
 
             if (lastIndex != i) {
-                this.methodInfoBuilder.append(';');
+                this.methodInfoBuilder.append(this.configuration.batchQueriesDelimiter());
+            } else if (parameters != null) {
+                this.methodInfoBuilder.append("\" ::: ").append(parameters);
             }
+        }
+
+        if (this.configuration.maxBatchQueriesToPrint() < sql.size()) {
+            this.methodInfoBuilder
+                    .append("+")
+                    .append(sql.size() - this.configuration.maxBatchQueriesToPrint())
+                    .append(" more");
         }
 
         final String result = this.methodInfoBuilder.append(')').toString();

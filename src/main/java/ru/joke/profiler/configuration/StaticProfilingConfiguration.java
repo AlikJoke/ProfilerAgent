@@ -16,7 +16,7 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
 
     private static final String STATIC_PREFIX = "static.";
     private static final String SINK_PROPERTIES_PREFIX = "sink.";
-    private static final String INCLUDED_SPIES = "included_spies";
+    private static final String ACTIVE_SPIES = "active_spies";
     private static final String SPY_PREFIX = "spy.";
     private static final String SINK_TYPE = "type";
     private static final String INCLUDED_RESOURCES = "included_resources";
@@ -44,7 +44,7 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
             @ProfilerConfigurationProperty(name = DYNAMIC_CONFIGURATION_REFRESH_INTERVAL, defaultValue = "1m", parser = MillisTimePropertyParser.class) final long dynamicConfigurationRefreshIntervalMs,
             @ProfilerConfigurationProperty(name = EXECUTION_TRACING_ENABLED) final boolean executionTracingEnabled,
             @ProfilerConfigurationPropertiesWrapper(prefix = SINK_PROPERTIES_PREFIX, parser = MapConfigurationPropertiesParser.class) final Map<String, String> sinkProperties,
-            @ProfilerConfigurationProperty(name = INCLUDED_SPIES, parser = TokenizeCommaDelimitedStringPropertyParser.class) final List<String> spies,
+            @ProfilerConfigurationProperty(name = ACTIVE_SPIES, parser = TokenizeCommaDelimitedStringPropertyParser.class) final List<String> spies,
             @ProfilerConfigurationPropertiesWrapper(prefix = SPY_PREFIX, parser = MapConfigurationPropertiesParser.class) final Map<String, String> spiesProperties
     ) {
         super(

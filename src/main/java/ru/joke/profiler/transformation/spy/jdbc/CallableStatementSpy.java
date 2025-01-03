@@ -7,6 +7,7 @@ import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.*;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Map;
 
@@ -180,11 +181,13 @@ final class CallableStatementSpy extends PreparedStatementSpy<CallableStatement>
     @Override
 	public void setURL(String parameterName, URL val) throws SQLException {
         delegate.setURL(parameterName, val);
+        appendParameterInfo(parameterName, val);
     }
 
     @Override
 	public void setNull(String parameterName, int sqlType) throws SQLException {
         delegate.setNull(parameterName, sqlType);
+        appendParameterInfo(parameterName, null);
     }
 
     @Override
@@ -195,111 +198,147 @@ final class CallableStatementSpy extends PreparedStatementSpy<CallableStatement>
     @Override
 	public void setByte(String parameterName, byte x) throws SQLException {
         delegate.setByte(parameterName, x);
+        if (this.configuration.printQueryParameters()) {
+            appendParameterInfo(parameterName, String.valueOf(x));
+        }
     }
 
     @Override
 	public void setShort(String parameterName, short x) throws SQLException {
         delegate.setShort(parameterName, x);
+        if (this.configuration.printQueryParameters()) {
+            appendParameterInfo(parameterName, String.valueOf(x));
+        }
     }
 
     @Override
 	public void setInt(String parameterName, int x) throws SQLException {
         delegate.setInt(parameterName, x);
+        if (this.configuration.printQueryParameters()) {
+            appendParameterInfo(parameterName, String.valueOf(x));
+        }
     }
 
     @Override
 	public void setLong(String parameterName, long x) throws SQLException {
         delegate.setLong(parameterName, x);
+        if (this.configuration.printQueryParameters()) {
+            appendParameterInfo(parameterName, String.valueOf(x));
+        }
     }
 
     @Override
 	public void setFloat(String parameterName, float x) throws SQLException {
         delegate.setFloat(parameterName, x);
+        if (this.configuration.printQueryParameters()) {
+            appendParameterInfo(parameterName, String.valueOf(x));
+        }
     }
 
     @Override
 	public void setDouble(String parameterName, double x) throws SQLException {
         delegate.setDouble(parameterName, x);
+        if (this.configuration.printQueryParameters()) {
+            appendParameterInfo(parameterName, String.valueOf(x));
+        }
     }
 
     @Override
 	public void setBigDecimal(String parameterName, BigDecimal x) throws SQLException {
         delegate.setBigDecimal(parameterName, x);
+        appendParameterInfo(parameterName, x);
     }
 
     @Override
 	public void setString(String parameterName, String x) throws SQLException {
         delegate.setString(parameterName, x);
+        appendParameterInfo(parameterName, x);
     }
 
     @Override
 	public void setBytes(String parameterName, byte[] x) throws SQLException {
         delegate.setBytes(parameterName, x);
+        if (this.configuration.printQueryParameters()) {
+            appendParameterInfo(parameterName, Arrays.toString(x));
+        }
     }
 
     @Override
 	public void setDate(String parameterName, Date x) throws SQLException {
         delegate.setDate(parameterName, x);
+        appendParameterInfo(parameterName, x);
     }
 
     @Override
 	public void setTime(String parameterName, Time x) throws SQLException {
         delegate.setTime(parameterName, x);
+        appendParameterInfo(parameterName, x);
     }
 
     @Override
 	public void setTimestamp(String parameterName, Timestamp x) throws SQLException {
         delegate.setTimestamp(parameterName, x);
+        appendParameterInfo(parameterName, x);
     }
 
     @Override
 	public void setAsciiStream(String parameterName, InputStream x, int length) throws SQLException {
         delegate.setAsciiStream(parameterName, x, length);
+        appendParameterInfo(parameterName, ASCII_STREAM);
     }
 
     @Override
 	public void setBinaryStream(String parameterName, InputStream x, int length) throws SQLException {
         delegate.setBinaryStream(parameterName, x, length);
+        appendParameterInfo(parameterName, BINARY_STREAM);
     }
 
     @Override
 	public void setObject(String parameterName, Object x, int targetSqlType, int scale) throws SQLException {
         delegate.setObject(parameterName, x, targetSqlType, scale);
+        appendParameterInfo(parameterName, x);
     }
 
     @Override
 	public void setObject(String parameterName, Object x, int targetSqlType) throws SQLException {
         delegate.setObject(parameterName, x, targetSqlType);
+        appendParameterInfo(parameterName, x);
     }
 
     @Override
 	public void setObject(String parameterName, Object x) throws SQLException {
         delegate.setObject(parameterName, x);
+        appendParameterInfo(parameterName, x);
     }
 
     @Override
 	public void setCharacterStream(String parameterName, Reader reader, int length) throws SQLException {
         delegate.setCharacterStream(parameterName, reader, length);
+        appendParameterInfo(parameterName, CHARACTER_STREAM);
     }
 
     @Override
 	public void setDate(String parameterName, Date x, Calendar cal) throws SQLException {
         delegate.setDate(parameterName, x, cal);
+        appendParameterInfo(parameterName, x);
     }
 
     @Override
 	public void setTime(String parameterName, Time x, Calendar cal) throws SQLException {
         delegate.setTime(parameterName, x, cal);
+        appendParameterInfo(parameterName, x);
     }
 
     @Override
 	public void setTimestamp(String parameterName, Timestamp x, Calendar cal) throws SQLException {
         delegate.setTimestamp(parameterName, x, cal);
+        appendParameterInfo(parameterName, x);
     }
 
     @Override
 	public void setNull(String parameterName, int sqlType, String typeName) throws SQLException {
         delegate.setNull(parameterName, sqlType, typeName);
+        appendParameterInfo(parameterName, null);
     }
 
     @Override
@@ -430,36 +469,43 @@ final class CallableStatementSpy extends PreparedStatementSpy<CallableStatement>
     @Override
 	public void setRowId(String parameterName, RowId x) throws SQLException {
         delegate.setRowId(parameterName, x);
+        appendParameterInfo(parameterName, x);
     }
 
     @Override
 	public void setNString(String parameterName, String value) throws SQLException {
         delegate.setNString(parameterName, value);
+        appendParameterInfo(parameterName, value);
     }
 
     @Override
 	public void setNCharacterStream(String parameterName, Reader value, long length) throws SQLException {
         delegate.setNCharacterStream(parameterName, value, length);
+        appendParameterInfo(parameterName, NCHARACTER_STREAM);
     }
 
     @Override
 	public void setNClob(String parameterName, NClob value) throws SQLException {
         delegate.setNClob(parameterName, value);
+        appendParameterInfo(parameterName, value);
     }
 
     @Override
 	public void setClob(String parameterName, Reader reader, long length) throws SQLException {
         delegate.setClob(parameterName, reader, length);
+        appendParameterInfo(parameterName, CLOB);
     }
 
     @Override
 	public void setBlob(String parameterName, InputStream inputStream, long length) throws SQLException {
         delegate.setBlob(parameterName, inputStream, length);
+        appendParameterInfo(parameterName, BLOB);
     }
 
     @Override
 	public void setNClob(String parameterName, Reader reader, long length) throws SQLException {
         delegate.setNClob(parameterName, reader, length);
+        appendParameterInfo(parameterName, NCLOB);
     }
 
     @Override
@@ -475,6 +521,7 @@ final class CallableStatementSpy extends PreparedStatementSpy<CallableStatement>
     @Override
 	public void setSQLXML(String parameterName, SQLXML xmlObject) throws SQLException {
         delegate.setSQLXML(parameterName, xmlObject);
+        appendParameterInfo(parameterName, xmlObject);
     }
 
     @Override
@@ -520,61 +567,73 @@ final class CallableStatementSpy extends PreparedStatementSpy<CallableStatement>
     @Override
 	public void setBlob(String parameterName, Blob x) throws SQLException {
         delegate.setBlob(parameterName, x);
+        appendParameterInfo(parameterName, x);
     }
 
     @Override
 	public void setClob(String parameterName, Clob x) throws SQLException {
         delegate.setClob(parameterName, x);
+        appendParameterInfo(parameterName, x);
     }
 
     @Override
 	public void setAsciiStream(String parameterName, InputStream x, long length) throws SQLException {
         delegate.setAsciiStream(parameterName, x, length);
+        appendParameterInfo(parameterName, ASCII_STREAM);
     }
 
     @Override
 	public void setBinaryStream(String parameterName, InputStream x, long length) throws SQLException {
         delegate.setBinaryStream(parameterName, x, length);
+        appendParameterInfo(parameterName, BINARY_STREAM);
     }
 
     @Override
 	public void setCharacterStream(String parameterName, Reader reader, long length) throws SQLException {
         delegate.setCharacterStream(parameterName, reader, length);
+        appendParameterInfo(parameterName, CHARACTER_STREAM);
     }
 
     @Override
 	public void setAsciiStream(String parameterName, InputStream x) throws SQLException {
         delegate.setAsciiStream(parameterName, x);
+        appendParameterInfo(parameterName, ASCII_STREAM);
     }
 
     @Override
 	public void setBinaryStream(String parameterName, InputStream x) throws SQLException {
         delegate.setBinaryStream(parameterName, x);
+        appendParameterInfo(parameterName, BINARY_STREAM);
     }
 
     @Override
 	public void setCharacterStream(String parameterName, Reader reader) throws SQLException {
         delegate.setCharacterStream(parameterName, reader);
+        appendParameterInfo(parameterName, CHARACTER_STREAM);
     }
 
     @Override
 	public void setNCharacterStream(String parameterName, Reader value) throws SQLException {
         delegate.setNCharacterStream(parameterName, value);
+        appendParameterInfo(parameterName, NCHARACTER_STREAM);
     }
 
     @Override
 	public void setClob(String parameterName, Reader reader) throws SQLException {
         delegate.setClob(parameterName, reader);
+        appendParameterInfo(parameterName, CLOB);
     }
 
     @Override
 	public void setBlob(String parameterName, InputStream inputStream) throws SQLException {
         delegate.setBlob(parameterName, inputStream);
+        appendParameterInfo(parameterName, BLOB);
     }
 
     @Override
 	public void setNClob(String parameterName, Reader reader) throws SQLException {
         delegate.setNClob(parameterName, reader);
+        appendParameterInfo(parameterName, NCLOB);
     }
 
     @Override
@@ -590,11 +649,13 @@ final class CallableStatementSpy extends PreparedStatementSpy<CallableStatement>
     @Override
 	public void setObject(String parameterName, Object x, SQLType targetSqlType, int scaleOrLength) throws SQLException {
         delegate.setObject(parameterName, x, targetSqlType, scaleOrLength);
+        appendParameterInfo(parameterName, x);
     }
 
     @Override
 	public void setObject(String parameterName, Object x, SQLType targetSqlType) throws SQLException {
         delegate.setObject(parameterName, x, targetSqlType);
+        appendParameterInfo(parameterName, x);
     }
 
     @Override
