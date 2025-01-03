@@ -7,12 +7,12 @@ import java.util.UUID;
 
 public final class TracedExecutionTimeRegistrar extends ExecutionTimeRegistrar {
 
-    private final ThreadLocal<OutputData> outputData = ThreadLocal.withInitial(OutputData::new);
-
+    private final ThreadLocal<OutputData> outputData;
     private final OutputDataSink<OutputData> outputSink;
 
     public TracedExecutionTimeRegistrar(final OutputDataSink<OutputData> outputSink) {
         this.outputSink = outputSink;
+        this.outputData = ThreadLocal.withInitial(OutputData::new);
     }
 
     @Override

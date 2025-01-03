@@ -108,7 +108,11 @@ public final class ProfilerAgent {
 
     private static OutputDataSink<OutputData> createOutputSink(final StaticProfilingConfiguration configuration) throws Exception {
         final OutputDataSinkFactory sinkFactory = new OutputDataSinkFactory();
-        final OutputDataSink<OutputData> sink = sinkFactory.create(configuration.sinkType(), configuration.sinkProperties());
+        final OutputDataSink<OutputData> sink = sinkFactory.create(
+                configuration.sinks(),
+                configuration.ignoreSinkErrors(),
+                configuration.sinkProperties()
+        );
         tryInitSink(sink);
 
         return sink;

@@ -17,8 +17,9 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
     private static final String STATIC_PREFIX = "static.";
     private static final String SINK_PROPERTIES_PREFIX = "sink.";
     private static final String ACTIVE_SPIES = "active_spies";
+    private static final String ACTIVE_SINKS = "active_sinks";
+    private static final String IGNORE_SINK_ERRORS = "ignore_errors";
     private static final String SPY_PREFIX = "spy.";
-    private static final String SINK_TYPE = "type";
     private static final String INCLUDED_RESOURCES = "included_resources";
     private static final String INCLUDED_RESOURCES_MASK = "included_resources_mask";
     private static final String DYNAMIC_CONFIGURATION_ENABLED = "dynamic_conf_enabled";
@@ -29,9 +30,10 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
     private final long dynamicConfigurationRefreshIntervalMs;
     private final boolean executionTracingEnabled;
     private final List<String> spies;
-    private final String sinkType;
+    private final List<String> sinks;
     private final Map<String, String> sinkProperties;
     private final Map<String, String> spiesProperties;
+    private final boolean ignoreSinkErrors;
 
     @ProfilerConfigurationPropertiesWrapper(prefix = STATIC_PREFIX)
     StaticProfilingConfiguration(
@@ -42,7 +44,8 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
             @ProfilerConfigurationProperty(name = MIN_EXECUTION_THRESHOLD, defaultValue = "0", parser = NanoTimePropertyParser.class) final long minExecutionThresholdNs,
             @ProfilerConfigurationProperty(name = DYNAMIC_CONFIGURATION_ENABLED) final boolean dynamicConfigurationEnabled,
             @ProfilerConfigurationProperty(name = DYNAMIC_CONFIGURATION_REFRESH_INTERVAL, defaultValue = "1m", parser = MillisTimePropertyParser.class) final long dynamicConfigurationRefreshIntervalMs,
-            @ProfilerConfigurationProperty(name = EXECUTION_TRACING_ENABLED) final boolean executionTracingEnabled,
+            @ProfilerConfigurationProperty(name = EXECUTION_TRACING_ENABLED, defaultValue = "true") final boolean executionTracingEnabled,
+            @ProfilerConfigurationProperty(name = ACTIVE_SINKS, defaultValue = OutputDataConsoleSinkHandle.SINK_TYPE, parser = TokenizeCommaDelimitedStringPropertyParser.class) final List<String> sinks,
             @ProfilerConfigurationPropertiesWrapper(prefix = SINK_PROPERTIES_PREFIX, parser = MapConfigurationPropertiesParser.class) final Map<String, String> sinkProperties,
             @ProfilerConfigurationProperty(name = ACTIVE_SPIES, parser = TokenizeCommaDelimitedStringPropertyParser.class) final List<String> spies,
             @ProfilerConfigurationPropertiesWrapper(prefix = SPY_PREFIX, parser = MapConfigurationPropertiesParser.class) final Map<String, String> spiesProperties
@@ -60,7 +63,8 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
         this.dynamicConfigurationEnabled = dynamicConfigurationEnabled;
         this.dynamicConfigurationRefreshIntervalMs = dynamicConfigurationRefreshIntervalMs;
         this.executionTracingEnabled = executionTracingEnabled;
-        this.sinkType = sinkProperties.getOrDefault(SINK_TYPE, OutputDataConsoleSinkHandle.SINK_TYPE);
+        this.sinks = Collections.unmodifiableList(sinks);
+        this.ignoreSinkErrors = Boolean.parseBoolean(sinkProperties.get(IGNORE_SINK_ERRORS));
         this.sinkProperties = Collections.unmodifiableMap(sinkProperties);
         this.spies = Collections.unmodifiableList(spies);
         this.spiesProperties = Collections.unmodifiableMap(spiesProperties);
@@ -68,6 +72,10 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
 
     public boolean dynamicConfigurationEnabled() {
         return dynamicConfigurationEnabled;
+    }
+
+    public boolean ignoreSinkErrors() {
+        return ignoreSinkErrors;
     }
 
     public long dynamicConfigurationRefreshIntervalMs() {
@@ -86,8 +94,8 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
         return spies;
     }
 
-    public String sinkType() {
-        return sinkType;
+    public List<String> sinks() {
+        return sinks;
     }
 
     public Map<String, String> spiesProperties() {
@@ -101,10 +109,11 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
                 + ", dynamicConfigurationRefreshIntervalMs=" + dynamicConfigurationRefreshIntervalMs
                 + ", executionTracingEnabled=" + executionTracingEnabled
                 + ", minExecutionThreshold=" + minExecutionThresholdNs
-                + ", sinkType=" + sinkType
+                + ", sinks=" + sinks
                 + ", sinkProperties=" + sinkProperties
                 + ", spies=" + spies
                 + ", spiesProperties=" + spiesProperties
+                + ", ignoreSinkErrors=" + ignoreSinkErrors
                 + '}';
     }
 }
