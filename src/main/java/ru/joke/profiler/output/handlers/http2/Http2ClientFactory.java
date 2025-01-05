@@ -18,14 +18,13 @@ import org.apache.hc.core5.util.TimeValue;
 import org.apache.hc.core5.util.Timeout;
 import ru.joke.profiler.configuration.InvalidConfigurationException;
 import ru.joke.profiler.output.handlers.OutputDataSink;
+import ru.joke.profiler.util.ProfilerThreadFactory;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.security.GeneralSecurityException;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -63,7 +62,7 @@ final class Http2ClientFactory {
                             .setDefaultCookieStore(new BasicCookieStore())
                             .setUserAgent(USER_AGENT)
                             .setTlsStrategy(buildTlsStrategy(configuration))
-                            .setThreadFactory(createHttp2ClientThreadFactory())
+                            .setThreadFactory(new ProfilerThreadFactory(HTTP2_CLIENT_THREAD_NAME, true))
                             .setRetryStrategy(retryStrategy)
                             .setRedirectStrategy(LaxRedirectStrategy.INSTANCE)
                             .setIoReactorExceptionCallback(e -> logger.log(Level.SEVERE, "Encountered error in IO reactor", e))
@@ -137,17 +136,5 @@ final class Http2ClientFactory {
         } catch (IOException e) {
             throw new InvalidConfigurationException("Unable to open key store or trust store", e);
         }
-    }
-
-    private ThreadFactory createHttp2ClientThreadFactory() {
-        final AtomicInteger counter = new AtomicInteger();
-        return r -> {
-            final Thread thread = new Thread(r);
-            thread.setDaemon(true);
-            thread.setName(HTTP2_CLIENT_THREAD_NAME + counter.getAndIncrement());
-            thread.setUncaughtExceptionHandler((t, e) -> logger.log(Level.SEVERE, "Exception in profiler http2 client thread", e));
-
-            return thread;
-        };
     }
 }

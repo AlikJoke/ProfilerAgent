@@ -2,6 +2,7 @@ package ru.joke.profiler.output.handlers.fs.stream.console;
 
 import ru.joke.profiler.output.handlers.fs.stream.OutputDataAbsStreamSink;
 
+import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
@@ -10,7 +11,7 @@ final class OutputDataConsoleSink extends OutputDataAbsStreamSink<ConsoleSinkCon
 
     OutputDataConsoleSink(final ConsoleSinkConfiguration configuration) throws UnsupportedEncodingException {
         super(
-                new OutputStreamWriter(System.out, StandardCharsets.UTF_8.displayName()),
+                new BufferedWriter(new OutputStreamWriter(System.out, StandardCharsets.UTF_8.displayName()), configuration.bufferSize()),
                 configuration
         );
     }

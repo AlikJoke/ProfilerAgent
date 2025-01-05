@@ -12,6 +12,7 @@ import ru.joke.profiler.output.handlers.util.pool.ConnectionPool;
 import ru.joke.profiler.output.handlers.util.pool.ConnectionPoolFactory;
 import ru.joke.profiler.output.handlers.util.recovery.ConnectionRecoveryConfiguration;
 import ru.joke.profiler.output.handlers.util.recovery.RecoveryProcessor;
+import ru.joke.profiler.util.ProfilerThreadFactory;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -23,7 +24,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 final class JmsMessageChannel implements AutoCloseable {
@@ -55,14 +55,7 @@ final class JmsMessageChannel implements AutoCloseable {
         this.outputMessageBodyBuilder = outputMessageBodyBuilder;
         this.producerPropertiesInjector = producerPropertiesInjector;
         this.outputEndpoint = lookup(configuration.outputDestinationConfiguration().destinationJndiName());
-        this.recoveryExecutor = Executors.newSingleThreadExecutor(r -> {
-            final Thread thread = new Thread(r);
-            thread.setDaemon(true);
-            thread.setName(RECOVERY_THREAD_NAME);
-            thread.setUncaughtExceptionHandler((t, e) -> logger.log(Level.SEVERE, "Unable to recover connection", e));
-
-            return thread;
-        });
+        this.recoveryExecutor = Executors.newSingleThreadExecutor(new ProfilerThreadFactory(RECOVERY_THREAD_NAME, false));
     }
     
     synchronized void init() {

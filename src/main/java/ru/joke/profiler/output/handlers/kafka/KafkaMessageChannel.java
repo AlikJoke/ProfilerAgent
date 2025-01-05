@@ -9,6 +9,7 @@ import ru.joke.profiler.output.handlers.OutputDataSink;
 import ru.joke.profiler.output.handlers.ProfilerOutputSinkException;
 import ru.joke.profiler.output.handlers.util.recovery.ConnectionRecoveryConfiguration;
 import ru.joke.profiler.output.handlers.util.recovery.RecoveryProcessor;
+import ru.joke.profiler.util.ProfilerThreadFactory;
 
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -48,14 +49,7 @@ final class KafkaMessageChannel implements AutoCloseable {
         this.configuration = configuration;
         this.messageFactory = messageFactory;
         this.producerSession = producerSessionFactory.create(configuration.producerConfiguration());
-        this.recoveryExecutor = Executors.newSingleThreadExecutor(r -> {
-            final Thread thread = new Thread(r);
-            thread.setDaemon(true);
-            thread.setName(RECOVERY_THREAD_NAME);
-            thread.setUncaughtExceptionHandler((t, e) -> logger.log(Level.SEVERE, "Unable to recover connection", e));
-
-            return thread;
-        });
+        this.recoveryExecutor = Executors.newSingleThreadExecutor(new ProfilerThreadFactory(RECOVERY_THREAD_NAME, false));
     }
     
     void init() {

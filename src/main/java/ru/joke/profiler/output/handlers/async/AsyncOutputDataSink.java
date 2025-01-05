@@ -3,17 +3,15 @@ package ru.joke.profiler.output.handlers.async;
 import ru.joke.profiler.output.handlers.OutputDataSink;
 import ru.joke.profiler.output.handlers.ProfilerOutputSinkException;
 import ru.joke.profiler.output.handlers.util.ConcurrentLinkedBlockingQueue;
+import ru.joke.profiler.util.ProfilerThreadFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 final class AsyncOutputDataSink<S, T> implements OutputDataSink<S> {
@@ -38,7 +36,7 @@ final class AsyncOutputDataSink<S, T> implements OutputDataSink<S> {
         this.queue = new ConcurrentLinkedBlockingQueue<>(configuration.overflowLimit());
         this.flushExecutor = Executors.newScheduledThreadPool(
                 configuration.flushingThreadPoolSize(),
-                createAsyncFlushingThreadFactory()
+                new ProfilerThreadFactory(FLUSHING_THREAD_NAME_PREFIX, true)
         );
         this.conversionFunc = conversionFunc;
     }
@@ -99,17 +97,5 @@ final class AsyncOutputDataSink<S, T> implements OutputDataSink<S> {
         if (!dataItems.isEmpty()) {
             this.delegateSink.write(dataItems);
         }
-    }
-
-    private ThreadFactory createAsyncFlushingThreadFactory() {
-        final AtomicInteger counter = new AtomicInteger();
-        return r -> {
-            final Thread thread = new Thread(r);
-            thread.setDaemon(true);
-            thread.setName(FLUSHING_THREAD_NAME_PREFIX + counter.getAndIncrement());
-            thread.setUncaughtExceptionHandler((t, e) -> logger.log(Level.SEVERE, "Unable to flush data", e));
-
-            return thread;
-        };
     }
 }

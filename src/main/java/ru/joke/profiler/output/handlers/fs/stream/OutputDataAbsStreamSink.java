@@ -3,7 +3,6 @@ package ru.joke.profiler.output.handlers.fs.stream;
 import ru.joke.profiler.output.handlers.OutputDataSink;
 import ru.joke.profiler.output.handlers.ProfilerOutputSinkException;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
@@ -22,7 +21,7 @@ public abstract class OutputDataAbsStreamSink<C extends AbstractFsStreamSinkConf
             final Writer writer,
             final C configuration
     ) {
-        this.writer = new BufferedWriter(writer, configuration.bufferSize());
+        this.writer = writer;
         this.forceFlushOnWrites = configuration.forceFlushOnWrites();
     }
 

@@ -3,6 +3,7 @@ package ru.joke.profiler.output.handlers.util.pool;
 import ru.joke.profiler.output.handlers.OutputDataSink;
 import ru.joke.profiler.output.handlers.ProfilerOutputSinkException;
 import ru.joke.profiler.output.handlers.util.ConcurrentLinkedBlockingQueue;
+import ru.joke.profiler.util.ProfilerThreadFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,14 +36,7 @@ public final class StdConnectionPool<T extends PooledConnection> implements Conn
         this.idleConnectionsTerminator =
                 configuration.keepAliveIdleMs() == -1
                         ? null
-                        : Executors.newSingleThreadScheduledExecutor(r -> {
-                            final Thread thread = new Thread(r);
-                            thread.setDaemon(true);
-                            thread.setName(IDLE_CONNECTIONS_TERMINATOR_THREAD_NAME);
-                            thread.setUncaughtExceptionHandler((t, e) -> logger.log(Level.SEVERE, "Unable to terminate idle connections", e));
-
-                            return thread;
-                        });
+                        : Executors.newSingleThreadScheduledExecutor(new ProfilerThreadFactory(IDLE_CONNECTIONS_TERMINATOR_THREAD_NAME, false));
     }
 
     @Override
