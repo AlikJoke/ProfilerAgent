@@ -1,7 +1,7 @@
 package ru.joke.profiler.output;
 
-import ru.joke.profiler.output.handlers.OutputData;
-import ru.joke.profiler.output.handlers.OutputDataSink;
+import ru.joke.profiler.output.sinks.OutputData;
+import ru.joke.profiler.output.sinks.OutputDataSink;
 
 import java.util.UUID;
 

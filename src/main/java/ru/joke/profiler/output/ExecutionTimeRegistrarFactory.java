@@ -2,8 +2,8 @@ package ru.joke.profiler.output;
 
 import ru.joke.profiler.configuration.DynamicProfilingConfigurationHolder;
 import ru.joke.profiler.configuration.StaticProfilingConfiguration;
-import ru.joke.profiler.output.handlers.OutputData;
-import ru.joke.profiler.output.handlers.OutputDataSink;
+import ru.joke.profiler.output.sinks.OutputData;
+import ru.joke.profiler.output.sinks.OutputDataSink;
 
 public final class ExecutionTimeRegistrarFactory {
 

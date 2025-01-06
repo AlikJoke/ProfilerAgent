@@ -1,0 +1,7 @@
+ru.joke.profiler.output.sinks.fs.stream.file.OutputDataFileSinkHandle
+ru.joke.profiler.output.sinks.fs.stream.console.OutputDataConsoleSinkHandle
+ru.joke.profiler.output.sinks.fs.jul.OutputDataLoggerSinkHandle
+ru.joke.profiler.output.sinks.jdbc.OutputDataJdbcSinkHandle
+ru.joke.profiler.output.sinks.kafka.OutputDataKafkaSinkHandle
+ru.joke.profiler.output.sinks.http2.OutputDataHttp2SinkHandle
+ru.joke.profiler.output.sinks.jms.OutputDataJmsSinkHandle

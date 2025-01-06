@@ -6,7 +6,7 @@ import ru.joke.profiler.configuration.util.MapConfigurationPropertiesParser;
 import ru.joke.profiler.configuration.util.MillisTimePropertyParser;
 import ru.joke.profiler.configuration.util.NanoTimePropertyParser;
 import ru.joke.profiler.configuration.util.TokenizeCommaDelimitedStringPropertyParser;
-import ru.joke.profiler.output.handlers.fs.stream.console.OutputDataConsoleSinkHandle;
+import ru.joke.profiler.output.sinks.fs.stream.console.OutputDataConsoleSinkHandle;
 
 import java.util.Collections;
 import java.util.List;
@@ -16,8 +16,8 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
 
     private static final String STATIC_PREFIX = "static.";
     private static final String SINK_PROPERTIES_PREFIX = "sink.";
-    private static final String ACTIVE_SPIES = "active_spies";
-    private static final String ACTIVE_SINKS = "active_sinks";
+    private static final String ACTIVE_SPIES = "spies";
+    private static final String ACTIVE_SINKS = "sinks";
     private static final String IGNORE_SINK_ERRORS = "ignore_errors";
     private static final String SPY_PREFIX = "spy.";
     private static final String INCLUDED_RESOURCES = "included_resources";
