@@ -26,26 +26,53 @@ final class VaultConfigurationPropertiesLoader implements ConfigurationPropertie
     VaultConfigurationPropertiesLoader(final Map<String, String> args) {
         this.configuration = ConfigurationParser.parse(VaultPropertiesSourceConfiguration.class, args);
     }
-
     @Override
     public Map<String, String> load() {
         if (this.configuration == null) {
             return Collections.emptyMap();
         }
 
+        return load(true);
+    }
+
+    private Map<String, String> load(final boolean retryOnAuthError) {
+
         try {
             final RefreshableVaultClient actualClient = takeActualVaultClient();
-            final LogicalResponse response = actualClient.readProperties(this.configuration.storage().path());
+            final LogicalResponse dataResponse = actualClient.readProperties(this.configuration.storage().path());
 
-            if (response.getRestResponse().getStatus() != 200) {
-                throw new InvalidConfigurationException("Unable to load configuration from Vault server. " + extractVaultResponse(response.getRestResponse()));
+            final RestResponse response = dataResponse.getRestResponse();
+            if (response.getStatus() != 200) {
+                return handleErrorResponse(
+                        response.getStatus(),
+                        retryOnAuthError,
+                        response.getBody()
+                );
             }
 
-            return response.getData();
+            return dataResponse.getData();
         } catch (VaultException ex) {
+            if (ex.getHttpStatusCode() == 401) {
+                return handleErrorResponse(ex.getHttpStatusCode(), retryOnAuthError, new byte[0]);
+            }
+
             logger.log(Level.SEVERE, "Unable to load configuration from Vault server", ex);
             throw new InvalidConfigurationException(ex);
         }
+    }
+
+    private Map<String, String> handleErrorResponse(
+            final int responseCode,
+            final boolean retryOnAuthError,
+            final byte[] responseBody
+    ) {
+        if (responseCode == 401 && retryOnAuthError) {
+            this.refreshableVaultClient = null;
+            return load(false);
+        }
+
+        final String vaultResponse = extractVaultResponse(responseBody, responseCode);
+        throw new InvalidConfigurationException("Unable to load configuration from Vault server. " + vaultResponse);
     }
 
     private synchronized RefreshableVaultClient takeActualVaultClient() throws VaultException {
@@ -54,9 +81,9 @@ final class VaultConfigurationPropertiesLoader implements ConfigurationPropertie
         return current == actual ? actual : (this.refreshableVaultClient = actual);
     }
 
-    private static String extractVaultResponse(final RestResponse restResponse) {
-        final String responseBody = new String(restResponse.getBody(), StandardCharsets.UTF_8);
-        return String.format("Vault response (status is %d): %s", restResponse.getStatus(), responseBody);
+    private static String extractVaultResponse(final byte[] responseBodyBytes, final int responseStatus) {
+        final String responseBody = new String(responseBodyBytes, StandardCharsets.UTF_8);
+        return String.format("Vault response (status is %d): %s", responseStatus, responseBody);
     }
 
     static class RefreshableVaultClient {
@@ -122,7 +149,7 @@ final class VaultConfigurationPropertiesLoader implements ConfigurationPropertie
         private static void validateAuthResponse(final AuthResponse response) {
             final RestResponse restResponse = response.getRestResponse();
             if (restResponse.getStatus() != 200) {
-                throw new InvalidConfigurationException("Invalid auth data provided. " + extractVaultResponse(restResponse));
+                throw new InvalidConfigurationException("Invalid auth data provided. " + extractVaultResponse(restResponse.getBody(), restResponse.getStatus()));
             }
         }
 
