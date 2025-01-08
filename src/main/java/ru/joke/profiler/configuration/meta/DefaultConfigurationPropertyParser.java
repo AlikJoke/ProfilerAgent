@@ -10,7 +10,7 @@ import java.util.function.Function;
 import static ru.joke.profiler.configuration.meta.ReflectionUtil.findField;
 
 @StatelessParser
-public final class DefaultConfigurationPropertyParser implements ConfigurationPropertyParser<Object> {
+public class DefaultConfigurationPropertyParser implements ConfigurationPropertyParser<Object> {
 
     private final Map<Class<?>, Function<String, ?>> convertors;
 

@@ -12,4 +12,6 @@ public @interface ProfilerConfigurationPropertiesWrapper {
     Class<? extends ConfigurationParser> parser() default DefaultConfigurationParser.class;
 
     String conditionalOn() default "";
+
+    boolean nullIfNoExplicitPropertiesProvided() default false;
 }

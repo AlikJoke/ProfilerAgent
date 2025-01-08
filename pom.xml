@@ -19,6 +19,7 @@
         <kafka.version>3.9.0</kafka.version>
         <http2.client.version>5.4.1</http2.client.version>
         <jms.version>3.0.0</jms.version>
+        <vault.version>5.1.0</vault.version>
     </properties>
 
     <scm>
@@ -90,6 +91,12 @@
             <groupId>jakarta.jms</groupId>
             <artifactId>jakarta.jms-api</artifactId>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.bettercloud</groupId>
+            <artifactId>vault-java-driver</artifactId>
+            <version>${vault.version}</version>
         </dependency>
 
     </dependencies>
@@ -320,6 +327,10 @@
                                         <pattern>org.</pattern>
                                         <shadedPattern>ru.joke_shaded.org.</shadedPattern>
                                     </relocation>
+                                    <relocation>
+                                        <pattern>com.bettercloud.</pattern>
+                                        <shadedPattern>ru.joke_shaded.com.bettercloud.</shadedPattern>
+                                    </relocation>
                                 </relocations>
                                 <minimizeJar>true</minimizeJar>
                                 <createDependencyReducedPom>false</createDependencyReducedPom>
@@ -331,6 +342,13 @@
                                             <exclude>META-INF/LICENSE</exclude>
                                             <exclude>META-INF/MANIFEST.MF</exclude>
                                             <exclude>META-INF/NOTICE</exclude>
+                                            <exclude>module-info.class</exclude>
+                                        </excludes>
+                                    </filter>
+                                    <filter>
+                                        <artifact>com.*:*</artifact>
+                                        <excludes>
+                                            <exclude>META-INF/MANIFEST.MF</exclude>
                                             <exclude>module-info.class</exclude>
                                         </excludes>
                                     </filter>

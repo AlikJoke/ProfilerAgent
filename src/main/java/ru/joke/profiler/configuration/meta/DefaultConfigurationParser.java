@@ -20,6 +20,10 @@ public final class DefaultConfigurationParser<T> implements ConfigurationParser<
             final ProfilerConfigurationPropertiesWrapper configuration,
             final Map<String, String> properties
     ) {
+        if (properties.isEmpty() && configuration.nullIfNoExplicitPropertiesProvided()) {
+            return null;
+        }
+
         final Constructor<T> targetConstructor = findConstructor(type, annotatedElement);
         final Object[] args = new Object[targetConstructor.getParameterCount()];
         for (int i = 0; i < targetConstructor.getParameterCount(); i++) {

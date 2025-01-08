@@ -6,7 +6,6 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ru.joke.profiler.configuration.meta.ReflectionUtil.findAnnotatedConstructor;
@@ -26,10 +25,10 @@ public interface ConfigurationParser<T> {
     ) {
         final boolean init = CacheableParsersFactory.init();
         try {
-            final Optional<Constructor<T>> constructor = findAnnotatedConstructor(configurationType, ProfilerConfigurationPropertiesWrapper.class);
-            return constructor
-                    .map(c -> parse(configurationType, c, properties))
-                    .orElseThrow(() -> new InvalidConfigurationException(String.format("No any annotated by %s constructor found on class %s", ProfilerConfigurationPropertiesWrapper.class.getCanonicalName(), configurationType.getCanonicalName())));
+            final Constructor<T> constructor =
+                    findAnnotatedConstructor(configurationType, ProfilerConfigurationPropertiesWrapper.class)
+                            .orElseThrow(() -> new InvalidConfigurationException(String.format("No any annotated by %s constructor found on class %s", ProfilerConfigurationPropertiesWrapper.class.getCanonicalName(), configurationType.getCanonicalName())));
+            return parse(configurationType, constructor, properties);
         } finally {
             if (init) {
                 CacheableParsersFactory.clear();

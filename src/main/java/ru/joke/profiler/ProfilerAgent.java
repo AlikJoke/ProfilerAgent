@@ -1,13 +1,20 @@
 package ru.joke.profiler;
 
-import ru.joke.profiler.configuration.*;
+import ru.joke.profiler.configuration.DynamicProfilingConfigurationHolder;
+import ru.joke.profiler.configuration.DynamicProfilingConfigurationHolderFactory;
+import ru.joke.profiler.configuration.DynamicProfilingConfigurationRefreshService;
+import ru.joke.profiler.configuration.StaticProfilingConfiguration;
+import ru.joke.profiler.configuration.loaders.ProfilingConfigurationLoader;
+import ru.joke.profiler.configuration.loaders.ProfilingConfigurationLoaderFactory;
 import ru.joke.profiler.output.ExecutionTimeRegistrar;
 import ru.joke.profiler.output.ExecutionTimeRegistrarFactory;
 import ru.joke.profiler.output.ExecutionTimeRegistrarMetadataSelector;
 import ru.joke.profiler.output.sinks.OutputData;
 import ru.joke.profiler.output.sinks.OutputDataSink;
 import ru.joke.profiler.output.sinks.OutputDataSinkFactory;
-import ru.joke.profiler.transformation.*;
+import ru.joke.profiler.transformation.NativeClassMethodsCollector;
+import ru.joke.profiler.transformation.ProfilingTransformer;
+import ru.joke.profiler.transformation.TransformationFilter;
 import ru.joke.profiler.transformation.spy.SpyContext;
 import ru.joke.profiler.transformation.spy.SpyInjector;
 import ru.joke.profiler.transformation.spy.SpyInjectorFactory;
@@ -22,7 +29,7 @@ public final class ProfilerAgent {
     }
 
     public static void agentmain(final String args, final Instrumentation instrumentation) throws Exception {
-        final ProfilingConfigurationLoader configurationLoader = new ProfilingConfigurationLoader(args);
+        final ProfilingConfigurationLoader configurationLoader = createConfigurationLoader(args);
         final StaticProfilingConfiguration staticConfiguration = configurationLoader.loadStatic();
 
         final DynamicProfilingConfigurationHolder dynamicConfigHolder = createDynamicConfigurationHolder();
@@ -36,6 +43,11 @@ public final class ProfilerAgent {
                 dynamicConfigHolder
         );
         instrumentation.addTransformer(transformer);
+    }
+
+    private static ProfilingConfigurationLoader createConfigurationLoader(final String args) {
+        final ProfilingConfigurationLoaderFactory configurationLoaderFactory = new ProfilingConfigurationLoaderFactory();
+        return configurationLoaderFactory.create(args);
     }
 
     private static DynamicProfilingConfigurationHolder createDynamicConfigurationHolder() {

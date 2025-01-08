@@ -1,5 +1,6 @@
 package ru.joke.profiler.configuration;
 
+import ru.joke.profiler.configuration.loaders.ProfilingConfigurationLoader;
 import ru.joke.profiler.util.ProfilerThreadFactory;
 
 import java.util.concurrent.Executors;
