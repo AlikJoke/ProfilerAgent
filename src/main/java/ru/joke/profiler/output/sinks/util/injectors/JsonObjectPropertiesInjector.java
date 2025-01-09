@@ -17,7 +17,9 @@ public final class JsonObjectPropertiesInjector extends OutputPropertiesInjector
             DEPTH_PROPERTY,
             METHOD_PROPERTY,
             METHOD_ENTER_TS_PROPERTY,
-            METHOD_ELAPSED_TIME_PROPERTY
+            METHOD_ELAPSED_TIME_PROPERTY,
+            SPAN_ID_PROPERTY,
+            PARENT_SPAN_ID_PROPERTY
     ).collect(Collectors.toMap(Function.identity(), Function.identity()));
 
     public JsonObjectPropertiesInjector(final Map<String, String> mappingMetadata) {
@@ -82,6 +84,30 @@ public final class JsonObjectPropertiesInjector extends OutputPropertiesInjector
     ) {
         appendFieldName(template, property);
         appendIntValue(template, depth);
+        return template;
+    }
+
+    @Override
+    protected StringBuilder injectSpanId(
+            final StringBuilder template,
+            final String spanId,
+            final String property,
+            final int propertyIndex
+    ) {
+        appendFieldName(template, property);
+        appendStringValue(template, spanId);
+        return template;
+    }
+
+    @Override
+    protected StringBuilder injectParentSpanId(
+            final StringBuilder template,
+            final String parentSpanId,
+            final String property,
+            final int propertyIndex
+    ) {
+        appendFieldName(template, property);
+        appendStringValue(template, parentSpanId);
         return template;
     }
 

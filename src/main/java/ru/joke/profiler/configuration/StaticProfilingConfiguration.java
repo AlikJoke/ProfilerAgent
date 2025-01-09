@@ -24,11 +24,9 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
     private static final String INCLUDED_RESOURCES_MASK = "included_resources_mask";
     private static final String DYNAMIC_CONFIGURATION_ENABLED = "dynamic_conf_enabled";
     private static final String DYNAMIC_CONFIGURATION_REFRESH_INTERVAL = "dynamic_conf_refresh_interval";
-    private static final String EXECUTION_TRACING_ENABLED = "execution_tracing_enabled";
 
     private final boolean dynamicConfigurationEnabled;
     private final long dynamicConfigurationRefreshIntervalMs;
-    private final boolean executionTracingEnabled;
     private final List<String> spies;
     private final List<String> sinks;
     private final Map<String, String> sinkProperties;
@@ -44,7 +42,6 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
             @ProfilerConfigurationProperty(name = MIN_EXECUTION_THRESHOLD, defaultValue = "0", parser = NanoTimePropertyParser.class) final long minExecutionThresholdNs,
             @ProfilerConfigurationProperty(name = DYNAMIC_CONFIGURATION_ENABLED) final boolean dynamicConfigurationEnabled,
             @ProfilerConfigurationProperty(name = DYNAMIC_CONFIGURATION_REFRESH_INTERVAL, defaultValue = "1m", parser = MillisTimePropertyParser.class) final long dynamicConfigurationRefreshIntervalMs,
-            @ProfilerConfigurationProperty(name = EXECUTION_TRACING_ENABLED, defaultValue = "true") final boolean executionTracingEnabled,
             @ProfilerConfigurationProperty(name = ACTIVE_SINKS, defaultValue = OutputDataConsoleSinkHandle.SINK_TYPE, parser = TokenizeCommaDelimitedStringPropertyParser.class) final List<String> sinks,
             @ProfilerConfigurationPropertiesWrapper(prefix = SINK_PROPERTIES_PREFIX, parser = MapConfigurationPropertiesParser.class) final Map<String, String> sinkProperties,
             @ProfilerConfigurationProperty(name = ACTIVE_SPIES, parser = TokenizeCommaDelimitedStringPropertyParser.class) final List<String> spies,
@@ -62,7 +59,6 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
         );
         this.dynamicConfigurationEnabled = dynamicConfigurationEnabled;
         this.dynamicConfigurationRefreshIntervalMs = dynamicConfigurationRefreshIntervalMs;
-        this.executionTracingEnabled = executionTracingEnabled;
         this.sinks = Collections.unmodifiableList(sinks);
         this.ignoreSinkErrors = Boolean.parseBoolean(sinkProperties.get(IGNORE_SINK_ERRORS));
         this.sinkProperties = Collections.unmodifiableMap(sinkProperties);
@@ -80,10 +76,6 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
 
     public long dynamicConfigurationRefreshIntervalMs() {
         return dynamicConfigurationRefreshIntervalMs;
-    }
-
-    public boolean executionTracingEnabled() {
-        return executionTracingEnabled;
     }
 
     public Map<String, String> sinkProperties() {
@@ -107,7 +99,6 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
         return "StaticProfilingConfiguration{"
                 + "dynamicConfigurationEnabled=" + dynamicConfigurationEnabled
                 + ", dynamicConfigurationRefreshIntervalMs=" + dynamicConfigurationRefreshIntervalMs
-                + ", executionTracingEnabled=" + executionTracingEnabled
                 + ", minExecutionThreshold=" + minExecutionThresholdNs
                 + ", sinks=" + sinks
                 + ", sinkProperties=" + sinkProperties

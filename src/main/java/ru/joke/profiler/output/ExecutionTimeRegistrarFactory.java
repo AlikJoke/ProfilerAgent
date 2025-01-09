@@ -22,13 +22,10 @@ public final class ExecutionTimeRegistrarFactory {
     }
 
     public ExecutionTimeRegistrar create() {
-        final ExecutionTimeRegistrar baseRegistrar =
-                this.staticConfiguration.executionTracingEnabled()
-                        ? new TracedExecutionTimeRegistrar(this.outputSink)
-                        : new SimpleExecutionTimeRegistrar(this.outputSink);
+        final ExecutionTimeRegistrar baseRegistrar = new TracedExecutionTimeRegistrar(this.outputSink);
         final ExecutionTimeRegistrar resultRegistrar =
                 this.staticConfiguration.dynamicConfigurationEnabled()
-                        ? new DynamicConfigurableExecutionTimeRegistrar(baseRegistrar, this.staticConfiguration, this.dynamicProfilingConfigurationHolder)
+                        ? new DynamicConfigurableExecutionTimeRegistrar(baseRegistrar, this.dynamicProfilingConfigurationHolder)
                         : baseRegistrar;
         resultRegistrar.init();
 

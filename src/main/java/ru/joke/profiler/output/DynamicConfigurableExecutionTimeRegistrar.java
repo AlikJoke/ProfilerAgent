@@ -1,9 +1,8 @@
 package ru.joke.profiler.output;
 
-import ru.joke.profiler.configuration.DynamicProfilingConfigurationHolder;
 import ru.joke.profiler.ProfilerException;
 import ru.joke.profiler.configuration.DynamicProfilingConfiguration;
-import ru.joke.profiler.configuration.StaticProfilingConfiguration;
+import ru.joke.profiler.configuration.DynamicProfilingConfigurationHolder;
 
 public final class DynamicConfigurableExecutionTimeRegistrar extends ExecutionTimeRegistrar {
 
@@ -11,15 +10,12 @@ public final class DynamicConfigurableExecutionTimeRegistrar extends ExecutionTi
 
     private final ExecutionTimeRegistrar delegate;
     private final DynamicProfilingConfigurationHolder dynamicProfilingConfigurationHolder;
-    private final StaticProfilingConfiguration staticProfilingConfiguration;
 
     public DynamicConfigurableExecutionTimeRegistrar(
             final ExecutionTimeRegistrar delegate,
-            final StaticProfilingConfiguration staticProfilingConfiguration,
             final DynamicProfilingConfigurationHolder dynamicProfilingConfigurationHolder
     ) {
         this.delegate = delegate;
-        this.staticProfilingConfiguration = staticProfilingConfiguration;
         this.dynamicProfilingConfigurationHolder = dynamicProfilingConfigurationHolder;
     }
 
@@ -32,11 +28,6 @@ public final class DynamicConfigurableExecutionTimeRegistrar extends ExecutionTi
         }
 
         try {
-            if (!isTracingRegistrationEnabled()) {
-                this.delegate.registerMethodEnter(method);
-                return;
-            }
-
             if (executionContext.configuration == null
                     || this.delegate.isRegistrationOccurredOnTrace()
                     || executionContext.configuration.profilingRootsFilter() == null
@@ -55,11 +46,6 @@ public final class DynamicConfigurableExecutionTimeRegistrar extends ExecutionTi
         final DynamicExecutionContext executionContext = findOrCreateExecutionContext();
         try {
             if (executionContext.configuration != null && executionContext.depth-- > executionContext.configuration.profiledTraceMaxDepth()) {
-                return;
-            }
-
-            if (!isTracingRegistrationEnabled()) {
-                this.delegate.registerMethodExit();
                 return;
             }
 
@@ -82,7 +68,7 @@ public final class DynamicConfigurableExecutionTimeRegistrar extends ExecutionTi
         final DynamicExecutionContext executionContext = findOrCreateExecutionContext();
         try {
             if (executionContext.configuration != null && executionContext.depth-- > executionContext.configuration.profiledTraceMaxDepth()
-                    || isTracingRegistrationEnabled() && !this.delegate.isRegistrationOccurredOnTrace()) {
+                    || !this.delegate.isRegistrationOccurredOnTrace()) {
                 return;
             }
 
@@ -113,10 +99,6 @@ public final class DynamicConfigurableExecutionTimeRegistrar extends ExecutionTi
     @Override
     protected boolean isRegistrationOccurredOnTrace() {
         return this.delegate.isRegistrationOccurredOnTrace();
-    }
-
-    private boolean isTracingRegistrationEnabled() {
-        return this.staticProfilingConfiguration.executionTracingEnabled();
     }
 
     private boolean isProfiled(final DynamicProfilingConfiguration dynamicConfig, final String method) {

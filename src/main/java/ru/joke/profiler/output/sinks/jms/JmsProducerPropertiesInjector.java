@@ -66,6 +66,26 @@ final class JmsProducerPropertiesInjector extends OutputPropertiesInjector<JMSPr
     }
 
     @Override
+    protected JMSProducer injectSpanId(
+            final JMSProducer template,
+            final String spanId,
+            final String property,
+            final int propertyIndex
+    ) {
+        return template.setProperty(this.propertiesMapping.getOrDefault(property, property), spanId);
+    }
+
+    @Override
+    protected JMSProducer injectParentSpanId(
+            final JMSProducer template,
+            final String parentSpanId,
+            final String property,
+            final int propertyIndex
+    ) {
+        return template.setProperty(this.propertiesMapping.getOrDefault(property, property), parentSpanId);
+    }
+
+    @Override
     protected JMSProducer injectIp(
             final JMSProducer template,
             final String ip,

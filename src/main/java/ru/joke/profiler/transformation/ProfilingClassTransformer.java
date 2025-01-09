@@ -98,6 +98,10 @@ public final class ProfilingClassTransformer extends ClassVisitor {
 
         @Override
         public void visitCode() {
+            /*
+             * ~ ExecutionTimeRegistrar.getInstance().registerMethodEnter();
+             */
+            invokeMethodEnterRegistration(this.methodName);
 
             /*
              * ~ long startTime = System.nanoTime();
@@ -105,11 +109,6 @@ public final class ProfilingClassTransformer extends ClassVisitor {
             this.timestampEnterVarIndex = newLocal(Type.LONG_TYPE);
             invokeNanoTime();
             mv.visitVarInsn(LSTORE, this.timestampEnterVarIndex);
-
-            /*
-             * ~ ExecutionTimeRegistrar.getInstance().registerMethodEnter();
-             */
-            invokeMethodEnterRegistration(this.methodName);
 
             /*
              * Try block in constructors starts only after the parent class constructor is called.
@@ -200,18 +199,18 @@ public final class ProfilingClassTransformer extends ClassVisitor {
                 final String descriptor,
                 final boolean isInterface
         ) {
+            final String nativeMethodName = toCanonicalFormat(owner) + '.' + name;
+            /*
+             * ~ ExecutionTimeRegistrar.getInstance().registerMethodEnter();
+             */
+            invokeMethodEnterRegistration(nativeMethodName);
+
             /*
              * ~ long startTime = System.nanoTime();
              */
             final int nativeMethodStartVarIndex = newLocal(Type.LONG_TYPE);
             invokeNanoTime();
             mv.visitVarInsn(LSTORE, nativeMethodStartVarIndex);
-
-            final String nativeMethodName = toCanonicalFormat(owner) + '.' + name;
-            /*
-             * ~ ExecutionTimeRegistrar.getInstance().registerMethodEnter();
-             */
-            invokeMethodEnterRegistration(nativeMethodName);
 
             final Label tryHandlerLabel = new Label();
             final Label tryStartLabel = new Label();

@@ -61,8 +61,29 @@ final class KafkaHeaderPropertiesInjector extends OutputPropertiesInjector<Heade
             final Headers template,
             final int depth,
             final String property,
-            final int propertyIndex) {
+            final int propertyIndex
+    ) {
         return addIntHeader(template, property, depth);
+    }
+
+    @Override
+    protected Headers injectSpanId(
+            final Headers template,
+            final String spanId,
+            final String property,
+            final int propertyIndex
+    ) {
+        return addStringHeader(template, property, spanId);
+    }
+
+    @Override
+    protected Headers injectParentSpanId(
+            final Headers template,
+            final String parentSpanId,
+            final String property,
+            final int propertyIndex
+    ) {
+        return addStringHeader(template, property, parentSpanId);
     }
 
     @Override

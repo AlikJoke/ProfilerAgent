@@ -67,6 +67,26 @@ final class Http2HeaderPropertiesInjector extends OutputPropertiesInjector<Heade
     }
 
     @Override
+    protected Header[] injectSpanId(
+            final Header[] template,
+            final String spanId,
+            final String property,
+            final int propertyIndex
+    ) {
+        return addHeader(template, property, spanId, propertyIndex);
+    }
+
+    @Override
+    protected Header[] injectParentSpanId(
+            final Header[] template,
+            final String parentSpanId,
+            final String property,
+            final int propertyIndex
+    ) {
+        return addHeader(template, property, parentSpanId, propertyIndex);
+    }
+
+    @Override
     protected Header[] injectIp(
             final Header[] template,
             final String ip,

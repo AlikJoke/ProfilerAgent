@@ -43,8 +43,10 @@ public final class OutputStringDataFormatter extends OutputPropertiesInjector<St
         final int depth = outputData.depth();
         final String threadName = outputData.thread();
         final LocalDateTime timestamp = outputData.timestamp();
+        final String spanId = outputData.spanId();
+        final String parentSpanId = outputData.parentSpanId();
 
-        return () -> format(traceId, depth, method, methodEnterTimestamp, elapsedTime, threadName, timestamp);
+        return () -> format(traceId, depth, method, methodEnterTimestamp, elapsedTime, threadName, timestamp, spanId, parentSpanId);
     }
 
     public String format(final OutputData outputData) {
@@ -55,7 +57,9 @@ public final class OutputStringDataFormatter extends OutputPropertiesInjector<St
                 outputData.methodEnterTimestamp(),
                 outputData.methodElapsedTime(),
                 outputData.thread(),
-                outputData.timestamp()
+                outputData.timestamp(),
+                outputData.spanId(),
+                outputData.parentSpanId()
         );
     }
 
@@ -107,6 +111,26 @@ public final class OutputStringDataFormatter extends OutputPropertiesInjector<St
             final int propertyIndex
     ) {
         return injectProperty(template, property, String.valueOf(depth));
+    }
+
+    @Override
+    protected String injectSpanId(
+            final String template,
+            final String spanId,
+            final String property,
+            final int propertyIndex
+    ) {
+        return injectProperty(template, property, spanId);
+    }
+
+    @Override
+    protected String injectParentSpanId(
+            final String template,
+            final String parentSpanId,
+            final String property,
+            final int propertyIndex
+    ) {
+        return injectProperty(template, property, parentSpanId);
     }
 
     @Override
@@ -176,20 +200,22 @@ public final class OutputStringDataFormatter extends OutputPropertiesInjector<St
             final long methodEnterTimestamp,
             final long elapsedTime,
             final String threadName,
-            final LocalDateTime timestamp
+            final LocalDateTime timestamp,
+            final String spanId,
+            final String parentSpanId
     ) {
         String result = injectProperty(this.outputDataPattern, THREAD_PROPERTY, threadName);
         result = injectProperty(result, METHOD_PROPERTY, method);
         result = injectProperty(result, METHOD_ENTER_TS_PROPERTY, String.valueOf(this.enterTimestampUnit.convert(methodEnterTimestamp, TimeUnit.NANOSECONDS)));
         result = injectProperty(result, METHOD_ELAPSED_TIME_PROPERTY, String.valueOf(this.elapsedTimeUnit.convert(elapsedTime, TimeUnit.NANOSECONDS)));
         result = injectProperty(result, SOURCE_PROPERTY, PROFILER_LABEL);
+        result = injectProperty(result, TRACE_ID_PROPERTY, traceId);
+        result = injectProperty(result, DEPTH_PROPERTY, String.valueOf(depth));
+        result = injectProperty(result, SPAN_ID_PROPERTY, spanId);
+        result = injectProperty(result, PARENT_SPAN_ID_PROPERTY, parentSpanId);
+
         if (this.currentTimestampFormatter != null) {
             result = injectProperty(result, CURRENT_TS_PROPERTY, this.currentTimestampFormatter.format(timestamp));
-        }
-
-        if (traceId != null) {
-            result = injectProperty(result, TRACE_ID_PROPERTY, traceId);
-            result = injectProperty(result, DEPTH_PROPERTY, String.valueOf(depth));
         }
 
         return result;

@@ -26,6 +26,7 @@ final class VaultConfigurationPropertiesLoader implements ConfigurationPropertie
     VaultConfigurationPropertiesLoader(final Map<String, String> args) {
         this.configuration = ConfigurationParser.parse(VaultPropertiesSourceConfiguration.class, args);
     }
+
     @Override
     public Map<String, String> load() {
         if (this.configuration == null) {

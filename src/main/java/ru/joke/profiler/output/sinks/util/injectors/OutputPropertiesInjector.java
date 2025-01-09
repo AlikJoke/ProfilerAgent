@@ -17,6 +17,8 @@ public abstract class OutputPropertiesInjector<T> {
     public static final String DEPTH_PROPERTY = "depth";
     public static final String METHOD_ELAPSED_TIME_PROPERTY = "elapsed";
     public static final String METHOD_ENTER_TS_PROPERTY = "enter_ts";
+    public static final String SPAN_ID_PROPERTY = "span_id";
+    public static final String PARENT_SPAN_ID_PROPERTY = "parent_span_id";
 
     public static final String SOURCE_PROPERTY = "source";
     public static final String HOST_PROPERTY = "host";
@@ -94,6 +96,20 @@ public abstract class OutputPropertiesInjector<T> {
             final int propertyIndex
     );
 
+    protected abstract T injectSpanId(
+            final T template,
+            final String spanId,
+            final String property,
+            final int propertyIndex
+    );
+
+    protected abstract T injectParentSpanId(
+            final T template,
+            final String parentSpanId,
+            final String property,
+            final int propertyIndex
+    );
+
     protected abstract T injectIp(
             final T template,
             final String ip,
@@ -154,6 +170,10 @@ public abstract class OutputPropertiesInjector<T> {
                 return injectTraceId(template, data.traceId(), property, index);
             case DEPTH_PROPERTY:
                 return injectDepth(template, data.depth(), property, index);
+            case SPAN_ID_PROPERTY:
+                return injectSpanId(template, data.spanId(), property, index);
+            case PARENT_SPAN_ID_PROPERTY:
+                return injectParentSpanId(template, data.parentSpanId(), property, index);
             case IP_PROPERTY:
                 return injectIp(template, this.ip, property, index);
             case HOST_PROPERTY:

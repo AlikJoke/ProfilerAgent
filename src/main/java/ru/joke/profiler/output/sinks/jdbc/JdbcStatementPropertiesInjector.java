@@ -66,6 +66,26 @@ final class JdbcStatementPropertiesInjector extends OutputPropertiesInjector<Pre
     }
 
     @Override
+    protected PreparedStatement injectSpanId(
+            final PreparedStatement template,
+            final String spanId,
+            final String property,
+            final int propertyIndex
+    ) {
+        return injectStringParam(template, propertyIndex, spanId);
+    }
+
+    @Override
+    protected PreparedStatement injectParentSpanId(
+            final PreparedStatement template,
+            final String parentSpanId,
+            final String property,
+            final int propertyIndex
+    ) {
+        return injectStringParam(template, propertyIndex, parentSpanId);
+    }
+
+    @Override
     protected PreparedStatement injectIp(
             final PreparedStatement template,
             final String ip,
