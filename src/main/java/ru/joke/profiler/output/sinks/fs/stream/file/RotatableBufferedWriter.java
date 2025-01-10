@@ -76,7 +76,7 @@ final class RotatableBufferedWriter extends Writer {
             return true;
         } catch (IOException ex) {
             if (this.writer == writer) {
-                throw ex;
+                handleException(writer, ex);
             }
 
             return false;
@@ -109,10 +109,19 @@ final class RotatableBufferedWriter extends Writer {
             return true;
         } catch (IOException ex) {
             if (this.writer == writer) {
-                throw ex;
+                handleException(writer, ex);
             }
 
             return false;
+        }
+    }
+
+    private synchronized void handleException(
+            final Writer writer,
+            final IOException ex
+    ) throws IOException {
+        if (this.writer == writer) {
+            throw ex;
         }
     }
 
