@@ -10,6 +10,9 @@ import java.util.Map;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+import static ru.joke.profiler.util.ArgUtil.checkPositive;
+
 public final class DynamicProfilingConfiguration extends ProfilingConfiguration {
 
     private static final String DYNAMIC_PREFIX = "dynamic.";
@@ -60,8 +63,11 @@ public final class DynamicProfilingConfiguration extends ProfilingConfiguration 
                 null,
                 '.'
         );
-        this.profiledTraceMaxDepth = profiledTraceMaxDepth == -1 ? Integer.MAX_VALUE : profiledTraceMaxDepth;
-        this.spiesProperties = Collections.unmodifiableMap(spiesProperties);
+        this.profiledTraceMaxDepth =
+                profiledTraceMaxDepth == -1
+                        ? Integer.MAX_VALUE
+                        : checkPositive(profiledTraceMaxDepth, "profiledTraceMaxDepth");
+        this.spiesProperties = Collections.unmodifiableMap(checkNotNull(spiesProperties, "spiesProperties"));
     }
 
     public boolean profilingDisabled() {

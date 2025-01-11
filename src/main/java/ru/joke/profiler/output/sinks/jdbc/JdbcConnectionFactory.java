@@ -7,12 +7,14 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+
 final class JdbcConnectionFactory implements ConnectionFactory<JdbcConnectionWrapper> {
 
     private final JdbcSinkConfiguration.ConnectionFactoryConfiguration configuration;
 
     JdbcConnectionFactory(final JdbcSinkConfiguration.ConnectionFactoryConfiguration configuration) {
-        this.configuration = configuration;
+        this.configuration = checkNotNull(configuration, "configuration");
     }
 
     @Override

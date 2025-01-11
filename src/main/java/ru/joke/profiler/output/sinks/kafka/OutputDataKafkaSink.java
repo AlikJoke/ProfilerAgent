@@ -3,12 +3,14 @@ package ru.joke.profiler.output.sinks.kafka;
 import ru.joke.profiler.output.sinks.OutputData;
 import ru.joke.profiler.output.sinks.OutputDataSink;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+
 final class OutputDataKafkaSink extends OutputDataSink<OutputData> {
 
     private final KafkaMessageChannel channel;
 
     OutputDataKafkaSink(final KafkaMessageChannel channel) {
-        this.channel = channel;
+        this.channel = checkNotNull(channel, "channel");
     }
 
     @Override

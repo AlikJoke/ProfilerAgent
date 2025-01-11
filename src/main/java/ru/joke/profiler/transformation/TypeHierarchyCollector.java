@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotEmpty;
 import static ru.joke.profiler.util.BytecodeUtil.OBJECT_TYPE;
 
 final class TypeHierarchyCollector {
@@ -30,7 +31,7 @@ final class TypeHierarchyCollector {
 
     List<String> collect(final String type) {
         final List<String> result = new ArrayList<>(4);
-        String currentType = type;
+        String currentType = checkNotEmpty(type, "type");
         result.add(currentType);
         while (true) {
             final String superType = this.type2superTypeMap.computeIfAbsent(currentType, this::readSuperType);

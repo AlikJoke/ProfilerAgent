@@ -7,6 +7,8 @@ import ru.joke.profiler.output.sinks.ProfilerOutputSinkException;
 import java.sql.SQLException;
 import java.util.List;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+
 final class OutputDataJdbcSink extends OutputDataSink<OutputData> {
 
     private final OutputDataJdbcStorage storage;
@@ -16,8 +18,8 @@ final class OutputDataJdbcSink extends OutputDataSink<OutputData> {
             final OutputDataJdbcStorage storage,
             final OutputDataTablePreparer outputDataTablePreparer
     ) {
-        this.storage = storage;
-        this.outputDataTablePreparer = outputDataTablePreparer;
+        this.storage = checkNotNull(storage, "storage");
+        this.outputDataTablePreparer = checkNotNull(outputDataTablePreparer, "outputDataTablePreparer");
     }
 
     @Override

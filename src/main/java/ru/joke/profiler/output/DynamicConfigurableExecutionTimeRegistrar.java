@@ -4,6 +4,8 @@ import ru.joke.profiler.ProfilerException;
 import ru.joke.profiler.configuration.DynamicProfilingConfiguration;
 import ru.joke.profiler.configuration.DynamicProfilingConfigurationHolder;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+
 public final class DynamicConfigurableExecutionTimeRegistrar extends ExecutionTimeRegistrar {
 
     private final ThreadLocal<DynamicExecutionContext> threadExecutionContext = new ThreadLocal<>();
@@ -15,8 +17,8 @@ public final class DynamicConfigurableExecutionTimeRegistrar extends ExecutionTi
             final ExecutionTimeRegistrar delegate,
             final DynamicProfilingConfigurationHolder dynamicProfilingConfigurationHolder
     ) {
-        this.delegate = delegate;
-        this.dynamicProfilingConfigurationHolder = dynamicProfilingConfigurationHolder;
+        this.delegate = checkNotNull(delegate, "delegate");
+        this.dynamicProfilingConfigurationHolder = checkNotNull(dynamicProfilingConfigurationHolder, "dynamicProfilingConfigurationHolder");
     }
 
     @Override

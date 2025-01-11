@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+
 public final class OutputDataConversionSinkWrapper<T> extends OutputDataSink<OutputData> {
 
     private final OutputDataSink<T> delegate;
@@ -16,8 +18,8 @@ public final class OutputDataConversionSinkWrapper<T> extends OutputDataSink<Out
             final OutputDataSink<T> delegate,
             final Function<OutputData, T> conversionFunc
     ) {
-        this.conversionFunc = conversionFunc;
-        this.delegate = delegate;
+        this.conversionFunc = checkNotNull(conversionFunc, "conversionFunc");
+        this.delegate = checkNotNull(delegate, "delegate");
     }
 
     @Override

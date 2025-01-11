@@ -8,6 +8,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import static ru.joke.profiler.util.ArgUtil.checkPositive;
+
 public final class DynamicProfilingConfigurationRefreshService {
 
     private static final Logger logger = Logger.getLogger(DynamicProfilingConfigurationRefreshService.class.getCanonicalName());
@@ -24,7 +26,7 @@ public final class DynamicProfilingConfigurationRefreshService {
             final long dynamicConfigRefreshIntervalMs
     ) {
         this.executorService = Executors.newSingleThreadScheduledExecutor(new ProfilerThreadFactory(REFRESHING_THREAD_NAME, false));
-        this.dynamicConfigRefreshIntervalMs = dynamicConfigRefreshIntervalMs;
+        this.dynamicConfigRefreshIntervalMs = checkPositive(dynamicConfigRefreshIntervalMs, "dynamicConfigRefreshIntervalMs");
         this.refreshAction = () -> {
             final DynamicProfilingConfiguration dynamicConfig = configurationLoader.loadDynamic();
             dynamicProfilingConfigurationHolder.set(dynamicConfig);

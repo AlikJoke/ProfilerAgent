@@ -7,6 +7,7 @@ import ru.joke.profiler.output.sinks.async.AsyncSinkDataFlushingConfiguration;
 import ru.joke.profiler.output.sinks.fs.stream.AbstractFsStreamSinkConfiguration;
 
 import static ru.joke.profiler.output.sinks.fs.stream.file.OutputDataFileSinkHandle.SINK_TYPE;
+import static ru.joke.profiler.util.ArgUtil.*;
 
 public final class FileSinkConfiguration extends AbstractFsStreamSinkConfiguration {
 
@@ -30,8 +31,8 @@ public final class FileSinkConfiguration extends AbstractFsStreamSinkConfigurati
             final AsyncSinkDataFlushingConfiguration asyncFlushingConfiguration
     ) {
         super(outputDataPattern, bufferSize, forceFlushOnWrites, asyncFlushingConfiguration);
-        this.filePath = filePath;
-        this.existingFilePolicy = existingFilePolicy;
+        this.filePath = checkNotEmpty(filePath, "filePath");
+        this.existingFilePolicy = checkNotNull(existingFilePolicy, "existingFilePolicy");
         this.rotation = rotation;
     }
 
@@ -74,7 +75,7 @@ public final class FileSinkConfiguration extends AbstractFsStreamSinkConfigurati
         private final int maxRotations;
         private final RotationMode mode;
 
-        @ProfilerConfigurationPropertiesWrapper(prefix = ROTATION_PREFIX)
+        @ProfilerConfigurationPropertiesWrapper(prefix = ROTATION_PREFIX, nullIfNoExplicitPropertiesProvided = true)
         public Rotation(
                 @ProfilerConfigurationProperty(name = ENABLED) final boolean enabled,
                 @ProfilerConfigurationProperty(name = OVERFLOW_LIMIT, defaultValue = "20480") final long overflowLimitBytes,
@@ -82,9 +83,9 @@ public final class FileSinkConfiguration extends AbstractFsStreamSinkConfigurati
                 @ProfilerConfigurationProperty(name = ROTATION_MODE) RotationMode mode
         ) {
             this.enabled = enabled;
-            this.overflowLimitBytes = overflowLimitBytes;
-            this.maxRotations = maxRotations;
-            this.mode = mode;
+            this.overflowLimitBytes = checkPositive(overflowLimitBytes, "overflowLimitBytes");
+            this.maxRotations = checkNonNegative(maxRotations, "maxRotations");
+            this.mode = checkNotNull(mode, "mode");
         }
 
         public boolean enabled() {

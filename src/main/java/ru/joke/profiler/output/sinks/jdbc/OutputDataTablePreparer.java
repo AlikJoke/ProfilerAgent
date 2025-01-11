@@ -8,6 +8,8 @@ import java.sql.Statement;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+
 final class OutputDataTablePreparer {
 
     private static final Logger logger = Logger.getLogger(OutputDataTablePreparer.class.getCanonicalName());
@@ -26,9 +28,9 @@ final class OutputDataTablePreparer {
             final ConnectionFactory<JdbcConnectionWrapper> connectionFactory,
             final OutputDataTableSchemaValidator tableSchemaValidator
     ) {
-        this.configuration = configuration;
-        this.connectionFactory = connectionFactory;
-        this.tableSchemaValidator = tableSchemaValidator;
+        this.configuration = checkNotNull(configuration, "configuration");
+        this.connectionFactory = checkNotNull(connectionFactory, "connectionFactory");
+        this.tableSchemaValidator = checkNotNull(tableSchemaValidator, "tableSchemaValidator");
     }
 
     void prepare() throws SQLException {

@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+
 final class OutputDataJdbcStorage implements AutoCloseable {
 
     private static final Logger logger = Logger.getLogger(OutputDataJdbcStorage.class.getCanonicalName());
@@ -31,9 +33,10 @@ final class OutputDataJdbcStorage implements AutoCloseable {
             final JdbcSinkConfiguration configuration,
             final OutputPropertiesInjector<PreparedStatement> parametersInjector
     ) {
-        this.pool = pool;
+        this.pool = checkNotNull(pool, "pool");
+        checkNotNull(configuration, "configuration");
         this.insertQuery = buildInsertQuery(configuration.outputTableConfiguration());
-        this.parametersInjector = parametersInjector;
+        this.parametersInjector = checkNotNull(parametersInjector, "parametersInjector");
         this.insertionConfiguration = configuration.dataInsertionConfiguration();
 
         logger.info("Jdbc storage created with config: " + configuration);

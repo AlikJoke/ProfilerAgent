@@ -19,6 +19,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+
 final class KafkaMessageChannel implements AutoCloseable {
 
     private static final Logger logger = Logger.getLogger(KafkaMessageChannel.class.getCanonicalName());
@@ -43,11 +45,11 @@ final class KafkaMessageChannel implements AutoCloseable {
             final KafkaMessageFactory messageFactory,
             final KafkaClusterValidator clusterValidator
     ) {
-        this.producerSessionFactory = producerSessionFactory;
-        this.clusterValidator = clusterValidator;
-        this.configuration = configuration;
-        this.messageFactory = messageFactory;
-        this.producerSession = producerSessionFactory.create(configuration.producerConfiguration());
+        this.producerSessionFactory = checkNotNull(producerSessionFactory, "producerSessionFactory");
+        this.clusterValidator = checkNotNull(clusterValidator, "clusterValidator");
+        this.configuration = checkNotNull(configuration, "configuration");
+        this.messageFactory = checkNotNull(messageFactory, "messageFactory");
+        this.producerSession = checkNotNull(producerSessionFactory, "producerSessionFactory").create(configuration.producerConfiguration());
         this.recoveryExecutor = Executors.newSingleThreadExecutor(new ProfilerThreadFactory(RECOVERY_THREAD_NAME, false));
     }
     

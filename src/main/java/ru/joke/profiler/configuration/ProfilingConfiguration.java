@@ -7,6 +7,8 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static ru.joke.profiler.util.ArgUtil.checkNonNegative;
+
 abstract class ProfilingConfiguration {
 
     static final String MIN_EXECUTION_THRESHOLD = "min_execution_threshold";
@@ -21,7 +23,7 @@ abstract class ProfilingConfiguration {
             final long minExecutionThresholdNs
     ) {
         this.resourcesFilter = resourcesFilter;
-        this.minExecutionThresholdNs = minExecutionThresholdNs;
+        this.minExecutionThresholdNs = checkNonNegative(minExecutionThresholdNs, "minExecutionThresholdNs");
     }
 
     public long minExecutionThresholdNs() {

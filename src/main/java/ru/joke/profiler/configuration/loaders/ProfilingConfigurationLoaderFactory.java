@@ -5,11 +5,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+
 public final class ProfilingConfigurationLoaderFactory {
 
     public ProfilingConfigurationLoader create(final String args) {
 
-        final Map<String, String> argsMap = parseArgs(args);
+        final Map<String, String> argsMap = parseArgs(checkNotNull(args, "args"));
         final ConfigurationPropertiesLoader[] loaders = createPropertiesLoaders(argsMap);
 
         final ConfigurationPropertiesLoader compositePropertiesLoader = () -> {

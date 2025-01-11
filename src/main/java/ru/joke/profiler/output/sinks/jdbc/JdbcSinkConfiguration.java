@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import static ru.joke.profiler.output.sinks.jdbc.OutputDataJdbcSinkHandle.SINK_TYPE;
+import static ru.joke.profiler.util.ArgUtil.*;
 
 public final class JdbcSinkConfiguration extends AsyncOutputDataSinkConfigurationSupport {
 
@@ -31,10 +32,10 @@ public final class JdbcSinkConfiguration extends AsyncOutputDataSinkConfiguratio
             final AsyncSinkDataFlushingConfiguration asyncFlushingConfiguration
     ) {
         super(asyncFlushingConfiguration);
-        this.dataInsertionConfiguration = dataInsertionConfiguration;
-        this.outputTableConfiguration = outputTableConfiguration;
-        this.connectionPoolConfiguration = connectionPoolConfiguration;
-        this.connectionFactoryConfiguration = connectionFactoryConfiguration;
+        this.dataInsertionConfiguration = checkNotNull(dataInsertionConfiguration, "dataInsertionConfiguration");
+        this.outputTableConfiguration = checkNotNull(outputTableConfiguration, "outputTableConfiguration");
+        this.connectionPoolConfiguration = checkNotNull(connectionPoolConfiguration, "connectionPoolConfiguration");
+        this.connectionFactoryConfiguration = checkNotNull(connectionFactoryConfiguration, "connectionFactoryConfiguration");
     }
 
     public OutputTableConfiguration outputTableConfiguration() {
@@ -80,7 +81,7 @@ public final class JdbcSinkConfiguration extends AsyncOutputDataSinkConfiguratio
                 @ProfilerConfigurationProperty(name = BATCH_SIZE, defaultValue = "100") final int batchSize
         ) {
             this.enableBatching = !disableBatching;
-            this.batchSize = batchSize;
+            this.batchSize = checkPositive(batchSize, "batchSize");
         }
 
         public boolean enableBatching() {
@@ -124,11 +125,11 @@ public final class JdbcSinkConfiguration extends AsyncOutputDataSinkConfiguratio
                 @ProfilerConfigurationProperty(name = SKIP_SCHEMA_VALIDATION) final boolean skipSchemaValidation,
                 @ProfilerConfigurationProperty(name = COLUMNS_METADATA, required = true, parser = JdbcColumnsMetadataPropertyParser.class) final Map<String, ColumnMetadata> columnsMetadata
         ) {
-            this.tableName = tableName;
-            this.existingTablePolicy = existingTablePolicy;
+            this.tableName = checkNotEmpty(tableName, "tableName");
+            this.existingTablePolicy = checkNotNull(existingTablePolicy, "existingTablePolicy");
             this.autoCreateTableIfNotExist = autoCreateTableIfNotExist;
             this.skipSchemaValidation = skipSchemaValidation;
-            this.columnsMetadata = columnsMetadata;
+            this.columnsMetadata = checkNotNull(columnsMetadata, "columnsMetadata");
         }
 
         public String tableName() {
@@ -168,8 +169,8 @@ public final class JdbcSinkConfiguration extends AsyncOutputDataSinkConfiguratio
             private final String columnType;
 
             public ColumnMetadata(final String columnName, final String columnType) {
-                this.columnName = columnName;
-                this.columnType = columnType;
+                this.columnName = checkNotEmpty(columnName, "columnName");
+                this.columnType = checkNotEmpty(columnType, "columnType");
             }
 
             public String columnName() {
@@ -213,9 +214,9 @@ public final class JdbcSinkConfiguration extends AsyncOutputDataSinkConfiguratio
                 @ProfilerConfigurationProperty(name = CONNECTION_FACTORY_URL, required = true) final String url,
                 @ProfilerConfigurationPropertiesWrapper(parser = MapConfigurationPropertiesParser.class) final Map<String, String> connectionProperties
         ) {
-            this.url = url;
+            this.url = checkNotEmpty(url, "url");
             this.connectionProperties = new Properties();
-            this.connectionProperties.putAll(connectionProperties);
+            this.connectionProperties.putAll(checkNotNull(connectionProperties, "connectionProperties"));
         }
 
         public String url() {

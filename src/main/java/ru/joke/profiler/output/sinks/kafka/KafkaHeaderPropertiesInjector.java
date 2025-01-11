@@ -5,6 +5,7 @@ import ru.joke.profiler.output.sinks.util.injectors.OutputPropertiesInjector;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Map;
 
 final class KafkaHeaderPropertiesInjector extends OutputPropertiesInjector<Headers> {
@@ -13,7 +14,7 @@ final class KafkaHeaderPropertiesInjector extends OutputPropertiesInjector<Heade
 
     KafkaHeaderPropertiesInjector(final Map<String, String> properties2headersMapping) {
         super(properties2headersMapping.keySet());
-        this.properties2headersMapping = properties2headersMapping;
+        this.properties2headersMapping = Collections.unmodifiableMap(properties2headersMapping);
     }
 
     @Override

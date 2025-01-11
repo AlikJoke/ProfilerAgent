@@ -12,6 +12,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+import static ru.joke.profiler.util.ArgUtil.checkPositive;
+
 public final class StaticProfilingConfiguration extends ProfilingConfiguration {
 
     private static final String STATIC_PREFIX = "static.";
@@ -58,12 +61,12 @@ public final class StaticProfilingConfiguration extends ProfilingConfiguration {
                 minExecutionThresholdNs
         );
         this.dynamicConfigurationEnabled = dynamicConfigurationEnabled;
-        this.dynamicConfigurationRefreshIntervalMs = dynamicConfigurationRefreshIntervalMs;
-        this.sinks = Collections.unmodifiableList(sinks);
+        this.dynamicConfigurationRefreshIntervalMs = checkPositive(dynamicConfigurationRefreshIntervalMs, "dynamicConfigurationRefreshIntervalMs");
+        this.sinks = Collections.unmodifiableList(checkNotNull(sinks, "sinks"));
+        this.sinkProperties = Collections.unmodifiableMap(checkNotNull(sinkProperties, "sinkProperties"));
         this.ignoreSinkErrors = Boolean.parseBoolean(sinkProperties.get(IGNORE_SINK_ERRORS));
-        this.sinkProperties = Collections.unmodifiableMap(sinkProperties);
-        this.spies = Collections.unmodifiableList(spies);
-        this.spiesProperties = Collections.unmodifiableMap(spiesProperties);
+        this.spies = Collections.unmodifiableList(checkNotNull(spies, "spies"));
+        this.spiesProperties = Collections.unmodifiableMap(checkNotNull(spiesProperties, "spiesProperties"));
     }
 
     public boolean dynamicConfigurationEnabled() {

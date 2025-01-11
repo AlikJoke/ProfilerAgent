@@ -6,6 +6,7 @@ import ru.joke.profiler.output.sinks.async.AsyncSinkDataFlushingConfiguration;
 import ru.joke.profiler.output.sinks.fs.AbstractFsSinkConfiguration;
 
 import static ru.joke.profiler.output.sinks.fs.jul.OutputDataLoggerSinkHandle.SINK_TYPE;
+import static ru.joke.profiler.util.ArgUtil.checkNotEmpty;
 
 public final class LoggerSinkConfiguration extends AbstractFsSinkConfiguration {
 
@@ -25,8 +26,8 @@ public final class LoggerSinkConfiguration extends AbstractFsSinkConfiguration {
             final AsyncSinkDataFlushingConfiguration asyncFlushingConfiguration
     ) {
         super(outputDataPattern, asyncFlushingConfiguration);
-        this.category = category;
-        this.level = level;
+        this.category = checkNotEmpty(category, "category");
+        this.level = checkNotEmpty(level, "level");
     }
 
     public String category() {

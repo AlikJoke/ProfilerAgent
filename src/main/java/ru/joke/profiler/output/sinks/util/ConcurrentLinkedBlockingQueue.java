@@ -6,6 +6,8 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import static ru.joke.profiler.util.ArgUtil.checkPositive;
+
 public final class ConcurrentLinkedBlockingQueue<E> {
 
     private final Semaphore emptySemaphore;
@@ -13,6 +15,7 @@ public final class ConcurrentLinkedBlockingQueue<E> {
     private final Queue<E> sourceQueue;
 
     public ConcurrentLinkedBlockingQueue(final int capacity) {
+        checkPositive(capacity, "capacity");
         this.sourceQueue = new ConcurrentLinkedQueue<>();
         this.emptySemaphore = new Semaphore(1);
         this.fullSemaphore = new Semaphore(capacity);

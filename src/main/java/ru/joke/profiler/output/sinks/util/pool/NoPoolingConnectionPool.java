@@ -2,12 +2,14 @@ package ru.joke.profiler.output.sinks.util.pool;
 
 import ru.joke.profiler.output.sinks.ProfilerOutputSinkException;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+
 public final class NoPoolingConnectionPool<T extends PooledConnection> implements ConnectionPool<T> {
 
     private final ConnectionFactory<T> connectionFactory;
 
     public NoPoolingConnectionPool(final ConnectionFactory<T> connectionFactory) {
-        this.connectionFactory = connectionFactory;
+        this.connectionFactory = checkNotNull(connectionFactory, "connectionFactory");
     }
 
     @Override

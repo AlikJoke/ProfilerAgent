@@ -6,6 +6,9 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotEmpty;
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+
 public abstract class BytecodeUtil {
 
     public static final String CONSTRUCTOR_NAME = "<init>";
@@ -13,26 +16,26 @@ public abstract class BytecodeUtil {
     public static final String OBJECT_TYPE = toBytecodeFormat(Object.class);
 
     public static boolean isArrayType(final String type) {
-        return type.startsWith(ARRAY);
+        return checkNotNull(type, "type").startsWith(ARRAY);
     }
 
     public static String getTargetArrayType(final String arrayType) {
-        return arrayType.substring(1);
+        return checkNotEmpty(arrayType, "arrayType").substring(1);
     }
 
     public static String toCanonicalFormat(final String bytecodeFormat) {
-        return bytecodeFormat.replace('/', '.');
+        return checkNotNull(bytecodeFormat, "bytecodeFormat").replace('/', '.');
     }
 
     public static String insertObjectParameterInTheBeginningOfMethodDescriptor(
             final String original,
             final String parameterType
     ) {
-        return '(' + createObjectTypeDescriptor(parameterType) + original.substring(1);
+        return '(' + createObjectTypeDescriptor(checkNotEmpty(parameterType, "parameterType")) + checkNotEmpty(original.substring(1), "original");
     }
 
     public static String buildMethodDescriptor(final Class<?> owner, final String methodName) {
-        return Arrays.stream(owner.getMethods())
+        return Arrays.stream(checkNotNull(owner, "owner").getMethods())
                         .filter(m -> m.getName().equals(methodName))
                         .findAny()
                         .map(BytecodeUtil::buildMethodDescriptor)
@@ -40,7 +43,7 @@ public abstract class BytecodeUtil {
     }
 
     public static String buildMethodDescriptor(final Method method) {
-        final Class<?> returnType = method.getReturnType();
+        final Class<?> returnType = checkNotNull(method, "method").getReturnType();
         final String returnTypeSignature = getTypeSignature(returnType);
 
         final Class<?>[] parameters = method.getParameterTypes();
@@ -52,7 +55,7 @@ public abstract class BytecodeUtil {
     }
 
     public static String toBytecodeFormat(final Class<?> clazz) {
-        return clazz.getCanonicalName().replace('.', '/');
+        return checkNotNull(clazz, "clazz").getCanonicalName().replace('.', '/');
     }
 
     private static String getTypeSignature(final Class<?> type) {

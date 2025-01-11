@@ -5,6 +5,8 @@ import ru.joke.profiler.configuration.StaticProfilingConfiguration;
 import ru.joke.profiler.output.sinks.OutputData;
 import ru.joke.profiler.output.sinks.OutputDataSink;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+
 public final class ExecutionTimeRegistrarFactory {
 
     private final StaticProfilingConfiguration staticConfiguration;
@@ -16,9 +18,9 @@ public final class ExecutionTimeRegistrarFactory {
             final DynamicProfilingConfigurationHolder dynamicProfilingConfigurationHolder,
             final OutputDataSink<OutputData> outputSink
     ) {
-        this.staticConfiguration = staticConfiguration;
-        this.outputSink = outputSink;
-        this.dynamicProfilingConfigurationHolder = dynamicProfilingConfigurationHolder;
+        this.staticConfiguration = checkNotNull(staticConfiguration, "staticConfiguration");
+        this.outputSink = checkNotNull(outputSink, "outputSink");
+        this.dynamicProfilingConfigurationHolder = checkNotNull(dynamicProfilingConfigurationHolder, "dynamicProfilingConfigurationHolder");
     }
 
     public ExecutionTimeRegistrar create() {

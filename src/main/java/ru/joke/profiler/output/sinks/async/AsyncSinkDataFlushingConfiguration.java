@@ -5,6 +5,9 @@ import ru.joke.profiler.configuration.meta.ProfilerConfigurationProperty;
 import ru.joke.profiler.configuration.meta.ProfilerDefaultEnumProperty;
 import ru.joke.profiler.configuration.util.MillisTimePropertyParser;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+import static ru.joke.profiler.util.ArgUtil.checkPositive;
+
 public final class AsyncSinkDataFlushingConfiguration {
 
     private static final String ASYNC_FLUSHING_CONFIGURATION = "async-flushing.";
@@ -36,12 +39,12 @@ public final class AsyncSinkDataFlushingConfiguration {
             @ProfilerConfigurationProperty(name = FLUSHING_MAX_BATCH_SIZE, defaultValue = "-1") final int flushMaxBatchSize
     ) {
         this.asyncFlushingEnabled = asyncFlushingEnabled;
-        this.flushIntervalMs = flushIntervalMs;
-        this.overflowLimit = overflowLimit == -1 ? Integer.MAX_VALUE : overflowLimit;
-        this.overflowPolicy = overflowPolicy;
-        this.flushingThreadPoolSize = flushingThreadPoolSize;
+        this.flushIntervalMs = checkPositive(flushIntervalMs, "flushIntervalMs");
+        this.overflowLimit = overflowLimit == -1 ? Integer.MAX_VALUE : checkPositive(overflowLimit, "overflowLimit");
+        this.overflowPolicy = checkNotNull(overflowPolicy, "overflowPolicy");
+        this.flushingThreadPoolSize = checkPositive(flushingThreadPoolSize, "flushingThreadPoolSize");
         this.forceFlushOnExit = forceFlushOnExit;
-        this.flushMaxBatchSize = flushMaxBatchSize == -1 ? Integer.MAX_VALUE : flushMaxBatchSize;
+        this.flushMaxBatchSize = flushMaxBatchSize == -1 ? Integer.MAX_VALUE : checkPositive(flushMaxBatchSize, "flushMaxBatchSize");
     }
 
     boolean asyncFlushingEnabled() {

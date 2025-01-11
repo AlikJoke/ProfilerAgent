@@ -6,6 +6,8 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+
 public final class OutputDataSinkFactory {
 
     private static final Logger logger = Logger.getLogger(OutputDataSinkFactory.class.getCanonicalName());
@@ -21,7 +23,7 @@ public final class OutputDataSinkFactory {
         }
 
         final List<OutputDataSink<OutputData>> sinks = new ArrayList<>();
-        for (final String type : types) {
+        for (final String type : checkNotNull(types, "types")) {
             final OutputDataSinkHandle handle = sinkHandles.get(type.toLowerCase());
             if (handle == null) {
                 throw new InvalidConfigurationException(String.format("Unknown sink type provided: %s", type));

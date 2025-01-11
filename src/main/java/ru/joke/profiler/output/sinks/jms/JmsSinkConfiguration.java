@@ -12,6 +12,8 @@ import ru.joke.profiler.output.sinks.util.recovery.ConnectionRecoveryConfigurati
 import java.util.Map;
 
 import static ru.joke.profiler.output.sinks.jms.OutputDataJmsSinkHandle.SINK_TYPE;
+import static ru.joke.profiler.util.ArgUtil.checkNotEmpty;
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
 
 public final class JmsSinkConfiguration extends AsyncOutputDataSinkConfigurationSupport {
 
@@ -31,10 +33,10 @@ public final class JmsSinkConfiguration extends AsyncOutputDataSinkConfiguration
             final AsyncSinkDataFlushingConfiguration asyncFlushingConfiguration
     ) {
         super(asyncFlushingConfiguration);
-        this.outputDestinationConfiguration = outputDestinationConfiguration;
-        this.outputMessageConfiguration = outputMessageConfiguration;
-        this.recoveryConfiguration = recoveryConfiguration;
-        this.connectionPoolConfiguration = connectionPoolConfiguration;
+        this.outputDestinationConfiguration = checkNotNull(outputDestinationConfiguration, "outputDestinationConfiguration");
+        this.outputMessageConfiguration = checkNotNull(outputMessageConfiguration, "outputMessageConfiguration");
+        this.recoveryConfiguration = checkNotNull(recoveryConfiguration, "recoveryConfiguration");
+        this.connectionPoolConfiguration = checkNotNull(connectionPoolConfiguration, "connectionPoolConfiguration");
     }
 
     public OutputDestinationConfiguration outputDestinationConfiguration() {
@@ -79,8 +81,8 @@ public final class JmsSinkConfiguration extends AsyncOutputDataSinkConfiguration
                 @ProfilerConfigurationProperty(name = CF_JNDI_NAME, required = true) final String connectionFactoryJndiName,
                 @ProfilerConfigurationProperty(name = DESTINATION_JNDI_NAME, required = true) final String destinationJndiName
         ) {
-            this.connectionFactoryJndiName = connectionFactoryJndiName;
-            this.destinationJndiName = destinationJndiName;
+            this.connectionFactoryJndiName = checkNotEmpty(connectionFactoryJndiName, "connectionFactoryJndiName");
+            this.destinationJndiName = checkNotEmpty(destinationJndiName, "destinationJndiName");
         }
 
         public String connectionFactoryJndiName() {
@@ -133,14 +135,14 @@ public final class JmsSinkConfiguration extends AsyncOutputDataSinkConfiguration
                 @ProfilerConfigurationProperty(name = BODY_MAPPING, parser = OutputDataPropertiesMappingConfigurationPropertyParser.class) final Map<String, String> bodyPropertiesMapping,
                 @ProfilerConfigurationProperty(name = HEADERS_MAPPING, parser = OutputDataPropertiesMappingConfigurationPropertyParser.class) final Map<String, String> messagePropertiesMapping
         ) {
-            this.messageType = messageType;
+            this.messageType = checkNotEmpty(messageType, "messageType");
             this.includeMessageId = includeMessageId;
             this.includeMessageTimestamp = includeMessageTimestamp;
             this.ttlMs = Math.max(ttlMs, 0);
             this.deliveryDelayMs = Math.max(deliveryDelayMs, 0);
             this.persistent = persistent;
-            this.bodyPropertiesMapping = bodyPropertiesMapping;
-            this.messagePropertiesMapping = messagePropertiesMapping;
+            this.bodyPropertiesMapping = checkNotNull(bodyPropertiesMapping, "bodyPropertiesMapping");
+            this.messagePropertiesMapping = checkNotNull(messagePropertiesMapping, "messagePropertiesMapping");
         }
 
         public String messageType() {

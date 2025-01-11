@@ -3,12 +3,14 @@ package ru.joke.profiler.output.sinks.http2;
 import ru.joke.profiler.output.sinks.OutputData;
 import ru.joke.profiler.output.sinks.OutputDataSink;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+
 final class OutputDataHttp2Sink extends OutputDataSink<OutputData> {
 
     private final Http2MessageChannel messageChannel;
 
     OutputDataHttp2Sink(final Http2MessageChannel messageChannel) {
-        this.messageChannel = messageChannel;
+        this.messageChannel = checkNotNull(messageChannel, "messageChannel");
     }
 
     @Override

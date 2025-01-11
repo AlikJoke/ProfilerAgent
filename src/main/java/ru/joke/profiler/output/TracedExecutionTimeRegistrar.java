@@ -5,19 +5,21 @@ import ru.joke.profiler.output.sinks.OutputDataSink;
 
 import java.util.UUID;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+
 public final class TracedExecutionTimeRegistrar extends ExecutionTimeRegistrar {
 
     private final ThreadLocal<OutputData> outputData;
     private final OutputDataSink<OutputData> outputSink;
 
     public TracedExecutionTimeRegistrar(final OutputDataSink<OutputData> outputSink) {
-        this.outputSink = outputSink;
+        this.outputSink = checkNotNull(outputSink, "outputSink");
         this.outputData = ThreadLocal.withInitial(OutputData::new);
     }
 
     @Override
     public void registerMethodEnter(final String method) {
-        final OutputData methodData = outputData.get();
+        final OutputData methodData = this.outputData.get();
         if (methodData.traceId() == null) {
             methodData.withTraceId(generateTraceId(method));
         } else {
@@ -34,7 +36,7 @@ public final class TracedExecutionTimeRegistrar extends ExecutionTimeRegistrar {
 
     @Override
     protected boolean isRegistrationOccurredOnTrace() {
-        return outputData.get().traceId() != null;
+        return this.outputData.get().traceId() != null;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package ru.joke.profiler.output.sinks.util.injectors;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -24,7 +25,7 @@ public final class JsonObjectPropertiesInjector extends OutputPropertiesInjector
 
     public JsonObjectPropertiesInjector(final Map<String, String> mappingMetadata) {
         super(mappingMetadata.isEmpty() ? defaultProperties.keySet() : mappingMetadata.keySet());
-        this.mappingMetadata = mappingMetadata.isEmpty() ? defaultProperties : mappingMetadata;
+        this.mappingMetadata = mappingMetadata.isEmpty() ? defaultProperties : Collections.unmodifiableMap(mappingMetadata);
     }
 
     @Override

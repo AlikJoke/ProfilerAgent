@@ -7,6 +7,8 @@ import ru.joke.profiler.configuration.meta.ProfilerConfigurationProperty;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+
 abstract class AbstractTimePropertyParser implements ConfigurationPropertyParser<Long> {
 
     private static final String NO_VALUE = "-1";
@@ -15,7 +17,7 @@ abstract class AbstractTimePropertyParser implements ConfigurationPropertyParser
     private final ProfilingTimeUnit defaultTimeUnit;
 
     AbstractTimePropertyParser(final ProfilingTimeUnit defaultTimeUnit) {
-        this.defaultTimeUnit = defaultTimeUnit;
+        this.defaultTimeUnit = checkNotNull(defaultTimeUnit, "defaultTimeUnit");
     }
 
     @Override

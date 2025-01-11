@@ -5,6 +5,8 @@ import ru.joke.profiler.configuration.meta.ProfilerConfigurationProperty;
 import ru.joke.profiler.configuration.meta.ProfilerDefaultEnumProperty;
 import ru.joke.profiler.configuration.util.MillisTimePropertyParser;
 
+import static ru.joke.profiler.util.ArgUtil.*;
+
 public final class ConnectionPoolConfiguration {
 
     private static final String CONNECTION_POOL_PROPERTIES_PREFIX = "connection-pool.";
@@ -33,11 +35,11 @@ public final class ConnectionPoolConfiguration {
             @ProfilerConfigurationProperty(name = CONN_UNAVAILABILITY_POLICY) final ConnectionUnavailabilityPolicy connectionUnavailabilityPolicy
     ) {
         this.enablePooling = enablePooling;
-        this.maxPoolSize = maxPoolSize;
-        this.initialPoolSize = initialPoolSize;
+        this.maxPoolSize = checkPositive(maxPoolSize, "maxPoolSize");
+        this.initialPoolSize = checkNonNegative(initialPoolSize, "initialPoolSize");
         this.keepAliveIdleMs = keepAliveIdleMs;
-        this.maxConnectionWaitMs = maxConnectionWaitMs;
-        this.connectionUnavailabilityPolicy = connectionUnavailabilityPolicy;
+        this.maxConnectionWaitMs = checkNonNegative(maxConnectionWaitMs, "maxConnectionWaitMs");
+        this.connectionUnavailabilityPolicy = checkNotNull(connectionUnavailabilityPolicy, "connectionUnavailabilityPolicy");
     }
 
     public boolean enablePooling() {

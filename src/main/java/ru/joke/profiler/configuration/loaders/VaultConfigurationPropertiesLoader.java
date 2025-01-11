@@ -16,6 +16,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+
 final class VaultConfigurationPropertiesLoader implements ConfigurationPropertiesLoader {
 
     private static final Logger logger = Logger.getLogger(ProfilingConfigurationLoader.class.getCanonicalName());
@@ -24,7 +26,7 @@ final class VaultConfigurationPropertiesLoader implements ConfigurationPropertie
     private volatile RefreshableVaultClient refreshableVaultClient;
 
     VaultConfigurationPropertiesLoader(final Map<String, String> args) {
-        this.configuration = ConfigurationParser.parse(VaultPropertiesSourceConfiguration.class, args);
+        this.configuration = ConfigurationParser.parse(VaultPropertiesSourceConfiguration.class, checkNotNull(args, "args"));
         if (this.configuration == null) {
             logger.info("Vault configuration source is not configured and will not be used");
         } else {

@@ -5,6 +5,9 @@ import ru.joke.profiler.configuration.meta.ProfilerConfigurationProperty;
 import ru.joke.profiler.configuration.meta.ProfilerDefaultEnumProperty;
 import ru.joke.profiler.configuration.util.MillisTimePropertyParser;
 
+import static ru.joke.profiler.util.ArgUtil.checkNonNegative;
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+
 public final class ConnectionRecoveryConfiguration {
 
     private static final String RECOVERY_CONFIGURATION_PREFIX = "connection-recovery.";
@@ -23,9 +26,9 @@ public final class ConnectionRecoveryConfiguration {
             @ProfilerConfigurationProperty(name = MAX_RETRY_INTERVAL, defaultValue = "30s", parser = MillisTimePropertyParser.class) final long maxRetryRecoveryIntervalMs,
             @ProfilerConfigurationProperty(name = PROCESSING_POLICY) final ProcessingInRecoveryStatePolicy processingInRecoveryStatePolicy
     ) {
-        this.recoveryTimeoutMs = recoveryTimeoutMs == -1 ? Long.MAX_VALUE : recoveryTimeoutMs;
-        this.maxRetryRecoveryIntervalMs = maxRetryRecoveryIntervalMs;
-        this.processingInRecoveryStatePolicy = processingInRecoveryStatePolicy;
+        this.recoveryTimeoutMs = recoveryTimeoutMs == -1 ? Long.MAX_VALUE : checkNonNegative(recoveryTimeoutMs, "recoveryTimeoutMs");
+        this.maxRetryRecoveryIntervalMs = checkNonNegative(maxRetryRecoveryIntervalMs, "maxRetryRecoveryIntervalMs");
+        this.processingInRecoveryStatePolicy = checkNotNull(processingInRecoveryStatePolicy, "processingInRecoveryStatePolicy");
     }
 
     public long recoveryTimeoutMs() {

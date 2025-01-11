@@ -7,6 +7,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotEmpty;
+
 public final class ProfilerThreadFactory implements ThreadFactory {
 
     private static final Logger logger = Logger.getLogger(ProfilerAgent.class.getCanonicalName());
@@ -14,8 +16,11 @@ public final class ProfilerThreadFactory implements ThreadFactory {
     private final String threadName;
     private final AtomicInteger threadCounter;
 
-    public ProfilerThreadFactory(final String threadName, final boolean useCounters) {
-        this.threadName = threadName;
+    public ProfilerThreadFactory(
+            final String threadName,
+            final boolean useCounters
+    ) {
+        this.threadName = checkNotEmpty(threadName, "threadName");
         this.threadCounter = useCounters ? new AtomicInteger(0) : null;
     }
 

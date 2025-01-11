@@ -2,10 +2,12 @@ package ru.joke.profiler.output.sinks.util.recovery;
 
 import ru.joke.profiler.output.sinks.ProfilerOutputSinkException;
 
-import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static ru.joke.profiler.util.ArgUtil.checkNonNegative;
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
 
 public final class RecoveryProcessor {
 
@@ -22,10 +24,10 @@ public final class RecoveryProcessor {
             final long maxRecoveryAttemptTimeMillis,
             final long maxRecoveryTimeoutMillis
     ) {
-        this.recoveryCallback = Objects.requireNonNull(recoveryCallback, "recoveryCallback");
-        this.cleaningCallback = Objects.requireNonNull(cleaningCallback, "cleaningCallback");
-        this.maxRecoveryAttemptTimeMillis = maxRecoveryAttemptTimeMillis;
-        this.maxRecoveryTimeoutMillis = maxRecoveryTimeoutMillis;
+        this.recoveryCallback = checkNotNull(recoveryCallback, "recoveryCallback");
+        this.cleaningCallback = checkNotNull(cleaningCallback, "cleaningCallback");
+        this.maxRecoveryAttemptTimeMillis = checkNonNegative(maxRecoveryAttemptTimeMillis, "maxRecoveryAttemptTimeMillis");
+        this.maxRecoveryTimeoutMillis = checkNonNegative(maxRecoveryTimeoutMillis, "maxRecoveryTimeoutMillis");
     }
 
     public void recover(final Exception exception) {

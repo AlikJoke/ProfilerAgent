@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import static ru.joke.profiler.output.sinks.http2.OutputDataHttp2SinkHandle.SINK_TYPE;
+import static ru.joke.profiler.util.ArgUtil.*;
 
 public final class Http2SinkConfiguration extends AsyncOutputDataSinkConfigurationSupport {
 
@@ -42,10 +43,10 @@ public final class Http2SinkConfiguration extends AsyncOutputDataSinkConfigurati
             final AsyncSinkDataFlushingConfiguration asyncFlushingConfiguration
     ) {
         super(asyncFlushingConfiguration);
-        this.outputMessageConfiguration = outputMessageConfiguration;
-        this.outputEndpointConfiguration = outputEndpointConfiguration;
-        this.processingConfiguration = processingConfiguration;
-        this.http2ClientConfiguration = http2ClientConfiguration;
+        this.outputMessageConfiguration = checkNotNull(outputMessageConfiguration, "configuration");
+        this.outputEndpointConfiguration = checkNotNull(outputEndpointConfiguration, "outputEndpointConfiguration");
+        this.processingConfiguration = checkNotNull(processingConfiguration, "processingConfiguration");
+        this.http2ClientConfiguration = checkNotNull(http2ClientConfiguration, "http2ClientConfiguration");
     }
 
     public OutputMessageConfiguration outputMessageConfiguration() {
@@ -98,11 +99,11 @@ public final class Http2SinkConfiguration extends AsyncOutputDataSinkConfigurati
                 @ProfilerConfigurationProperty(name = OUTPUT_ENDPOINT, required = true) final String outputEndpoint,
                 final AuthenticationConfiguration authenticationConfiguration
         ) {
-            this.outputScheme = outputScheme;
-            this.outputHost = outputHost;
+            this.outputScheme = checkNotEmpty(outputScheme, "outputScheme");
+            this.outputHost = checkNotEmpty(outputHost, "outputHost");
             this.outputPort = outputPort;
-            this.outputEndpoint = outputEndpoint;
-            this.authenticationConfiguration = authenticationConfiguration;
+            this.outputEndpoint = checkNotEmpty(outputEndpoint, "outputEndpoint");
+            this.authenticationConfiguration = checkNotNull(authenticationConfiguration, "authenticationConfiguration");
         }
 
         public String outputScheme() {
@@ -220,8 +221,8 @@ public final class Http2SinkConfiguration extends AsyncOutputDataSinkConfigurati
                         @ProfilerConfigurationProperty(name = USERNAME) final String username,
                         @ProfilerConfigurationProperty(name = PWD) final char[] password
                 ) {
-                    this.username = username;
-                    this.password = password;
+                    this.username = checkNotEmpty(username, "username");
+                    this.password = checkNotNull(password, "password");
                 }
 
                 public String username() {
@@ -260,7 +261,7 @@ public final class Http2SinkConfiguration extends AsyncOutputDataSinkConfigurati
                 @ProfilerConfigurationProperty(name = BODY_PROPERTIES_MAPPING, parser = OutputDataPropertiesMappingConfigurationPropertyParser.class) final Map<String, String> propertiesMapping,
                 @ProfilerConfigurationProperty(name = HEADERS_MAPPING, parser = OutputDataPropertiesMappingConfigurationPropertyParser.class) final Map<String, String> headersMapping
         ) {
-            this.contentType = contentType;
+            this.contentType = checkNotEmpty(contentType, "contentType");
             this.headersMapping = Collections.unmodifiableMap(headersMapping);
             this.propertiesMapping = Collections.unmodifiableMap(propertiesMapping);
         }
@@ -309,9 +310,9 @@ public final class Http2SinkConfiguration extends AsyncOutputDataSinkConfigurati
                 @ProfilerConfigurationProperty(name = SYNC_SENDING_WAIT, defaultValue = "5s", parser = MillisTimePropertyParser.class) final long syncSendingWaitMs
         ) {
             this.disableAsyncSending = disableAsyncSending;
-            this.onErrorPolicy = onErrorPolicy;
-            this.maxRetriesOnError = maxRetriesOnError;
-            this.syncSendingWaitMs = syncSendingWaitMs;
+            this.onErrorPolicy = checkNotNull(onErrorPolicy, "onErrorPolicy");
+            this.maxRetriesOnError = checkNonNegative(maxRetriesOnError, "maxRetriesOnError");
+            this.syncSendingWaitMs = checkNonNegative(syncSendingWaitMs, "syncSendingWaitMs");
         }
 
         public long syncSendingWaitMs() {
@@ -370,10 +371,10 @@ public final class Http2SinkConfiguration extends AsyncOutputDataSinkConfigurati
                 final IOConfiguration ioConfiguration,
                 @ProfilerConfigurationProperty(name = GRACEFUL_SHUTDOWN_ENABLED) final boolean enableGracefulShutdown
         ) {
-            this.connectionConfiguration = connectionConfiguration;
+            this.connectionConfiguration = checkNotNull(connectionConfiguration, "connectionConfiguration");
             this.tlsConfiguration = tlsConfiguration;
-            this.requestConfiguration = requestConfiguration;
-            this.ioConfiguration = ioConfiguration;
+            this.requestConfiguration = checkNotNull(requestConfiguration, "requestConfiguration");
+            this.ioConfiguration = checkNotNull(ioConfiguration, "ioConfiguration");
             this.enableGracefulShutdown = enableGracefulShutdown;
         }
 
@@ -456,19 +457,19 @@ public final class Http2SinkConfiguration extends AsyncOutputDataSinkConfigurati
                     @ProfilerConfigurationProperty(name = MAX_CONCURRENT_STREAMS, defaultValue = "-1") final int maxConcurrentStreams,
                     @ProfilerConfigurationProperty(name = INITIAL_WINDOW_SIZE, defaultValue = "65535") final int initialWindowSize
             ) {
-                this.maxRetries = maxRetries;
-                this.retriesIntervalMs = retriesIntervalMs;
+                this.maxRetries = checkNonNegative(maxRetries, "maxRetries");
+                this.retriesIntervalMs = checkNonNegative(retriesIntervalMs, "retriesIntervalMs");
                 this.authenticationEnabled = authenticationEnabled;
                 this.circularRedirectsAllowed = circularRedirectsAllowed;
-                this.keepAliveMs = keepAliveMs;
-                this.connectionManagerRequestTimeoutMs = connectionManagerRequestTimeoutMs;
+                this.keepAliveMs = checkNonNegative(keepAliveMs, "keepAliveMs");
+                this.connectionManagerRequestTimeoutMs = checkNonNegative(connectionManagerRequestTimeoutMs, "connectionManagerRequestTimeoutMs");
                 this.expectContinueEnabled = expectContinueEnabled;
-                this.maxRedirects = maxRedirects;
+                this.maxRedirects = checkNonNegative(maxRedirects, "maxRedirects");
                 this.disableProtocolUpgrade = disableProtocolUpgrade;
-                this.maxFrameSize = maxFrameSize;
+                this.maxFrameSize = checkPositive(maxFrameSize, "maxFrameSize");
                 this.compressionDisabled = compressionDisabled;
-                this.maxConcurrentStreams = maxConcurrentStreams == -1 ? Integer.MAX_VALUE : maxConcurrentStreams;
-                this.initialWindowSize = initialWindowSize;
+                this.maxConcurrentStreams = maxConcurrentStreams == -1 ? Integer.MAX_VALUE : checkPositive(maxConcurrentStreams, "maxConcurrentStreams");
+                this.initialWindowSize = checkPositive(initialWindowSize, "initialWindowSize");
             }
 
             public int maxRetries() {
@@ -651,18 +652,18 @@ public final class Http2SinkConfiguration extends AsyncOutputDataSinkConfigurati
                     @ProfilerConfigurationProperty(name = SOCKS_PROXY_PWD) final char[] socksProxyPassword,
                     @ProfilerConfigurationProperty(name = SOCKET_TIMEOUT, defaultValue = "2s", parser = MillisTimePropertyParser.class) final long ioTimeoutMs
             ) {
-                this.threadCount = threadCount;
-                this.sendBufferSize = sendBufferSize;
+                this.threadCount = checkPositive(threadCount, "threadCount");
+                this.sendBufferSize = checkNonNegative(sendBufferSize, "sendBufferSize");
                 this.lingerTimeoutMs = lingerTimeoutMs;
                 this.tcpNoDelay = tcpNoDelay;
                 this.keepAliveIntervalMs = keepAliveIntervalMs;
                 this.idleTimeoutMs = idleTimeoutMs;
-                this.maxKeepAliveProbesBeforeDrop = maxKeepAliveProbesBeforeDrop;
+                this.maxKeepAliveProbesBeforeDrop = checkNonNegative(maxKeepAliveProbesBeforeDrop, "maxKeepAliveProbesBeforeDrop");
                 this.socksProxyHost = socksProxyHost;
                 this.socksProxyPort = socksProxyPort;
                 this.socksProxyUsername = socksProxyUsername;
                 this.socksProxyPassword = socksProxyPassword;
-                this.ioTimeoutMs = ioTimeoutMs;
+                this.ioTimeoutMs = checkPositive(ioTimeoutMs, "ioTimeoutMs");
             }
 
             public int threadCount() {
@@ -744,8 +745,8 @@ public final class Http2SinkConfiguration extends AsyncOutputDataSinkConfigurati
             public TLSConfiguration(
                     @ProfilerConfigurationProperty(name = PROTOCOL, defaultValue = DEFAULT_PROTOCOL) final String protocol,
                     @ProfilerConfigurationPropertiesWrapper(prefix = TRUSTSTORE_PREFIX) final KStore trustStore) {
-                this.protocol = protocol;
-                this.trustStore = trustStore;
+                this.protocol = checkNotEmpty(protocol, "protocol");
+                this.trustStore = checkNotNull(trustStore, "trustStore");
             }
 
             public SSLContext createSSLContext() throws GeneralSecurityException, IOException {
@@ -791,9 +792,9 @@ public final class Http2SinkConfiguration extends AsyncOutputDataSinkConfigurati
                         @ProfilerConfigurationProperty(name = LOCATION, required = true) final String location,
                         @ProfilerConfigurationProperty(name = PWD, required = true) final char[] password
                 ) {
-                    this.type = type;
-                    this.location = location;
-                    this.password = password;
+                    this.type = checkNotEmpty(type, "type");
+                    this.location = checkNotEmpty(location, "location");
+                    this.password = checkNotNull(password, "password");
                 }
 
                 @Override
@@ -822,8 +823,8 @@ public final class Http2SinkConfiguration extends AsyncOutputDataSinkConfigurati
                     @ProfilerConfigurationProperty(name = KEY_PWD, required = true) final char[] keyPassword
             ) {
                 super(protocol, trustStore);
-                this.keyStore = keyStore;
-                this.keyPassword = keyPassword;
+                this.keyStore = checkNotNull(keyStore, "keyStore");
+                this.keyPassword = checkNotNull(keyPassword, "keyPassword");
             }
 
             @Override

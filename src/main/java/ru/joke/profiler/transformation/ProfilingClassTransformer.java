@@ -9,7 +9,7 @@ import ru.joke.profiler.transformation.spy.SpyInjector;
 import static org.objectweb.asm.Opcodes.*;
 import static ru.joke.profiler.util.BytecodeUtil.*;
 
-public final class ProfilingClassTransformer extends ClassVisitor {
+final class ProfilingClassTransformer extends ClassVisitor {
 
     private static final String SYSTEM_CLASS_NAME = toBytecodeFormat(System.class);
     private static final String NANO_TIME_METHOD_NAME = "nanoTime";

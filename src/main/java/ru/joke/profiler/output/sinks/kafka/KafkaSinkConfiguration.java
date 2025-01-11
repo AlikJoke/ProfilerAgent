@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import static ru.joke.profiler.output.sinks.kafka.OutputDataKafkaSinkHandle.SINK_TYPE;
+import static ru.joke.profiler.util.ArgUtil.*;
 
 public final class KafkaSinkConfiguration extends AsyncOutputDataSinkConfigurationSupport {
 
@@ -32,9 +33,9 @@ public final class KafkaSinkConfiguration extends AsyncOutputDataSinkConfigurati
             final AsyncSinkDataFlushingConfiguration asyncFlushingConfiguration
     ) {
         super(asyncFlushingConfiguration);
-        this.producerConfiguration = producerConfiguration;
-        this.outputRecordConfiguration = outputRecordConfiguration;
-        this.recoveryConfiguration = recoveryConfiguration;
+        this.producerConfiguration = checkNotNull(producerConfiguration, "producerConfiguration");
+        this.outputRecordConfiguration = checkNotNull(outputRecordConfiguration, "outputRecordConfiguration");
+        this.recoveryConfiguration = checkNotNull(recoveryConfiguration, "recoveryConfiguration");
     }
 
     public ProducerConfiguration producerConfiguration() {
@@ -79,14 +80,14 @@ public final class KafkaSinkConfiguration extends AsyncOutputDataSinkConfigurati
                 @ProfilerConfigurationProperty(name = WAIT_ON_CLOSE, defaultValue = "30s", parser = MillisTimePropertyParser.class) final long waitOnCloseTimeoutMs,
                 @ProfilerConfigurationProperty(name = DISABLE_CLUSTER_VALIDATION_ON_START) final boolean disableClusterValidationOnStart
         ) {
+            this.producerProperties = checkNotNull(producerProperties, "producerProperties");
+            this.useCompression = !disableCompression;
+            this.waitOnCloseTimeoutMs = checkNonNegative(waitOnCloseTimeoutMs, "waitOnCloseTimeoutMs");
+            this.checkClusterOnStart = !disableClusterValidationOnStart;
+
             if (producerProperties.get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG) == null) {
                 throw new InvalidConfigurationException(String.format("'%s' property is required to connect to Kafka", ProducerConfig.BOOTSTRAP_SERVERS_CONFIG));
             }
-
-            this.producerProperties = producerProperties;
-            this.useCompression = !disableCompression;
-            this.waitOnCloseTimeoutMs = waitOnCloseTimeoutMs;
-            this.checkClusterOnStart = !disableClusterValidationOnStart;
         }
 
         public Map<String, String> producerProperties() {
@@ -140,9 +141,9 @@ public final class KafkaSinkConfiguration extends AsyncOutputDataSinkConfigurati
                 @ProfilerConfigurationProperty(name = BODY_MAPPING, parser = OutputDataPropertiesMappingConfigurationPropertyParser.class) final Map<String, String> propertiesMapping,
                 @ProfilerConfigurationProperty(name = HEADERS_MAPPING, parser = OutputDataPropertiesMappingConfigurationPropertyParser.class) final Map<String, String> headersMapping
         ) {
-            this.outputQueue = outputQueue;
-            this.messageType = messageType;
-            this.messageTypeHeader = messageTypeHeader;
+            this.outputQueue = checkNotEmpty(outputQueue, "outputQueue");
+            this.messageType = checkNotEmpty(messageType, "messageType");
+            this.messageTypeHeader = checkNotNull(messageTypeHeader, "messageTypeHeader");
             this.headersMapping = Collections.unmodifiableMap(headersMapping);
             this.propertiesMapping = Collections.unmodifiableMap(propertiesMapping);
         }

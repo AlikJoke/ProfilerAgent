@@ -8,6 +8,8 @@ import java.io.Writer;
 import java.util.List;
 import java.util.logging.Level;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+
 public abstract class OutputDataAbsStreamSink<C extends AbstractFsStreamSinkConfiguration> extends OutputDataSink<String> {
 
     private final Writer writer;
@@ -18,8 +20,8 @@ public abstract class OutputDataAbsStreamSink<C extends AbstractFsStreamSinkConf
             final Writer writer,
             final C configuration
     ) {
-        this.writer = writer;
-        this.forceFlushOnWrites = configuration.forceFlushOnWrites();
+        this.writer = checkNotNull(writer, "writer");
+        this.forceFlushOnWrites = checkNotNull(configuration, "configuration").forceFlushOnWrites();
 
         logger.info("Sink created with configuration: " + configuration);
     }

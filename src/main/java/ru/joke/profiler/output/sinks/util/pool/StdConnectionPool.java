@@ -12,6 +12,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+
 public final class StdConnectionPool<T extends PooledConnection> implements ConnectionPool<T> {
 
     private static final Logger logger = Logger.getLogger(StdConnectionPool.class.getCanonicalName());
@@ -28,8 +30,8 @@ public final class StdConnectionPool<T extends PooledConnection> implements Conn
             final ConnectionFactory<T> connectionFactory,
             final ConnectionPoolConfiguration configuration
     ) {
-        this.connectionFactory = connectionFactory;
-        this.configuration = configuration;
+        this.connectionFactory = checkNotNull(connectionFactory, "connectionFactory");
+        this.configuration = checkNotNull(configuration, "configuration");
         this.pool = new ConcurrentLinkedBlockingQueue<>(configuration.maxPoolSize());
         this.registry = new ArrayList<>();
         this.idleConnectionsTerminator =

@@ -5,12 +5,14 @@ import ru.joke.profiler.output.sinks.OutputDataSink;
 
 import java.util.List;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+
 final class OutputDataJmsSink extends OutputDataSink<OutputData> {
 
     private final JmsMessageChannel messageChannel;
 
     OutputDataJmsSink(final JmsMessageChannel messageChannel) {
-        this.messageChannel = messageChannel;
+        this.messageChannel = checkNotNull(messageChannel, "messageChannel");
     }
 
     @Override

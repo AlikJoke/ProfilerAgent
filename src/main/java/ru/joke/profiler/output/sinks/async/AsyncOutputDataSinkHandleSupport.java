@@ -10,11 +10,13 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+
 public abstract class AsyncOutputDataSinkHandleSupport<T, C extends AsyncOutputDataSinkConfigurationSupport> implements OutputDataSinkHandle {
 
     @Override
     public final OutputDataSink<OutputData> create(final Map<String, String> properties) throws Exception {
-        final C configuration = loadConfiguration(properties);
+        final C configuration = loadConfiguration(checkNotNull(properties, "properties"));
         final Map<String, Object> creationContext = buildCreationContext(configuration);
         final AsyncSinkDataFlushingConfiguration asyncConfiguration = configuration.asyncFlushingConfiguration();
         return asyncConfiguration != null && asyncConfiguration.asyncFlushingEnabled()

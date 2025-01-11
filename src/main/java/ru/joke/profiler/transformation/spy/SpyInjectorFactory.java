@@ -5,6 +5,9 @@ import org.objectweb.asm.MethodVisitor;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotEmpty;
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+
 public interface SpyInjectorFactory {
 
     String spyId();
@@ -14,10 +17,10 @@ public interface SpyInjectorFactory {
     static SpyInjector create(SpyContext context) {
         final Map<String, SpyInjectorFactory> factories = new HashMap<>();
         for (final SpyInjectorFactory factory : ServiceLoader.load(SpyInjectorFactory.class)) {
-            factories.put(factory.spyId().toLowerCase(), factory);
+            factories.put(checkNotEmpty(factory.spyId(), "spyId").toLowerCase(), factory);
         }
 
-        final List<String> activeSpies = context.staticConfiguration().spies();
+        final List<String> activeSpies = checkNotNull(context, "context").staticConfiguration().spies();
         final List<SpyInjector> injectors =
                 activeSpies
                         .stream()

@@ -6,6 +6,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.stream.Collectors;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+
 final class OutputDataTableSchemaValidator {
 
     private static final String CHECK_COLUMN_QUERY = "SELECT %s FROM %s WHERE 1 = 0";
@@ -13,7 +15,7 @@ final class OutputDataTableSchemaValidator {
     private final JdbcSinkConfiguration.OutputTableConfiguration configuration;
 
     OutputDataTableSchemaValidator(final JdbcSinkConfiguration.OutputTableConfiguration configuration) {
-        this.configuration = configuration;
+        this.configuration = checkNotNull(configuration, "configuration");
     }
 
     void validate(final Statement statement) {

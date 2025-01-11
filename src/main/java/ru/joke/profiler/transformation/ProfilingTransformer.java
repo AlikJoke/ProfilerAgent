@@ -12,6 +12,7 @@ import java.security.ProtectionDomain;
 import java.util.List;
 import java.util.function.Predicate;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
 import static ru.joke.profiler.util.BytecodeUtil.*;
 
 public final class ProfilingTransformer implements ClassFileTransformer {
@@ -31,11 +32,11 @@ public final class ProfilingTransformer implements ClassFileTransformer {
             final NativeClassMethodsCollector nativeClassMethodsCollector,
             final SpyInjector spyInjector
     ) {
-        this.transformationFilter = transformationFilter;
-        this.configuration = configuration;
-        this.registrarMetadataSelector = registrarMetadataSelector;
-        this.nativeClassMethodsCollector = nativeClassMethodsCollector;
-        this.spyInjector = spyInjector;
+        this.transformationFilter = checkNotNull(transformationFilter, "transformationFilter");
+        this.configuration = checkNotNull(configuration, "configuration");
+        this.registrarMetadataSelector = checkNotNull(registrarMetadataSelector, "registrarMetadataSelector");
+        this.nativeClassMethodsCollector = checkNotNull(nativeClassMethodsCollector, "nativeClassMethodsCollector");
+        this.spyInjector = checkNotNull(spyInjector, "spyInjector");
     }
 
     @Override
@@ -71,7 +72,7 @@ public final class ProfilingTransformer implements ClassFileTransformer {
 
     private static ClassWriter createClassWriter(ClassReader cr) {
         final TypeHierarchyCollector typeHierarchyCollector = new TypeHierarchyCollector();
-        return new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS) {
+        return new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES) {
             @Override
             protected String getCommonSuperClass(String type1, String type2) {
                 if (type1.equals(OBJECT_TYPE) || type2.equals(OBJECT_TYPE)) {

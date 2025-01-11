@@ -15,6 +15,8 @@ import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+
 final class Http2MessageChannel implements AutoCloseable {
 
     private static final Logger logger = Logger.getLogger(Http2MessageChannel.class.getCanonicalName());
@@ -32,10 +34,10 @@ final class Http2MessageChannel implements AutoCloseable {
             final Http2MessageFactory messageEntityFactory,
             final Http2RequestProducerFactory requestProducerFactory
     ) {
-        this.configuration = configuration;
-        this.httpClient = http2ClientFactory.create();
-        this.messageEntityFactory = messageEntityFactory;
-        this.requestProducerFactory = requestProducerFactory;
+        this.configuration = checkNotNull(configuration, "configuration");
+        this.httpClient = checkNotNull(http2ClientFactory, "http2ClientFactory").create();
+        this.messageEntityFactory = checkNotNull(messageEntityFactory, "messageEntityFactory");
+        this.requestProducerFactory = checkNotNull(requestProducerFactory, "requestProducerFactory");
         this.activeRequests = new ConcurrentHashMap<>();
     }
 

@@ -3,6 +3,8 @@ package ru.joke.profiler.output.sinks.fs.stream;
 import ru.joke.profiler.output.sinks.async.AsyncSinkDataFlushingConfiguration;
 import ru.joke.profiler.output.sinks.fs.AbstractFsSinkConfiguration;
 
+import static ru.joke.profiler.util.ArgUtil.checkPositive;
+
 public abstract class AbstractFsStreamSinkConfiguration extends AbstractFsSinkConfiguration {
 
     protected static final String OUTPUT_STREAM_BUFFER_SIZE = "output_stream_buffer_size";
@@ -18,7 +20,7 @@ public abstract class AbstractFsStreamSinkConfiguration extends AbstractFsSinkCo
             final AsyncSinkDataFlushingConfiguration asyncFlushingConfiguration
     ) {
         super(outputDataPattern, asyncFlushingConfiguration);
-        this.bufferSize = bufferSize;
+        this.bufferSize = checkPositive(bufferSize, "bufferSize");
         this.forceFlushOnWrites = forceFlushOnWrites;
     }
 

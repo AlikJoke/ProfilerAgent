@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+
 public final class JdbcStatementFactory {
 
     private static final Logger logger = Logger.getLogger(JdbcStatementFactory.class.getCanonicalName());
@@ -45,7 +47,7 @@ public final class JdbcStatementFactory {
             throw new ProfilerException("Singleton factory instance already created: " + instance);
         }
 
-        final StaticProfilingConfiguration staticConfiguration = spyContext.staticConfiguration();
+        final StaticProfilingConfiguration staticConfiguration = checkNotNull(spyContext, "spyContext").staticConfiguration();
         final JdbcSpyConfiguration staticSpyConfiguration =
                 staticConfiguration.dynamicConfigurationEnabled()
                         ? null

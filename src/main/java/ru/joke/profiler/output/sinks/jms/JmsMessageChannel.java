@@ -26,6 +26,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+
 final class JmsMessageChannel implements AutoCloseable {
 
     private static final Logger logger = Logger.getLogger(JmsMessageChannel.class.getCanonicalName());
@@ -50,10 +52,10 @@ final class JmsMessageChannel implements AutoCloseable {
             final OutputPropertiesInjector<StringBuilder> outputMessageBodyBuilder,
             final OutputPropertiesInjector<JMSProducer> producerPropertiesInjector
     ) {
-        this.connectionPool = connectionPoolFactory.create(configuration.connectionPoolConfiguration());
-        this.configuration = configuration;
-        this.outputMessageBodyBuilder = outputMessageBodyBuilder;
-        this.producerPropertiesInjector = producerPropertiesInjector;
+        this.configuration = checkNotNull(configuration, "configuration");
+        this.connectionPool = checkNotNull(connectionPoolFactory, "connectionPoolFactory").create(configuration.connectionPoolConfiguration());
+        this.outputMessageBodyBuilder = checkNotNull(outputMessageBodyBuilder, "outputMessageBodyBuilder");
+        this.producerPropertiesInjector = checkNotNull(producerPropertiesInjector, "producerPropertiesInjector");
         this.outputEndpoint = lookup(configuration.outputDestinationConfiguration().destinationJndiName());
         this.recoveryExecutor = Executors.newSingleThreadExecutor(new ProfilerThreadFactory(RECOVERY_THREAD_NAME, false));
     }

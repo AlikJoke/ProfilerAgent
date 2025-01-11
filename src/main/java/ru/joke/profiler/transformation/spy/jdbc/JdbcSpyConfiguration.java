@@ -5,6 +5,8 @@ import ru.joke.profiler.configuration.meta.ProfilerConfigurationProperty;
 import ru.joke.profiler.configuration.util.NanoTimePropertyParser;
 
 import static ru.joke.profiler.transformation.spy.jdbc.JdbcSpyInjectorFactory.SPY_ID;
+import static ru.joke.profiler.util.ArgUtil.checkNonNegative;
+import static ru.joke.profiler.util.ArgUtil.checkNotEmpty;
 
 final class JdbcSpyConfiguration {
 
@@ -36,11 +38,17 @@ final class JdbcSpyConfiguration {
             @ProfilerConfigurationProperty(name = MIN_EXECUTION_THRESHOLD, defaultValue = "0", parser = NanoTimePropertyParser.class) final long minExecutionThresholdNs
     ) {
         this.disabled = disabled;
-        this.maxPrintedQueryCharacters = maxPrintedQueryCharacters == -1 ? Integer.MAX_VALUE : maxPrintedQueryCharacters;
-        this.maxBatchQueriesToPrint = maxBatchQueriesToPrint == -1 ? Integer.MAX_VALUE : maxBatchQueriesToPrint;
-        this.batchQueriesDelimiter = batchQueriesDelimiter;
-        this.queryParametersDelimiter = queryParametersDelimiter;
-        this.minExecutionThresholdNs = minExecutionThresholdNs;
+        this.maxPrintedQueryCharacters =
+                maxPrintedQueryCharacters == -1
+                        ? Integer.MAX_VALUE
+                        : checkNonNegative(maxPrintedQueryCharacters, "maxPrintedQueryCharacters");
+        this.maxBatchQueriesToPrint =
+                maxBatchQueriesToPrint == -1
+                        ? Integer.MAX_VALUE
+                        : checkNonNegative(maxBatchQueriesToPrint, "maxBatchQueriesToPrint");
+        this.batchQueriesDelimiter = checkNotEmpty(batchQueriesDelimiter, "batchQueriesDelimiter");
+        this.queryParametersDelimiter = checkNotEmpty(queryParametersDelimiter, "queryParametersDelimiter");
+        this.minExecutionThresholdNs = checkNonNegative(minExecutionThresholdNs, "minExecutionThresholdNs");
         this.printQueryParameters = printQueryParameters;
     }
 

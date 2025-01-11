@@ -14,6 +14,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+
 final class AsyncOutputDataSink<S, T> extends OutputDataSink<S> {
 
     private static final Logger logger = Logger.getLogger(AsyncOutputDataSink.class.getCanonicalName());
@@ -32,15 +34,15 @@ final class AsyncOutputDataSink<S, T> extends OutputDataSink<S> {
             final Function<S, Supplier<T>> conversionFunc,
             final String sinkType
     ) {
-        this.delegateSink = delegateSink;
-        this.configuration = configuration;
+        this.delegateSink = checkNotNull(delegateSink, "delegateSink");
+        this.configuration = checkNotNull(configuration, "configuration");
         this.queue = new ConcurrentLinkedBlockingQueue<>(configuration.overflowLimit());
         final String threadNamePrefix = String.format(FLUSHING_THREAD_NAME_PREFIX_TEMPLATE, sinkType);
         this.flushExecutor = Executors.newScheduledThreadPool(
                 configuration.flushingThreadPoolSize(),
                 new ProfilerThreadFactory(threadNamePrefix, true)
         );
-        this.conversionFunc = conversionFunc;
+        this.conversionFunc = checkNotNull(conversionFunc, "conversionFunc");
     }
 
     @Override

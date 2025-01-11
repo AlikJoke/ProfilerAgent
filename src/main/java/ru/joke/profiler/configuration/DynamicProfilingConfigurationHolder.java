@@ -6,6 +6,9 @@ import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotEmpty;
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+
 public final class DynamicProfilingConfigurationHolder implements Supplier<DynamicProfilingConfiguration> {
 
     private static final Logger logger = Logger.getLogger(DynamicProfilingConfiguration.class.getCanonicalName());
@@ -40,12 +43,15 @@ public final class DynamicProfilingConfigurationHolder implements Supplier<Dynam
             final String subscriptionId,
             final BiConsumer<String, DynamicProfilingConfiguration> subscription
     ) {
-        this.subscriptions.put(subscriptionId, subscription);
+        this.subscriptions.put(
+                checkNotEmpty(subscriptionId, "subscriptionId"),
+                checkNotNull(subscription, "subscription")
+        );
         logger.fine(String.format("Subscription is created with id %s", subscription));
     }
 
     public boolean unsubscribe(final String subscriptionId) {
-        final boolean result = this.subscriptions.remove(subscriptionId) != null;
+        final boolean result = this.subscriptions.remove(checkNotEmpty(subscriptionId, "subscriptionId")) != null;
         logger.fine(String.format("Unsubscribe called for %s with result %b", subscriptionId, result));
 
         return result;

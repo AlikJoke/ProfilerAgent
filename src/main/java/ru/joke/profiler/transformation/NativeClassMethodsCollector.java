@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 
 import static org.objectweb.asm.ClassReader.*;
 import static org.objectweb.asm.Opcodes.ASM9;
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
 import static ru.joke.profiler.util.BytecodeUtil.toCanonicalFormat;
 
 public final class NativeClassMethodsCollector extends ClassVisitor {
@@ -31,7 +32,7 @@ public final class NativeClassMethodsCollector extends ClassVisitor {
         super(ASM9);
         this.class2methodsMap = new ConcurrentHashMap<>(4096, 0.5f, 256);
         this.classMethods = ThreadLocal.withInitial(HashSet::new);
-        this.filter = filter;
+        this.filter = checkNotNull(filter, "filter");
     }
 
     @Override

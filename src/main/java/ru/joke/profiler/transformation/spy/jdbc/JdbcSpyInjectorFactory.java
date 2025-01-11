@@ -4,6 +4,8 @@ import ru.joke.profiler.transformation.spy.SpyContext;
 import ru.joke.profiler.transformation.spy.SpyInjector;
 import ru.joke.profiler.transformation.spy.SpyInjectorFactory;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+
 public final class JdbcSpyInjectorFactory implements SpyInjectorFactory {
 
     static final String SPY_ID = "jdbc";
@@ -15,6 +17,6 @@ public final class JdbcSpyInjectorFactory implements SpyInjectorFactory {
 
     @Override
     public SpyInjector createSpyInjector(final SpyContext context) {
-        return new JdbcSpyInjector(context);
+        return new JdbcSpyInjector(checkNotNull(context, "context"));
     }
 }

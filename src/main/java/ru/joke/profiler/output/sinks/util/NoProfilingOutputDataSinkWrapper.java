@@ -5,12 +5,14 @@ import ru.joke.profiler.transformation.ProfilingTransformer;
 
 import java.util.List;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+
 public final class NoProfilingOutputDataSinkWrapper<T> extends OutputDataSink<T> {
 
     private final OutputDataSink<T> delegate;
 
     public NoProfilingOutputDataSinkWrapper(final OutputDataSink<T> delegate) {
-        this.delegate = delegate;
+        this.delegate = checkNotNull(delegate, "delegate");
     }
 
     @Override

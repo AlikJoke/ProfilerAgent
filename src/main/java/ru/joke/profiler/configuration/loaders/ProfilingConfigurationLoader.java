@@ -7,6 +7,8 @@ import ru.joke.profiler.configuration.meta.ConfigurationParser;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import static ru.joke.profiler.util.ArgUtil.checkNotNull;
+
 public final class ProfilingConfigurationLoader {
 
     private static final Logger logger = Logger.getLogger(ProfilingConfigurationLoader.class.getCanonicalName());
@@ -14,7 +16,7 @@ public final class ProfilingConfigurationLoader {
     private final ConfigurationPropertiesLoader propertiesLoader;
 
     ProfilingConfigurationLoader(final ConfigurationPropertiesLoader propertiesLoader) {
-        this.propertiesLoader = propertiesLoader;
+        this.propertiesLoader = checkNotNull(propertiesLoader, "propertiesLoader");
     }
 
     public DynamicProfilingConfiguration loadDynamic() {

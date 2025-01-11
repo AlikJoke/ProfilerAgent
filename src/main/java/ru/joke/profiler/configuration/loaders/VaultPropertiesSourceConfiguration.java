@@ -9,6 +9,8 @@ import ru.joke.profiler.configuration.util.MillisTimePropertyParser;
 
 import java.io.File;
 
+import static ru.joke.profiler.util.ArgUtil.*;
+
 final class VaultPropertiesSourceConfiguration {
 
     private static final String VAULT_PREFIX = "vault.";
@@ -40,15 +42,15 @@ final class VaultPropertiesSourceConfiguration {
             final SslConfiguration sslConfiguration,
             final StorageConfiguration storageConfiguration
     ) {
-        this.storage = storageConfiguration;
-        this.address = address;
+        this.storage = checkNotNull(storageConfiguration, "storageConfiguration");
+        this.address = checkNotEmpty(address, "address");
         this.token = token;
-        this.retry = retryConfiguration;
+        this.retry = checkNotNull(retryConfiguration, "retryConfiguration");
         this.userPass = userPassConfiguration;
-        this.ssl = sslConfiguration;
-        this.readTimeoutSeconds = readTimeoutSeconds;
-        this.openTimeoutSeconds = openTimeoutSeconds;
-        this.leaseLifespanSeconds = leaseLifespanSeconds;
+        this.ssl = checkNotNull(sslConfiguration, "sslConfiguration");
+        this.readTimeoutSeconds = checkPositive(readTimeoutSeconds, "readTimeoutSeconds");
+        this.openTimeoutSeconds = checkPositive(openTimeoutSeconds, "openTimeoutSeconds");
+        this.leaseLifespanSeconds = checkNonNegative(leaseLifespanSeconds, "leaseLifespanSeconds");
     }
 
     StorageConfiguration storage() {
@@ -114,8 +116,8 @@ final class VaultPropertiesSourceConfiguration {
                 @ProfilerConfigurationProperty(name = VERSION, defaultValue = "2") final int version,
                 @ProfilerConfigurationProperty(name = PATH, required = true) final String path
         ) {
-            this.version = version;
-            this.path = path;
+            this.version = checkPositive(version, "version");
+            this.path = checkNotEmpty(path, "path");
         }
 
         int version() {
@@ -149,8 +151,8 @@ final class VaultPropertiesSourceConfiguration {
                 @ProfilerConfigurationProperty(name = MAX_RETRIES, defaultValue = "3") final int maxRetries,
                 @ProfilerConfigurationProperty(name = INTERVAL_MS, defaultValue = "5s", parser = MillisTimePropertyParser.class) final long retryIntervalMs
         ) {
-            this.maxRetries = maxRetries;
-            this.retryIntervalMs = retryIntervalMs;
+            this.maxRetries = checkNonNegative(maxRetries, "maxRetries");
+            this.retryIntervalMs = checkNonNegative(retryIntervalMs, "retryIntervalMs");
         }
 
         int maxRetries() {
@@ -184,8 +186,8 @@ final class VaultPropertiesSourceConfiguration {
                 @ProfilerConfigurationProperty(name = USERNAME, required = true) final String username,
                 @ProfilerConfigurationProperty(name = PASSWORD, required = true) final char[] password
         ) {
-            this.username = username;
-            this.password = password;
+            this.username = checkNotEmpty(username, "username");
+            this.password = checkNotNull(password, "password");
         }
 
         String username() {
@@ -271,7 +273,7 @@ final class VaultPropertiesSourceConfiguration {
                     @ProfilerConfigurationProperty(name = KEY_STORE_FILE_PATH) final String keyStoreFilePath,
                     @ProfilerConfigurationProperty(name = KEY_STORE_PASSWORD) final char[] keyStorePassword
             ) {
-                this.trustStoreFilePath = trustStoreFilePath;
+                this.trustStoreFilePath = checkNotEmpty(trustStoreFilePath, "trustStoreFilePath");
                 this.keyStoreFilePath = keyStoreFilePath;
                 this.keyStorePassword = keyStorePassword;
             }
@@ -306,11 +308,11 @@ final class VaultPropertiesSourceConfiguration {
 
             @ProfilerConfigurationPropertiesWrapper(prefix = PEM_PREFIX, nullIfNoExplicitPropertiesProvided = true)
             Pem(
-                    @ProfilerConfigurationProperty(name = PEM_FILE_PATH) final String pemFilePath,
+                    @ProfilerConfigurationProperty(name = PEM_FILE_PATH, required = true) final String pemFilePath,
                     @ProfilerConfigurationProperty(name = CLIENT_PEM_FILE_PATH) final String clientPemFilePath,
                     @ProfilerConfigurationProperty(name = CLIENT_KEY_PEM_FILE_PATH) final String clientKeyPemFilePath
             ) {
-                this.pemFilePath = pemFilePath;
+                this.pemFilePath = checkNotEmpty(pemFilePath, "pemFilePath");
                 this.clientPemFilePath = clientPemFilePath;
                 this.clientKeyPemFilePath = clientKeyPemFilePath;
             }
