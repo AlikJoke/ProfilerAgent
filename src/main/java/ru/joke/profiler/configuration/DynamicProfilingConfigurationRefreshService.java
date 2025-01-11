@@ -6,8 +6,11 @@ import ru.joke.profiler.util.ProfilerThreadFactory;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 public final class DynamicProfilingConfigurationRefreshService {
+
+    private static final Logger logger = Logger.getLogger(DynamicProfilingConfigurationRefreshService.class.getCanonicalName());
 
     private static final String REFRESHING_THREAD_NAME = "profiler-dynamic-configuration-refreshing-thread";
 
@@ -29,6 +32,8 @@ public final class DynamicProfilingConfigurationRefreshService {
     }
 
     public void start() {
+        logger.info("Dynamic configuration refresh service will be started");
+
         this.refreshAction.run();
         this.executorService.scheduleAtFixedRate(
                 this.refreshAction,
@@ -36,9 +41,13 @@ public final class DynamicProfilingConfigurationRefreshService {
                 this.dynamicConfigRefreshIntervalMs,
                 TimeUnit.MILLISECONDS
         );
+
+        logger.info("Dynamic configuration refresh service started");
     }
 
     public void close() {
+        logger.info("Dynamic configuration refresh service will be closed");
         this.executorService.shutdownNow();
+        logger.info("Dynamic configuration refresh service closed");
     }
 }

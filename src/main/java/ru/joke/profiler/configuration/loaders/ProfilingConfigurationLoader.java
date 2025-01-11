@@ -5,8 +5,11 @@ import ru.joke.profiler.configuration.StaticProfilingConfiguration;
 import ru.joke.profiler.configuration.meta.ConfigurationParser;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
 public final class ProfilingConfigurationLoader {
+
+    private static final Logger logger = Logger.getLogger(ProfilingConfigurationLoader.class.getCanonicalName());
 
     private final ConfigurationPropertiesLoader propertiesLoader;
 
@@ -20,11 +23,18 @@ public final class ProfilingConfigurationLoader {
             return null;
         }
 
-        return ConfigurationParser.parse(DynamicProfilingConfiguration.class, properties);
+        final DynamicProfilingConfiguration result = ConfigurationParser.parse(DynamicProfilingConfiguration.class, properties);
+        logger.fine("Dynamic configuration loaded: " + result);
+
+        return result;
     }
 
     public StaticProfilingConfiguration loadStatic() {
         final Map<String, String> properties = this.propertiesLoader.load();
-        return ConfigurationParser.parse(StaticProfilingConfiguration.class, properties);
+        logger.fine("Loaded properties from source: " + properties);
+        final StaticProfilingConfiguration result = ConfigurationParser.parse(StaticProfilingConfiguration.class, properties);
+        logger.fine("Static configuration loaded: " + result);
+
+        return result;
     }
 }

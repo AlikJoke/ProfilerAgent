@@ -17,7 +17,6 @@ import org.apache.hc.core5.reactor.IOReactorConfig;
 import org.apache.hc.core5.util.TimeValue;
 import org.apache.hc.core5.util.Timeout;
 import ru.joke.profiler.configuration.InvalidConfigurationException;
-import ru.joke.profiler.output.sinks.OutputDataSink;
 import ru.joke.profiler.util.ProfilerThreadFactory;
 
 import javax.net.ssl.SSLContext;
@@ -30,7 +29,7 @@ import java.util.logging.Logger;
 
 final class Http2ClientFactory {
 
-    private static final Logger logger = Logger.getLogger(OutputDataSink.class.getCanonicalName());
+    private static final Logger logger = Logger.getLogger(Http2ClientFactory.class.getCanonicalName());
 
     private static final String USER_AGENT = "JokeProfiler";
     private static final String HTTP2_CLIENT_THREAD_NAME = "profiler-http2-thread-";

@@ -25,6 +25,11 @@ final class VaultConfigurationPropertiesLoader implements ConfigurationPropertie
 
     VaultConfigurationPropertiesLoader(final Map<String, String> args) {
         this.configuration = ConfigurationParser.parse(VaultPropertiesSourceConfiguration.class, args);
+        if (this.configuration == null) {
+            logger.info("Vault configuration source is not configured and will not be used");
+        } else {
+            logger.info("Vault configuration source properties loaded: " + this.configuration);
+        }
     }
 
     @Override
@@ -68,11 +73,14 @@ final class VaultConfigurationPropertiesLoader implements ConfigurationPropertie
             final byte[] responseBody
     ) {
         if (responseCode == 401 && retryOnAuthError) {
+            logger.warning("Vault response code is 401, repeat request with new token");
             this.refreshableVaultClient = null;
             return load(false);
         }
 
         final String vaultResponse = extractVaultResponse(responseBody, responseCode);
+        logger.severe(vaultResponse);
+
         throw new InvalidConfigurationException("Unable to load configuration from Vault server. " + vaultResponse);
     }
 
@@ -131,6 +139,7 @@ final class VaultConfigurationPropertiesLoader implements ConfigurationPropertie
             try {
                 Vault vault = buildVault(configuration, null);
                 if (!configuration.isInitialTokenProvided()) {
+                    logger.fine("Initial token isn't provided, trying to request it by auth request");
                     final long lastTokenRequestTime = System.currentTimeMillis();
                     final AuthResponse authResponse = requestVaultToken(vault, configuration);
                     validateAuthResponse(authResponse);
@@ -151,6 +160,8 @@ final class VaultConfigurationPropertiesLoader implements ConfigurationPropertie
             final RestResponse restResponse = response.getRestResponse();
             if (restResponse.getStatus() != 200) {
                 throw new InvalidConfigurationException("Invalid auth data provided. " + extractVaultResponse(restResponse.getBody(), restResponse.getStatus()));
+            } else {
+                logger.fine("Vault token successfully received by auth request");
             }
         }
 
@@ -159,8 +170,10 @@ final class VaultConfigurationPropertiesLoader implements ConfigurationPropertie
                 final VaultPropertiesSourceConfiguration configuration
         ) throws VaultException {
             if (configuration.ssl().isCertAuthEnabled()) {
+                logger.finest("Trying to take token from Vault server by TLS auth method");
                 return vault.auth().loginByCert();
             } else if (configuration.userPass() != null) {
+                logger.finest("Trying to take token from Vault server by user-pass method");
                 return vault.auth().loginByUserPass(
                         configuration.userPass().username(),
                         new String(configuration.userPass().password())

@@ -3,7 +3,7 @@ package ru.joke.profiler.output.sinks.http2;
 import ru.joke.profiler.output.sinks.OutputData;
 import ru.joke.profiler.output.sinks.OutputDataSink;
 
-final class OutputDataHttp2Sink implements OutputDataSink<OutputData> {
+final class OutputDataHttp2Sink extends OutputDataSink<OutputData> {
 
     private final Http2MessageChannel messageChannel;
 
@@ -13,7 +13,9 @@ final class OutputDataHttp2Sink implements OutputDataSink<OutputData> {
 
     @Override
     public void init() {
+        this.logger.info("Http2 sink initializing");
         this.messageChannel.init();
+        this.logger.info("Http2 sink initialized");
     }
 
     @Override
@@ -22,7 +24,9 @@ final class OutputDataHttp2Sink implements OutputDataSink<OutputData> {
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
+        this.logger.info("Sink will be closed");
         this.messageChannel.close();
+        this.logger.info("Sink closed");
     }
 }

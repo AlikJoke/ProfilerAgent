@@ -7,11 +7,8 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
-public abstract class OutputDataAbsStreamSink<C extends AbstractFsStreamSinkConfiguration> implements OutputDataSink<String> {
-
-    private static final Logger logger = Logger.getLogger(OutputDataSink.class.getCanonicalName());
+public abstract class OutputDataAbsStreamSink<C extends AbstractFsStreamSinkConfiguration> extends OutputDataSink<String> {
 
     private final Writer writer;
     private final boolean forceFlushOnWrites;
@@ -23,6 +20,8 @@ public abstract class OutputDataAbsStreamSink<C extends AbstractFsStreamSinkConf
     ) {
         this.writer = writer;
         this.forceFlushOnWrites = configuration.forceFlushOnWrites();
+
+        logger.info("Sink created with configuration: " + configuration);
     }
 
     @Override
@@ -52,6 +51,7 @@ public abstract class OutputDataAbsStreamSink<C extends AbstractFsStreamSinkConf
 
     @Override
     public synchronized void close() {
+        logger.info("Closing stream sink");
         try {
             this.isClosed = true;
             this.writer.close();
@@ -59,5 +59,7 @@ public abstract class OutputDataAbsStreamSink<C extends AbstractFsStreamSinkConf
             logger.log(Level.SEVERE, "Unable to close sink", ex);
             throw new ProfilerOutputSinkException(ex);
         }
+
+        super.close();
     }
 }

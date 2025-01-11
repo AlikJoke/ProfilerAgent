@@ -5,7 +5,7 @@ import ru.joke.profiler.transformation.ProfilingTransformer;
 
 import java.util.List;
 
-public final class NoProfilingOutputDataSinkWrapper<T> implements OutputDataSink<T> {
+public final class NoProfilingOutputDataSinkWrapper<T> extends OutputDataSink<T> {
 
     private final OutputDataSink<T> delegate;
 
@@ -41,5 +41,10 @@ public final class NoProfilingOutputDataSinkWrapper<T> implements OutputDataSink
     @Override
     public void close() {
         this.delegate.close();
+    }
+
+    @Override
+    public String toString() {
+        return "NoProfilingOutputDataSinkWrapper{" + "delegate=" + delegate + '}';
     }
 }

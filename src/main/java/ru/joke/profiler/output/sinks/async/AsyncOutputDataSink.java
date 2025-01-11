@@ -14,9 +14,9 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
-final class AsyncOutputDataSink<S, T> implements OutputDataSink<S> {
+final class AsyncOutputDataSink<S, T> extends OutputDataSink<S> {
 
-    private static final Logger logger = Logger.getLogger(OutputDataSink.class.getCanonicalName());
+    private static final Logger logger = Logger.getLogger(AsyncOutputDataSink.class.getCanonicalName());
 
     private static final String FLUSHING_THREAD_NAME_PREFIX_TEMPLATE = "profiler-%s-flushing-thread-";
 
@@ -45,6 +45,8 @@ final class AsyncOutputDataSink<S, T> implements OutputDataSink<S> {
 
     @Override
     public void init() {
+        logger.info(String.format("Async sink wrapper for %s will be initialized", this.delegateSink));
+
         this.delegateSink.init();
         this.flushExecutor.scheduleAtFixedRate(
                 this::flush,
@@ -52,6 +54,8 @@ final class AsyncOutputDataSink<S, T> implements OutputDataSink<S> {
                 this.configuration.flushIntervalMs(),
                 TimeUnit.MILLISECONDS
         );
+
+        logger.info(String.format("Async sink wrapper for %s initialized with configuration: %s", this.delegateSink, this.configuration));
     }
 
     @Override
@@ -75,11 +79,15 @@ final class AsyncOutputDataSink<S, T> implements OutputDataSink<S> {
 
     @Override
     public void close() {
+        logger.info(String.format("Async sink wrapper for %s will be closed", this.delegateSink));
+
         this.flushExecutor.shutdownNow();
         if (this.configuration.forceFlushOnExit()) {
             flush();
         }
         this.delegateSink.close();
+
+        logger.info(String.format("Async sink wrapper for %s closed", this.delegateSink));
     }
 
     private void flush() {

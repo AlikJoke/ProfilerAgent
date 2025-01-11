@@ -1,6 +1,5 @@
 package ru.joke.profiler.output.sinks.util.pool;
 
-import ru.joke.profiler.output.sinks.OutputDataSink;
 import ru.joke.profiler.output.sinks.ProfilerOutputSinkException;
 import ru.joke.profiler.output.sinks.util.ConcurrentLinkedBlockingQueue;
 import ru.joke.profiler.util.ProfilerThreadFactory;
@@ -15,7 +14,7 @@ import java.util.logging.Logger;
 
 public final class StdConnectionPool<T extends PooledConnection> implements ConnectionPool<T> {
 
-    private static final Logger logger = Logger.getLogger(OutputDataSink.class.getCanonicalName());
+    private static final Logger logger = Logger.getLogger(StdConnectionPool.class.getCanonicalName());
 
     private static final String IDLE_CONNECTIONS_TERMINATOR_THREAD_NAME = "profiler-idle-connections-terminator";
 

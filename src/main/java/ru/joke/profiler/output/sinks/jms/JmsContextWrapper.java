@@ -1,7 +1,6 @@
 package ru.joke.profiler.output.sinks.jms;
 
 import jakarta.jms.*;
-import ru.joke.profiler.output.sinks.OutputDataSink;
 import ru.joke.profiler.output.sinks.util.pool.AbstractPooledConnection;
 
 import java.io.Serializable;
@@ -11,7 +10,7 @@ import java.util.logging.Logger;
 
 final class JmsContextWrapper extends AbstractPooledConnection implements JMSContext {
 
-    private static final Logger logger = Logger.getLogger(OutputDataSink.class.getCanonicalName());
+    private static final Logger logger = Logger.getLogger(JmsContextWrapper.class.getCanonicalName());
 
     private final Supplier<JMSContext> connectionRetriever;
 

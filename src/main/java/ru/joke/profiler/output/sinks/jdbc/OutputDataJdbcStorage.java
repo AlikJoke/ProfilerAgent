@@ -10,9 +10,12 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 final class OutputDataJdbcStorage implements AutoCloseable {
+
+    private static final Logger logger = Logger.getLogger(OutputDataJdbcStorage.class.getCanonicalName());
 
     private static final String INSERT_QUERY_TEMPLATE = "INSERT INTO %s(%s) VALUES(%s)";
 
@@ -32,10 +35,14 @@ final class OutputDataJdbcStorage implements AutoCloseable {
         this.insertQuery = buildInsertQuery(configuration.outputTableConfiguration());
         this.parametersInjector = parametersInjector;
         this.insertionConfiguration = configuration.dataInsertionConfiguration();
+
+        logger.info("Jdbc storage created with config: " + configuration);
     }
 
     void init() {
+        logger.info("Jdbc storage will be initialized");
         this.pool.init();
+        logger.info("Jdbc storage initialized");
     }
 
     void store(final OutputData data) {
@@ -130,8 +137,10 @@ final class OutputDataJdbcStorage implements AutoCloseable {
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
+        logger.info("Jdbc storage will be closed");
         this.isClosed = true;
         this.pool.close();
+        logger.info("Jdbc storage closed");
     }
 }

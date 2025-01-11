@@ -5,7 +5,6 @@ import org.apache.kafka.clients.admin.DescribeClusterOptions;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.KafkaFuture;
 import org.apache.kafka.common.Node;
-import ru.joke.profiler.output.sinks.OutputDataSink;
 
 import java.time.Duration;
 import java.util.Collection;
@@ -17,7 +16,7 @@ import java.util.logging.Logger;
 
 final class KafkaClusterValidator {
 
-    private static final Logger logger = Logger.getLogger(OutputDataSink.class.getCanonicalName());
+    private static final Logger logger = Logger.getLogger(KafkaClusterValidator.class.getCanonicalName());
 
     private static final int DEFAULT_ADMIN_REQUEST_TIMEOUT_MS = 5_000;
 
@@ -26,6 +25,7 @@ final class KafkaClusterValidator {
     }
 
     private boolean isKafkaClusterAlive(final Map<String, String> properties) {
+        logger.fine("Check kafka cluster status");
         final AdminClient adminClient = createAdminClient(properties);
         try {
             final DescribeClusterOptions describeClusterOptions =
@@ -35,11 +35,14 @@ final class KafkaClusterValidator {
 
             final KafkaFuture<Collection<Node>> nodesFuture = adminClient.describeCluster(describeClusterOptions).nodes();
             final Collection<Node> nodes = nodesFuture.get();
-            return nodes != null && !nodes.isEmpty();
+            final boolean result = nodes != null && !nodes.isEmpty();
+            logger.fine("Kafka cluster available: " + result);
+            return result;
         } catch (ExecutionException e) {
             logger.log(Level.WARNING, "Unable to validate cluster state", e);
             return false;
         } catch (InterruptedException e) {
+            logger.log(Level.WARNING, "Thread interrupted", e);
             Thread.currentThread().interrupt();
             return false;
         } finally {

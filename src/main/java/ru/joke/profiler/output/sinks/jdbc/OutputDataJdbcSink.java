@@ -7,7 +7,7 @@ import ru.joke.profiler.output.sinks.ProfilerOutputSinkException;
 import java.sql.SQLException;
 import java.util.List;
 
-final class OutputDataJdbcSink implements OutputDataSink<OutputData> {
+final class OutputDataJdbcSink extends OutputDataSink<OutputData> {
 
     private final OutputDataJdbcStorage storage;
     private final OutputDataTablePreparer outputDataTablePreparer;
@@ -22,12 +22,15 @@ final class OutputDataJdbcSink implements OutputDataSink<OutputData> {
 
     @Override
     public void init() {
+        this.logger.info("Jdbc sink will be initialized");
         try {
             this.outputDataTablePreparer.prepare();
             this.storage.init();
         } catch (SQLException ex) {
             throw new ProfilerOutputSinkException(ex);
         }
+
+        this.logger.info("Jdbc sink initialized");
     }
 
     @Override
@@ -41,7 +44,9 @@ final class OutputDataJdbcSink implements OutputDataSink<OutputData> {
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
+        this.logger.info("Jdbc sink will be closed");
         this.storage.close();
+        this.logger.info("Jdbc sink closed");
     }
 }

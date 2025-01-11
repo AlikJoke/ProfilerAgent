@@ -5,7 +5,7 @@ import ru.joke.profiler.output.sinks.OutputDataSink;
 
 import java.util.List;
 
-final class OutputDataJmsSink implements OutputDataSink<OutputData> {
+final class OutputDataJmsSink extends OutputDataSink<OutputData> {
 
     private final JmsMessageChannel messageChannel;
 
@@ -15,7 +15,9 @@ final class OutputDataJmsSink implements OutputDataSink<OutputData> {
 
     @Override
     public void init() {
+        logger.info("JMS sink will be initialized");
         this.messageChannel.init();
+        logger.info("JMS sink initialized");
     }
 
     @Override
@@ -30,6 +32,8 @@ final class OutputDataJmsSink implements OutputDataSink<OutputData> {
 
     @Override
     public void close() {
+        logger.info("JMS sink will be closed");
         this.messageChannel.close();
+        logger.info("JMS sink closed");
     }
 }

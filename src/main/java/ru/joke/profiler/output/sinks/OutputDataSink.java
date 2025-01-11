@@ -1,19 +1,24 @@
 package ru.joke.profiler.output.sinks;
 
 import java.util.List;
+import java.util.logging.Logger;
 
-public interface OutputDataSink<T> extends AutoCloseable {
+public abstract class OutputDataSink<T> implements AutoCloseable {
 
-    default void init() {
+    protected final Logger logger = Logger.getLogger(getClass().getCanonicalName());
+
+    public void init() {
+        logger.info(String.format("Sink %s initialized", this));
     }
 
-    void write(T dataItem);
+    public abstract void write(T dataItem);
 
-    default void write(List<T> dataItems) {
+    public void write(List<T> dataItems) {
         dataItems.forEach(this::write);
     }
 
     @Override
-    default void close() {
+    public void close() {
+        logger.info(String.format("Sink %s closed", this));
     }
 }

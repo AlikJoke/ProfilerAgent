@@ -3,7 +3,7 @@ package ru.joke.profiler.output.sinks.kafka;
 import ru.joke.profiler.output.sinks.OutputData;
 import ru.joke.profiler.output.sinks.OutputDataSink;
 
-final class OutputDataKafkaSink implements OutputDataSink<OutputData> {
+final class OutputDataKafkaSink extends OutputDataSink<OutputData> {
 
     private final KafkaMessageChannel channel;
 
@@ -13,7 +13,9 @@ final class OutputDataKafkaSink implements OutputDataSink<OutputData> {
 
     @Override
     public void init() {
+        logger.info("Kafka sink will be initialized");
         this.channel.init();
+        logger.info("Kafka sink initialized");
     }
 
     @Override
@@ -23,6 +25,8 @@ final class OutputDataKafkaSink implements OutputDataSink<OutputData> {
 
     @Override
     public synchronized void close() {
+        logger.info("Kafka sink will be closed");
         this.channel.close();
+        logger.info("Kafka sink closed");
     }
 }

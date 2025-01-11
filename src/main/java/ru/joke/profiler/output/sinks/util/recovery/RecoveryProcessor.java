@@ -1,6 +1,5 @@
 package ru.joke.profiler.output.sinks.util.recovery;
 
-import ru.joke.profiler.output.sinks.OutputDataSink;
 import ru.joke.profiler.output.sinks.ProfilerOutputSinkException;
 
 import java.util.Objects;
@@ -10,7 +9,7 @@ import java.util.logging.Logger;
 
 public final class RecoveryProcessor {
 
-    private static final Logger logger = Logger.getLogger(OutputDataSink.class.getCanonicalName());
+    private static final Logger logger = Logger.getLogger(RecoveryProcessor.class.getCanonicalName());
 
     private final Runnable cleaningCallback;
     private final Runnable recoveryCallback;

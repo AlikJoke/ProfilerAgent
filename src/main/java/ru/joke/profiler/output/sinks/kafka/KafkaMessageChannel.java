@@ -5,7 +5,6 @@ import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.errors.BrokerNotAvailableException;
 import org.apache.kafka.common.errors.RetriableException;
 import ru.joke.profiler.output.sinks.OutputData;
-import ru.joke.profiler.output.sinks.OutputDataSink;
 import ru.joke.profiler.output.sinks.ProfilerOutputSinkException;
 import ru.joke.profiler.output.sinks.util.recovery.ConnectionRecoveryConfiguration;
 import ru.joke.profiler.output.sinks.util.recovery.RecoveryProcessor;
@@ -22,7 +21,7 @@ import java.util.logging.Logger;
 
 final class KafkaMessageChannel implements AutoCloseable {
 
-    private static final Logger logger = Logger.getLogger(OutputDataSink.class.getCanonicalName());
+    private static final Logger logger = Logger.getLogger(KafkaMessageChannel.class.getCanonicalName());
 
     private static final String RECOVERY_THREAD_NAME = "profiler-kafka-recovery-thread";
 
@@ -53,10 +52,13 @@ final class KafkaMessageChannel implements AutoCloseable {
     }
     
     void init() {
+        logger.info("Kafka channel will be initialized with config: " + this.configuration);
         final boolean checkClusterOnStart = this.configuration.producerConfiguration().checkClusterOnStart();
         if (checkClusterOnStart) {
             validateClusterAvailable();
         }
+
+        logger.info("Kafka channel initialized");
     }
 
     void send(final OutputData data) {
@@ -83,6 +85,7 @@ final class KafkaMessageChannel implements AutoCloseable {
 
                 break;
             } catch (RetriableException | BrokerNotAvailableException ex) {
+                logger.log(Level.WARNING, "Unable to send message to Kafka", ex);
                 if (!tryToRecoverProducerSessionIfNeed(ex, producerSession)) {
                     return;
                 }
@@ -103,6 +106,8 @@ final class KafkaMessageChannel implements AutoCloseable {
             return;
         }
 
+        logger.info("Kafka channel will be closed");
+
         this.isClosed = true;
         if (this.recoveryFuture != null) {
             this.recoveryFuture.cancel(true);
@@ -110,6 +115,8 @@ final class KafkaMessageChannel implements AutoCloseable {
 
         this.recoveryExecutor.shutdownNow();
         this.producerSession.close();
+
+        logger.info("Kafka channel closed");
     }
     
     private void validateClusterAvailable() {
@@ -138,6 +145,7 @@ final class KafkaMessageChannel implements AutoCloseable {
         try {
             return future.get() != null;
         } catch (InterruptedException ex) {
+            logger.log(Level.WARNING, "Thread interrupted", ex);
             Thread.currentThread().interrupt();
             return false;
         } catch (ExecutionException ex) {
@@ -181,6 +189,8 @@ final class KafkaMessageChannel implements AutoCloseable {
                 return;
             }
 
+            logger.fine("Start Kafka connection recovery");
+
             final RecoveryProcessor recoveryProcessor = new RecoveryProcessor(
                     session::close,
                     () -> {
@@ -192,6 +202,8 @@ final class KafkaMessageChannel implements AutoCloseable {
             );
 
             recoveryProcessor.recover(ex);
+
+            logger.fine("Kafka connection recovered");
         } finally {
             this.inRecoveryState.compareAndSet(true, false);
         }

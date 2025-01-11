@@ -10,8 +10,11 @@ import ru.joke.profiler.transformation.spy.SpyContext;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public final class JdbcStatementFactory {
+
+    private static final Logger logger = Logger.getLogger(JdbcStatementFactory.class.getCanonicalName());
 
     private static final String DYNAMIC_CONF_SUBSCRIPTION_ID = "jdbc-spy";
 
@@ -52,6 +55,10 @@ public final class JdbcStatementFactory {
                 staticSpyConfiguration == null
                         ? createDynamicSpyConfiguration(spyContext.dynamicConfigurationHolder().get(), staticConfiguration)
                         : null;
+
+        logger.fine(String.format("Jdbc spy statement factory will be created with %s configuration: %s",
+                staticSpyConfiguration == null ? "dynamic" : "static",
+                staticSpyConfiguration == null ? dynamicSpyConfiguration : staticSpyConfiguration));
 
         return instance = new JdbcStatementFactory(spyContext, staticSpyConfiguration, dynamicSpyConfiguration);
     }

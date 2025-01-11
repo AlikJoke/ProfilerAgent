@@ -5,9 +5,12 @@ import ru.joke.profiler.output.sinks.util.pool.ConnectionFactory;
 
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 final class OutputDataTablePreparer {
+
+    private static final Logger logger = Logger.getLogger(OutputDataTablePreparer.class.getCanonicalName());
 
     private static final String CHECK_TABLE_QUERY = "SELECT 1 FROM %s WHERE 1 = 0";
     private static final String CREATE_TABLE_QUERY = "CREATE TABLE %s (%s)";
@@ -42,6 +45,7 @@ final class OutputDataTablePreparer {
 
                 if (this.configuration.autoCreateTableIfNotExist()) {
                     createTable(statement);
+                    return;
                 } else {
                     throw new ProfilerOutputSinkException("Output table does not exists");
                 }
@@ -52,6 +56,9 @@ final class OutputDataTablePreparer {
 
             if (!this.configuration.skipSchemaValidation()) {
                 this.tableSchemaValidator.validate(statement);
+                logger.info("Schema is valid");
+            } else {
+                logger.info("Schema validation will be skipped");
             }
         } finally {
             connection.close();
@@ -71,17 +78,27 @@ final class OutputDataTablePreparer {
 
     private void createTable(final Statement statement) throws SQLException {
         final String query = buildOutputTableCreateQuery();
+        logger.info("Output table will be created by query: " + query);
         statement.execute(query);
+        logger.info("Output table created");
     }
 
     private void dropTable(final Statement statement) throws SQLException {
+        logger.info("Output table will be dropped");
+
         final String query = String.format(DROP_TABLE_QUERY, this.configuration.tableName());
         statement.execute(query);
+
+        logger.info("Output table dropped");
     }
 
     private void truncateTable(final Statement statement) throws SQLException {
+        logger.info("Output table will be truncated");
+
         final String query = String.format(DELETE_FROM_TABLE_QUERY, this.configuration.tableName());
         statement.execute(query);
+
+        logger.info("Output table truncated");
     }
 
     private boolean checkTableExistence(final Statement statement) {

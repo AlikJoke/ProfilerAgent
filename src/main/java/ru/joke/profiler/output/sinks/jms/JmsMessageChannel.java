@@ -5,7 +5,6 @@ import jakarta.jms.Destination;
 import jakarta.jms.JMSProducer;
 import jakarta.jms.JMSRuntimeException;
 import ru.joke.profiler.output.sinks.OutputData;
-import ru.joke.profiler.output.sinks.OutputDataSink;
 import ru.joke.profiler.output.sinks.ProfilerOutputSinkException;
 import ru.joke.profiler.output.sinks.util.injectors.OutputPropertiesInjector;
 import ru.joke.profiler.output.sinks.util.pool.ConnectionPool;
@@ -24,11 +23,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 final class JmsMessageChannel implements AutoCloseable {
 
-    private static final Logger logger = Logger.getLogger(OutputDataSink.class.getCanonicalName());
+    private static final Logger logger = Logger.getLogger(JmsMessageChannel.class.getCanonicalName());
 
     private static final String RECOVERY_THREAD_NAME = "profiler-jms-recovery-thread";
 
@@ -59,7 +59,9 @@ final class JmsMessageChannel implements AutoCloseable {
     }
     
     synchronized void init() {
+        logger.info("JMS channel will be initialized");
         this.connectionPool.init();
+        logger.info("JMS channel will be initialized with config: " + this.configuration);
     }
 
     void send(final OutputData data) {
@@ -85,6 +87,7 @@ final class JmsMessageChannel implements AutoCloseable {
 
                 sendMessage(outputBodies, outputData, session);
             } catch (ProfilerOutputSinkException | JMSRuntimeException ex) {
+                logger.log(Level.WARNING, "Exception while message sending", ex);
                 retry = tryToRecoverProducerSessionIfNeed(ex, session, this.inRecoveryState.compareAndSet(false, true));
             } finally {
                 if (session != null) {
@@ -101,6 +104,8 @@ final class JmsMessageChannel implements AutoCloseable {
             return;
         }
 
+        logger.info("JMS channel will be closed");
+
         this.isClosed = true;
         if (this.recoveryFuture != null) {
             this.recoveryFuture.cancel(true);
@@ -108,6 +113,8 @@ final class JmsMessageChannel implements AutoCloseable {
 
         this.recoveryExecutor.shutdownNow();
         this.connectionPool.close();
+
+        logger.info("JMS channel closed");
     }
 
     private byte[][] composeOutputMessagesBody(final List<OutputData> data) {
@@ -163,6 +170,7 @@ final class JmsMessageChannel implements AutoCloseable {
         try {
             return future.get() != null;
         } catch (InterruptedException ex) {
+            logger.log(Level.WARNING, "Thread interrupted", ex);
             Thread.currentThread().interrupt();
             return false;
         } catch (ExecutionException ex) {
@@ -211,6 +219,8 @@ final class JmsMessageChannel implements AutoCloseable {
                 return;
             }
 
+            logger.fine("Start JMS connection recovery");
+
             final RecoveryProcessor recoveryProcessor = new RecoveryProcessor(
                     () -> {
                         if (session != null) {
@@ -228,6 +238,8 @@ final class JmsMessageChannel implements AutoCloseable {
             );
 
             recoveryProcessor.recover(ex);
+
+            logger.fine("JMS connection recovered");
         } finally {
             this.inRecoveryState.compareAndSet(true, false);
         }

@@ -4,8 +4,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
+import java.util.logging.Logger;
 
 public final class DynamicProfilingConfigurationHolder implements Supplier<DynamicProfilingConfiguration> {
+
+    private static final Logger logger = Logger.getLogger(DynamicProfilingConfiguration.class.getCanonicalName());
 
     private static DynamicProfilingConfigurationHolder instance;
 
@@ -22,7 +25,10 @@ public final class DynamicProfilingConfigurationHolder implements Supplier<Dynam
 
     public void set(final DynamicProfilingConfiguration dynamicConfiguration) {
         this.dynamicConfiguration = dynamicConfiguration;
-        this.subscriptions.forEach((id, s) -> s.accept(id, dynamicConfiguration));
+        this.subscriptions.forEach((id, s) -> {
+            logger.finest(String.format("Calling to subscription '%s' with config: %s", id, dynamicConfiguration));
+            s.accept(id, dynamicConfiguration);
+        });
     }
 
     @Override
@@ -35,10 +41,14 @@ public final class DynamicProfilingConfigurationHolder implements Supplier<Dynam
             final BiConsumer<String, DynamicProfilingConfiguration> subscription
     ) {
         this.subscriptions.put(subscriptionId, subscription);
+        logger.fine(String.format("Subscription is created with id %s", subscription));
     }
 
     public boolean unsubscribe(final String subscriptionId) {
-        return this.subscriptions.remove(subscriptionId) != null;
+        final boolean result = this.subscriptions.remove(subscriptionId) != null;
+        logger.fine(String.format("Unsubscribe called for %s with result %b", subscriptionId, result));
+
+        return result;
     }
 
     void init() {

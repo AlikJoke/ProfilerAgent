@@ -2,7 +2,6 @@ package ru.joke.profiler.output.sinks.kafka;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
-import ru.joke.profiler.output.sinks.OutputDataSink;
 
 import java.io.Closeable;
 import java.time.Duration;
@@ -11,7 +10,7 @@ import java.util.logging.Logger;
 
 final class KafkaProducerSession implements Closeable {
 
-    private static final Logger logger = Logger.getLogger(OutputDataSink.class.getCanonicalName());
+    private static final Logger logger = Logger.getLogger(KafkaProducerSession.class.getCanonicalName());
 
     private final KafkaSinkConfiguration.ProducerConfiguration configuration;
     private final Producer<String, byte[]> producer;

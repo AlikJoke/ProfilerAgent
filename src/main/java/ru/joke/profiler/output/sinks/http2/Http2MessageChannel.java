@@ -8,7 +8,6 @@ import org.apache.hc.core5.http.nio.AsyncRequestProducer;
 import org.apache.hc.core5.http.nio.entity.DiscardingEntityConsumer;
 import org.apache.hc.core5.http.nio.support.BasicResponseConsumer;
 import ru.joke.profiler.output.sinks.OutputData;
-import ru.joke.profiler.output.sinks.OutputDataSink;
 import ru.joke.profiler.output.sinks.ProfilerOutputSinkException;
 
 import java.util.Map;
@@ -18,7 +17,7 @@ import java.util.logging.Logger;
 
 final class Http2MessageChannel implements AutoCloseable {
 
-    private static final Logger logger = Logger.getLogger(OutputDataSink.class.getCanonicalName());
+    private static final Logger logger = Logger.getLogger(Http2MessageChannel.class.getCanonicalName());
 
     private final Http2SinkConfiguration.ProcessingConfiguration configuration;
     private final Http2Client httpClient;
@@ -46,12 +45,16 @@ final class Http2MessageChannel implements AutoCloseable {
     }
 
     void init() {
+        logger.info("Http2 message channel initializing with config: " + this.configuration);
         this.httpClient.init();
+        logger.info("Http2 message channel initialized");
     }
 
     @Override
     public synchronized void close() {
+        logger.info("Http2 message channel will be closed");
         this.httpClient.close();
+        logger.info("Http2 message channel closed");
     }
 
     private void sendRequest(final Http2Message message, final int requestId) {
@@ -113,6 +116,7 @@ final class Http2MessageChannel implements AutoCloseable {
                 throw new ProfilerOutputSinkException(e);
             }
         } catch (InterruptedException e) {
+            logger.log(Level.WARNING, "Thread interrupted", e);
             Thread.currentThread().interrupt();
         }
     }

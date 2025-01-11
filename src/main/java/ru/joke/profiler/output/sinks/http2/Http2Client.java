@@ -9,8 +9,11 @@ import org.apache.hc.core5.reactor.IOReactorStatus;
 import ru.joke.profiler.output.sinks.ProfilerOutputSinkException;
 
 import java.util.concurrent.Future;
+import java.util.logging.Logger;
 
 final class Http2Client implements AutoCloseable {
+
+    private static final Logger logger = Logger.getLogger(Http2Client.class.getCanonicalName());
 
     private final CloseableHttpAsyncClient delegateClient;
     private final Http2SinkConfiguration.Http2ClientConfiguration http2ClientConfiguration;
@@ -24,7 +27,9 @@ final class Http2Client implements AutoCloseable {
     }
 
     void init() {
+        logger.info("Http2Client will be started");
         this.delegateClient.start();
+        logger.info("Http2Client started with configuration: " + this.http2ClientConfiguration);
     }
 
     <T> Future<T> execute(
@@ -47,6 +52,10 @@ final class Http2Client implements AutoCloseable {
         }
 
         final CloseMode closeMode = http2ClientConfiguration.enableGracefulShutdown() ? CloseMode.GRACEFUL : CloseMode.IMMEDIATE;
+        logger.info("Http2Client will be closed with mode " + closeMode);
+
         this.delegateClient.close(closeMode);
+
+        logger.info("Http2Client closed");
     }
 }

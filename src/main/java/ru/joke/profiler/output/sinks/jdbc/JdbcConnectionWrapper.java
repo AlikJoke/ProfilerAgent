@@ -1,6 +1,5 @@
 package ru.joke.profiler.output.sinks.jdbc;
 
-import ru.joke.profiler.output.sinks.OutputDataSink;
 import ru.joke.profiler.output.sinks.ProfilerOutputSinkException;
 import ru.joke.profiler.output.sinks.util.pool.AbstractPooledConnection;
 
@@ -14,7 +13,7 @@ import java.util.logging.Logger;
 
 final class JdbcConnectionWrapper extends AbstractPooledConnection implements Connection {
 
-    private static final Logger logger = Logger.getLogger(OutputDataSink.class.getCanonicalName());
+    private static final Logger logger = Logger.getLogger(JdbcConnectionWrapper.class.getCanonicalName());
 
     private final Supplier<Connection> connectionRetriever;
 

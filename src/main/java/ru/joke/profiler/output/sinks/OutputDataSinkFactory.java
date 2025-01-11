@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 
 public final class OutputDataSinkFactory {
 
-    private static final Logger logger = Logger.getLogger(OutputDataSink.class.getCanonicalName());
+    private static final Logger logger = Logger.getLogger(OutputDataSinkFactory.class.getCanonicalName());
 
     public OutputDataSink<OutputData> create(
             final List<String> types,
@@ -28,6 +28,7 @@ public final class OutputDataSinkFactory {
             }
 
             sinks.add(handle.create(properties));
+            logger.fine("Created sink with type: " + type);
         }
 
         return sinks.size() == 1
@@ -37,7 +38,7 @@ public final class OutputDataSinkFactory {
                 : new CompositeOutputDataSink(sinks, ignoreSinkErrors);
     }
 
-    private static class NoErrorOutputDataSinkWrapper implements OutputDataSink<OutputData> {
+    private static class NoErrorOutputDataSinkWrapper extends OutputDataSink<OutputData> {
 
         private final OutputDataSink<OutputData> sink;
 
@@ -74,7 +75,7 @@ public final class OutputDataSinkFactory {
         }
     }
 
-    private static class CompositeOutputDataSink implements OutputDataSink<OutputData> {
+    private static class CompositeOutputDataSink extends OutputDataSink<OutputData> {
 
         private final List<OutputDataSink<OutputData>> delegateSinks;
         private final boolean ignoreSinkErrors;

@@ -21,14 +21,19 @@ import ru.joke.profiler.transformation.spy.SpyInjectorFactory;
 
 import java.lang.instrument.Instrumentation;
 import java.util.function.Predicate;
+import java.util.logging.Logger;
 
 public final class ProfilerAgent {
+
+    private static final Logger logger = Logger.getLogger(ProfilerAgent.class.getCanonicalName());
 
     public static void premain(final String args, final Instrumentation instrumentation) throws Exception {
         agentmain(args, instrumentation);
     }
 
     public static void agentmain(final String args, final Instrumentation instrumentation) throws Exception {
+        logger.info("Profiling agent is called with args: " + args);
+
         final ProfilingConfigurationLoader configurationLoader = createConfigurationLoader(args);
         final StaticProfilingConfiguration staticConfiguration = configurationLoader.loadStatic();
 
@@ -43,6 +48,8 @@ public final class ProfilerAgent {
                 dynamicConfigHolder
         );
         instrumentation.addTransformer(transformer);
+
+        logger.info("Profiling transformer added by agent");
     }
 
     private static ProfilingConfigurationLoader createConfigurationLoader(final String args) {
@@ -68,6 +75,8 @@ public final class ProfilerAgent {
                 registrar,
                 dynamicConfigHolder
         );
+
+        logger.fine("Added spies: " + configuration.spies());
 
         return new ProfilingTransformer(
                 transformationFilter,
@@ -115,7 +124,10 @@ public final class ProfilerAgent {
                 dynamicConfigHolder,
                 sink
         );
-        return registrarFactory.create();
+        final ExecutionTimeRegistrar registrar = registrarFactory.create();
+
+        logger.info("Registrar created and ready to use: " + registrar);
+        return registrar;
     }
 
     private static OutputDataSink<OutputData> createOutputSink(final StaticProfilingConfiguration configuration) throws Exception {
@@ -144,6 +156,7 @@ public final class ProfilerAgent {
             final StaticProfilingConfiguration staticConfiguration
     ) {
         if (!staticConfiguration.dynamicConfigurationEnabled()) {
+            logger.info("Dynamic profiling configuring is disabled");
             return;
         }
 
